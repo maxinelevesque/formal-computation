@@ -102,6 +102,19 @@ these weakens a statement: each old statement is still proved, under a new name.
   only one direction.
 - `notes/11` §11.1: rows 15–18 record these.
 
+## Tiers 2 and 3 (2026-11-17)
+
+No statement changes. Additions and notation:
+
+| Node | Change | Why |
+|---|---|---|
+| P2 | adds `wtB : PentCatᵒᵖ ⥤ Type` (every bracketing ↦ `ℤ`, a reduction adds its weight) | The behaviour that witnesses `exists_beh_top_ne_bot`. |
+| G3 | adds `isProdConj_of_dchain` (a chain `g ⇝ k` writes `g k⁻¹` as a product of conjugates) and `dchain_of_isProdConj` | The two directions of `dchain_iff_prodConj`. |
+| K2 | adds `kfree_of_red` | Reduction keeps the K-free fragment; used by K6 for whiskered squares. |
+| K4 | adds `Red.wt_mapAppL` (weight 0), `Red.wt_mapAppR` (weight kept) | Weights of reductions in context. |
+| K6 | adds `sq_wt` (each generating square preserves the weight on a K-free source) | K6 is the equivalence closure of this. The two K-naturality squares are the ones that need K-freeness: `k_nat₂` erases an argument step, which can carry weight. |
+| K7 | `sii`, `Ω` are `abbrev` rather than `def` | So that the endpoints of `omegaLoop` match the equation lemmas of `Red.wt` at reducible transparency. Same terms. |
+
 ## Mathlib anchors (checked against v4.36.0 source)
 
 | Anchor | Status |

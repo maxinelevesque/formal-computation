@@ -48,10 +48,10 @@ theorem Red.wt_mapAppR (t : Tm) {u u' : Tm} (p : Red u u') :
   | cons p s ih => simp [Red.mapAppR, Red.wt, Step.wt, ih]
 
 /-- **K7.** `S I I`. -/
-def sii : Tm := .S ⬝ .I ⬝ .I
+abbrev sii : Tm := .S ⬝ .I ⬝ .I
 
 /-- **K7.** `Ω = S I I (S I I)`. -/
-def Ω : Tm := sii ⬝ sii
+abbrev Ω : Tm := sii ⬝ sii
 
 /-- **K7.** The loop: S-step at the root, then the I-step in function position, then the
 I-step in argument position. -/
