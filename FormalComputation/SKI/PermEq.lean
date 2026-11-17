@@ -103,6 +103,10 @@ theorem absorbed (a : Tm) :
   have e2 := Sq.whisker (r1 (Step.appR (.K ⬝ a) (Step.s .I .I sii))) .nil
     (Sq.k_nat₂ a (Step.appL (.I ⬝ sii) (Step.i sii)))
   have e3 := Sq.whisker .nil .nil (Sq.k_nat₂ a (Step.s .I .I sii))
+  -- Write every path as an explicit chain of steps, so the three squares visibly chain up.
+  simp only [Quiver.Path.comp_cons, Quiver.Path.comp_nil, Quiver.Path.nil_comp, r1, r2]
+    at e1 e2 e3
+  simp only [omegaLoop, r3, r2, r1, Red.mapAppR, Quiver.Path.comp_cons, Quiver.Path.comp_nil]
   exact Relation.EqvGen.trans _ _ _ (.rel _ _ e1)
     (.trans _ _ _ (.rel _ _ e2) (.rel _ _ e3))
 
