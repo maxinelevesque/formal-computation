@@ -65,7 +65,9 @@ def wt : PentCat ⥤ SingleObj (Multiplicative ℤ) :=
 /-- **P2.** The weight tells the two routes apart. -/
 theorem wt_top_ne_wt_bot : wt.map top ≠ wt.map bot := by
   intro h
-  simp [top, bot, ed, wt, SingleObj.comp_as_mul] at h
+  have e : wt.map top = (Multiplicative.ofAdd (1 : ℤ) : Multiplicative ℤ) := rfl
+  have e' : wt.map bot = (1 : Multiplicative ℤ) := rfl
+  exact absurd (congrArg Multiplicative.toAdd (e.symm.trans (h.trans e'))) (by decide)
 
 /-- **P2.** Hence `top` and `bot` stay distinct in the reduction groupoid: the pentagon is a
 loop there. -/
@@ -89,6 +91,7 @@ def wtB : PentCatᵒᵖ ⥤ Type where
   map_id X := ConcreteCategory.hom_ext _ _ fun n => by simp [SingleObj.id_as_one]
   map_comp f g := ConcreteCategory.hom_ext _ _ fun n => by
     simp [SingleObj.comp_as_mul, add_assoc, add_comm, add_left_comm]
+    rfl
 
 /-- **P2 (added).** With A1: a behaviour (a presheaf on which every step acts bijectively)
 on which the two routes act differently. Evaluation of `((xy)z)w` remembers which way one
@@ -98,11 +101,8 @@ theorem exists_beh_top_ne_bot :
   refine ⟨wtB, ?_, ?_⟩
   · rw [beh_iff_map_bijective]
     intro t t' s _
-    refine ⟨fun x y hxy => ?_, fun y => ⟨y - Multiplicative.toAdd (wt.map s), ?_⟩⟩
-    · have : x + Multiplicative.toAdd (wt.map s) = y + Multiplicative.toAdd (wt.map s) := hxy
-      exact add_right_cancel this
-    · show y - Multiplicative.toAdd (wt.map s) + Multiplicative.toAdd (wt.map s) = y
-      exact sub_add_cancel _ _
+    change Function.Bijective (fun n : ℤ => n + Multiplicative.toAdd (wt.map s))
+    exact (Equiv.addRight (Multiplicative.toAdd (wt.map s))).bijective
   · intro h
     have h0 := types_congr_hom h (0 : ℤ)
     change (0 : ℤ) + Multiplicative.toAdd (wt.map top) =
