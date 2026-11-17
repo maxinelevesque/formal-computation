@@ -1,4 +1,5 @@
 import FormalComputation.Pentagon
+import Mathlib.CategoryTheory.Quotient
 
 /-!
 # Imposing the pentagon (PROOF_MAP P3, stretch part)

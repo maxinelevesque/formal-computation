@@ -1,4 +1,7 @@
 import FormalComputation.Presentation
+import Mathlib.CategoryTheory.Localization.Predicate
+import Mathlib.CategoryTheory.Discrete.Basic
+import Mathlib.CategoryTheory.Limits.Shapes.IsTerminal
 
 /-!
 # Theorem A: behaviours are local systems (PROOF_MAP A1–A4)

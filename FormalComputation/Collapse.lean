@@ -1,4 +1,6 @@
-import Mathlib
+import Mathlib.CategoryTheory.Adjunction.Basic
+import Mathlib.CategoryTheory.Whiskering
+import Mathlib.CategoryTheory.Types.Basic
 
 /-!
 # The collapse lemma (PROOF_MAP C1–C4)

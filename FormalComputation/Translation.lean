@@ -43,50 +43,50 @@ theorem isLocal_eq_of_le_of_le_conv {P : Type u} [Category.{v} P] (S S' : Morphi
 /-- **B4 (added).** Adding rules that are already computations does not change the
 computations either (`notes/05` §5.2, "Adding rules already in `E` changes neither `E`
 nor `C`"). -/
-theorem E_eq_of_le_of_le_E {P : Type u} [Category.{v} P] (𝒫 𝒫' : Presentation P)
-    (h₁ : 𝒫.steps ≤ 𝒫'.steps) (h₂ : 𝒫'.steps ≤ 𝒫.E) : 𝒫'.E = 𝒫.E := by
+theorem E_eq_of_le_of_le_E {P : Type u} [Category.{v} P] (𝔓 𝔓' : Presentation P)
+    (h₁ : 𝔓.steps ≤ 𝔓'.steps) (h₂ : 𝔓'.steps ≤ 𝔓.E) : 𝔓'.E = 𝔓.E := by
   sorry
 
 variable {P : Type u} {P' : Type u'} {P'' : Type u''}
   [Category.{v} P] [Category.{v'} P'] [Category.{v''} P'']
 
 /-- **B2.** A simulation: an adjunction whose left adjoint sends steps to computations. -/
-structure Simulation (𝒫 : Presentation P) (𝒫' : Presentation P') where
+structure Simulation (𝔓 : Presentation P) (𝔓' : Presentation P') where
   G : P ⥤ P'
   R : P' ⥤ P
   adj : G ⊣ R
-  steps_to_E : ∀ ⦃X Y : P⦄ (f : X ⟶ Y), 𝒫.steps f → 𝒫'.E (G.map f)
+  steps_to_E : ∀ ⦃X Y : P⦄ (f : X ⟶ Y), 𝔓.steps f → 𝔓'.E (G.map f)
 
 namespace Simulation
 
-variable {𝒫 : Presentation P} {𝒫' : Presentation P'} {𝒫'' : Presentation P''}
+variable {𝔓 : Presentation P} {𝔓' : Presentation P'} {𝔓'' : Presentation P''}
 
 /-- **B2.** The right adjoint, restricted to behaviours. -/
-def onBeh [HasTerminal P'] (σ : Simulation 𝒫 𝒫') :
-    𝒫'.Beh.FullSubcategory ⥤ 𝒫.Beh.FullSubcategory :=
+def onBeh [HasTerminal P'] (σ : Simulation 𝔓 𝔓') :
+    𝔓'.Beh.FullSubcategory ⥤ 𝔓.Beh.FullSubcategory :=
   sorry
 
 /-- **B2. Theorem B.** Evaluation after `G` is left adjoint to `R` on behaviours. -/
-noncomputable def adjOnBeh [HasTerminal P'] [Reflective 𝒫'.Beh.ι] (σ : Simulation 𝒫 𝒫') :
-    (𝒫.Beh.ι ⋙ σ.G ⋙ 𝒫'.L) ⊣ σ.onBeh :=
+noncomputable def adjOnBeh [HasTerminal P'] [Reflective 𝔓'.Beh.ι] (σ : Simulation 𝔓 𝔓') :
+    (𝔓.Beh.ι ⋙ σ.G ⋙ 𝔓'.L) ⊣ σ.onBeh :=
   sorry
 
 /-- **B5.** The right adjoint preserves `M`. -/
-theorem R_preserves_M (σ : Simulation 𝒫 𝒫') :
-    ∀ ⦃X Y : P'⦄ (q : X ⟶ Y), 𝒫'.M q → 𝒫.M (σ.R.map q) := by
+theorem R_preserves_M (σ : Simulation 𝔓 𝔓') :
+    ∀ ⦃X Y : P'⦄ (q : X ⟶ Y), 𝔓'.M q → 𝔓.M (σ.R.map q) := by
   sorry
 
 /-- **B5.** The left adjoint preserves computations. -/
-theorem G_preserves_E (σ : Simulation 𝒫 𝒫') :
-    ∀ ⦃X Y : P⦄ (f : X ⟶ Y), 𝒫.E f → 𝒫'.E (σ.G.map f) := by
+theorem G_preserves_E (σ : Simulation 𝔓 𝔓') :
+    ∀ ⦃X Y : P⦄ (f : X ⟶ Y), 𝔓.E f → 𝔓'.E (σ.G.map f) := by
   sorry
 
 /-- **B6.** The identity simulation. -/
-def id (𝒫 : Presentation P) : Simulation 𝒫 𝒫 :=
+def id (𝔓 : Presentation P) : Simulation 𝔓 𝔓 :=
   sorry
 
 /-- **B6.** Composition of simulations. -/
-def comp (σ : Simulation 𝒫 𝒫') (τ : Simulation 𝒫' 𝒫'') : Simulation 𝒫 𝒫'' :=
+def comp (σ : Simulation 𝔓 𝔓') (τ : Simulation 𝔓' 𝔓'') : Simulation 𝔓 𝔓'' :=
   sorry
 
 end Simulation

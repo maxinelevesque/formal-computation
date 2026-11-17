@@ -52,6 +52,8 @@ type-check or fixes something the map left unspecified.
   morphisms are `ed .ab` etc.
 - K5: `⟦a, b⟧` is written `r2 a b` (also `r1`, `r3`); `EqvGen` → `Relation.EqvGen`;
   `p.mapAppL u` → `Red.mapAppL u p`. The infix `⬝` is scoped to `FormalComputation.SKI`.
+- Presentations are named `𝔓` (Fraktur), not `𝒫`: in Mathlib `𝒫` is the powerset
+  notation, so it cannot be a variable name.
 - Universe levels are explicit throughout. A4 states the point as `Discrete PUnit.{w + 1}`
   for every `w`.
 

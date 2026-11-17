@@ -1,4 +1,5 @@
-import Mathlib
+import Mathlib.GroupTheory.FreeGroup.Basic
+import Mathlib.Data.Nat.Lattice
 
 /-!
 # Cost equals area (PROOF_MAP G1–G3)

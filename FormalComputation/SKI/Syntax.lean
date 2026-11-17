@@ -1,4 +1,6 @@
-import Mathlib
+import Mathlib.Combinatorics.Quiver.Path
+import Mathlib.Logic.Relation
+import Mathlib.Data.Int.Init
 
 /-!
 # SKI: terms and steps (PROOF_MAP K1–K3)

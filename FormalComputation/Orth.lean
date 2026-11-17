@@ -1,4 +1,9 @@
-import Mathlib
+import Mathlib.CategoryTheory.MorphismProperty.Basic
+import Mathlib.CategoryTheory.ObjectProperty.Local
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Defs
+import Mathlib.CategoryTheory.Limits.Shapes.Diagonal
+import Mathlib.CategoryTheory.Limits.Shapes.Terminal
+import Mathlib.CategoryTheory.Adjunction.Basic
 
 /-!
 # Unique lifting and coercion (PROOF_MAP O1–O9)

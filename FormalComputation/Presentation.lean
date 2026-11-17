@@ -1,4 +1,11 @@
 import FormalComputation.Orth
+import Mathlib.CategoryTheory.Localization.Bousfield
+import Mathlib.CategoryTheory.Adjunction.Reflective
+import Mathlib.CategoryTheory.MorphismProperty.Factorization
+import Mathlib.CategoryTheory.MorphismProperty.Composition
+import Mathlib.CategoryTheory.Comma.Arrow
+import Mathlib.CategoryTheory.Yoneda
+import Mathlib.CategoryTheory.Types.Basic
 
 /-!
 # Presentations (PROOF_MAP D1–D5)
@@ -23,59 +30,59 @@ structure Presentation (P : Type u) [Category.{v} P] where
 
 namespace Presentation
 
-variable {P : Type u} [Category.{v} P] (𝒫 : Presentation P)
+variable {P : Type u} [Category.{v} P] (𝔓 : Presentation P)
 
 /-- **D2.** Maps with unique right lifting against the steps. -/
-def M : MorphismProperty P := rOrth 𝒫.steps
+def M : MorphismProperty P := rOrth 𝔓.steps
 
 /-- **D2.** Computations: maps with unique left lifting against `M`. -/
-def E : MorphismProperty P := lOrth 𝒫.M
+def E : MorphismProperty P := lOrth 𝔓.M
 
 /-- **D2.** Behaviours: the step-local objects. -/
-def Beh : ObjectProperty P := 𝒫.steps.isLocal
+def Beh : ObjectProperty P := 𝔓.steps.isLocal
 
 /-- **D2.** Conversions: maps that every behaviour sees as an isomorphism. -/
-def Conv : MorphismProperty P := 𝒫.Beh.isLocal
+def Conv : MorphismProperty P := 𝔓.Beh.isLocal
 
 /-- **D3.** Every step is a computation. -/
-theorem steps_le_E : 𝒫.steps ≤ 𝒫.E := by
+theorem steps_le_E : 𝔓.steps ≤ 𝔓.E := by
   sorry
 
 /-- **D3.** Every computation is a conversion. -/
-theorem E_le_Conv [HasTerminal P] : 𝒫.E ≤ 𝒫.Conv := by
+theorem E_le_Conv [HasTerminal P] : 𝔓.E ≤ 𝔓.Conv := by
   sorry
 
 /-- **D3.** Behaviours are the objects whose map to `⊤` is in `M`. -/
-theorem beh_iff_M [HasTerminal P] (X : P) : 𝒫.Beh X ↔ 𝒫.M (terminal.from X) := by
+theorem beh_iff_M [HasTerminal P] (X : P) : 𝔓.Beh X ↔ 𝔓.M (terminal.from X) := by
   sorry
 
 /-- **D3.** Conversions satisfy 2-out-of-3. -/
-instance : 𝒫.Conv.HasTwoOutOfThreeProperty := by
+instance : 𝔓.Conv.HasTwoOutOfThreeProperty := by
   sorry
 
 /-- **D4.** The size condition: `(E, M)` factors every map. -/
 class Convergent : Prop where
-  fac : 𝒫.E.HasFactorization 𝒫.M
+  fac : 𝔓.E.HasFactorization 𝔓.M
 
 /-- **D4 (added).** What convergence buys: with a terminal object, it makes behaviours
 reflective, i.e. every description has a denotation. Factor `X ⟶ ⊤` as `X ⟶ LX ⟶ ⊤`. -/
-theorem isRightAdjoint_of_convergent [HasTerminal P] [𝒫.Convergent] :
-    𝒫.Beh.ι.IsRightAdjoint := by
+theorem isRightAdjoint_of_convergent [HasTerminal P] [𝔓.Convergent] :
+    𝔓.Beh.ι.IsRightAdjoint := by
   sorry
 
 section Reflective
 
-variable [Reflective 𝒫.Beh.ι]
+variable [Reflective 𝔓.Beh.ι]
 
 /-- **D4.** Evaluation: the reflector onto behaviours. -/
-noncomputable def L : P ⥤ 𝒫.Beh.FullSubcategory := reflector 𝒫.Beh.ι
+noncomputable def L : P ⥤ 𝔓.Beh.FullSubcategory := reflector 𝔓.Beh.ι
 
 /-- **D4.** Conversions are exactly the maps that evaluation inverts. -/
-theorem conv_iff_isIso_L {X Y : P} (f : X ⟶ Y) : 𝒫.Conv f ↔ IsIso (𝒫.L.map f) := by
+theorem conv_iff_isIso_L {X Y : P} (f : X ⟶ Y) : 𝔓.Conv f ↔ IsIso (𝔓.L.map f) := by
   sorry
 
 /-- **D4.** The big step `X ⟶ LX` is a conversion. -/
-theorem unit_mem_Conv (X : P) : 𝒫.Conv ((reflectorAdjunction 𝒫.Beh.ι).unit.app X) := by
+theorem unit_mem_Conv (X : P) : 𝔓.Conv ((reflectorAdjunction 𝔓.Beh.ι).unit.app X) := by
   sorry
 
 end Reflective

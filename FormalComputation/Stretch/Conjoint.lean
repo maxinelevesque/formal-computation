@@ -1,4 +1,7 @@
 import FormalComputation.Translation
+import Mathlib.CategoryTheory.Functor.KanExtension.Adjunction
+import Mathlib.CategoryTheory.Limits.FunctorCategory.Basic
+import Mathlib.CategoryTheory.Limits.Types.Limits
 
 /-!
 # Translations and conjoints (PROOF_MAP B7, tier stretch)

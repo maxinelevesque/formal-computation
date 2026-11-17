@@ -1,4 +1,10 @@
 import FormalComputation.LocalSystems
+import Mathlib.CategoryTheory.PathCategory.Basic
+import Mathlib.CategoryTheory.SingleObj
+import Mathlib.Algebra.Group.TypeTags.Basic
+import Mathlib.Order.BoundedOrder.Basic
+import Mathlib.CategoryTheory.Category.Preorder
+import Mathlib.Tactic.DeriveFintype
 
 /-!
 # Associativity and the pentagon (PROOF_MAP P1–P3)
@@ -91,10 +97,14 @@ def leb : V4 → V4 → Bool
   | .c, .c => true
   | _, _ => false
 
-theorem leb_refl : ∀ x, leb x x = true := by decide
-theorem leb_trans : ∀ x y z, leb x y = true → leb y z = true → leb x z = true := by decide
-theorem leb_antisymm : ∀ x y, leb x y = true → leb y x = true → x = y := by decide
-theorem leb_c : ∀ x, leb x .c = true := by decide
+theorem leb_refl : ∀ x, leb x x = true := by
+  intro x; cases x <;> rfl
+theorem leb_trans : ∀ x y z, leb x y = true → leb y z = true → leb x z = true := by
+  intro x y z; cases x <;> cases y <;> cases z <;> simp [leb]
+theorem leb_antisymm : ∀ x y, leb x y = true → leb y x = true → x = y := by
+  intro x y; cases x <;> cases y <;> simp [leb]
+theorem leb_c : ∀ x, leb x .c = true := by
+  intro x; cases x <;> rfl
 
 /-- **P3.** The Tamari partial order. -/
 instance : PartialOrder Tamari4 where
