@@ -26,7 +26,9 @@ else
   rc_audit=0
 fi
 
-if [ "$before" != "$after" ]; then
+# Print the resolved manifest until one is committed (the CI runner's `cache get` creates it
+# before this script runs, so a before/after comparison cannot detect that case).
+if [ "$before" != "$after" ] || [ ! -f scripts/manifest-committed ]; then
   echo "LAKE_MANIFEST_BEGIN"; cat lake-manifest.json; echo "LAKE_MANIFEST_END"
 fi
 
@@ -41,6 +43,12 @@ if [ "$rc" -eq 124 ]; then echo "lake build TIMED OUT after ${BUDGET}s"; fi
 echo "sorry warnings: $(grep -cE "declaration uses .sorry." "$LOG" || true)"
 grep -E -B1 "declaration uses .sorry." "$LOG" | grep -oE "FormalComputation/[A-Za-z/]+\.lean:[0-9]+" | sort | uniq | head -60 || true
 echo "source lines with sorry (outside comments): $(grep -rnw --include='*.lean' sorry FormalComputation | grep -vE '^[^:]+:[0-9]+:\s*(--|/-)' | grep -vE '`sorry`|sorryAx' | wc -l)"
+for tier in "tier1:Orth Presentation LocalSystems Translation Collapse" "tier2:Pentagon Dehn" "tier3:SKI/Syntax SKI/Weight SKI/PermEq" "stretch:Stretch/Trace Stretch/Conjoint Stretch/PentQuotient Stretch/RedCat"; do
+  name=${tier%%:*}; files=""
+  for m in ${tier#*:}; do files="$files FormalComputation/$m.lean"; done
+  n=$(cat $files 2>/dev/null | grep -vE '^\s*(--|/-)' | grep -wc sorry || true)
+  echo "sorry in $name sources: $n"
+done
 echo "audit entries depending on sorryAx: $(grep -c "sorryAx" "$AUDIT" || true)"
 echo "project modules built: $(grep -cE "Built FormalComputation" "$LOG" || true)"
 echo "---- modules with errors ----"
