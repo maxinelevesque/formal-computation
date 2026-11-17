@@ -21,7 +21,7 @@ The quotient of the free category by `top = bot` being that poset is tier "stret
 
 namespace FormalComputation.Pentagon
 
-open CategoryTheory
+open CategoryTheory Limits
 
 /-- **P1.** Bracketings of four letters:
 `a = ((xy)z)w`, `b = (xy)(zw)`, `c = x(y(zw))`, `d = (x(yz))w`, `e = x((yz)w)`. -/
@@ -64,23 +64,50 @@ def wt : PentCat ⥤ SingleObj (Multiplicative ℤ) :=
 
 /-- **P2.** The weight tells the two routes apart. -/
 theorem wt_top_ne_wt_bot : wt.map top ≠ wt.map bot := by
-  sorry
+  intro h
+  simp [top, bot, ed, wt, SingleObj.comp_as_mul] at h
 
 /-- **P2.** Hence `top` and `bot` stay distinct in the reduction groupoid: the pentagon is a
 loop there. -/
 theorem top_ne_bot_localized :
     (⊤ : MorphismProperty PentCat).Q.map top ≠ (⊤ : MorphismProperty PentCat).Q.map bot := by
-  sorry
+  intro h
+  have hinv : (⊤ : MorphismProperty PentCat).IsInvertedBy wt := fun _ _ _ _ => inferInstance
+  apply wt_top_ne_wt_bot
+  have h' := congrArg (Localization.Construction.lift wt hinv).map h
+  rw [← Localization.Construction.fac wt hinv]
+  exact h'
 
 /-- The dynamic presentation in which every reduction is a step. -/
 def pentDyn : DynPresentation PentCat := ⟨⊤⟩
+
+/-- **P2.** A behaviour built from the weight: every bracketing is sent to `ℤ`, and a
+reduction `p` acts by adding its weight. -/
+def wtB : PentCatᵒᵖ ⥤ Type where
+  obj _ := ℤ
+  map f := ↾(fun n : ℤ => n + Multiplicative.toAdd (wt.map f.unop))
+  map_id X := ConcreteCategory.hom_ext _ _ fun n => by simp [SingleObj.id_as_one]
+  map_comp f g := ConcreteCategory.hom_ext _ _ fun n => by
+    simp [SingleObj.comp_as_mul, add_assoc, add_comm, add_left_comm]
 
 /-- **P2 (added).** With A1: a behaviour (a presheaf on which every step acts bijectively)
 on which the two routes act differently. Evaluation of `((xy)z)w` remembers which way one
 reduced. -/
 theorem exists_beh_top_ne_bot :
     ∃ B : PentCatᵒᵖ ⥤ Type, pentDyn.toPresentation.Beh B ∧ B.map top.op ≠ B.map bot.op := by
-  sorry
+  refine ⟨wtB, ?_, ?_⟩
+  · rw [beh_iff_map_bijective]
+    intro t t' s _
+    refine ⟨fun x y hxy => ?_, fun y => ⟨y - Multiplicative.toAdd (wt.map s), ?_⟩⟩
+    · have : x + Multiplicative.toAdd (wt.map s) = y + Multiplicative.toAdd (wt.map s) := hxy
+      exact add_right_cancel this
+    · show y - Multiplicative.toAdd (wt.map s) + Multiplicative.toAdd (wt.map s) = y
+      exact sub_add_cancel _ _
+  · intro h
+    have h0 := types_congr_hom h (0 : ℤ)
+    change (0 : ℤ) + Multiplicative.toAdd (wt.map top) =
+      0 + Multiplicative.toAdd (wt.map bot) at h0
+    exact wt_top_ne_wt_bot (Multiplicative.toAdd.injective (add_left_cancel h0))
 
 /-- **P3.** The four-variable Tamari order, on a copy of the vertex type (so that its
 category structure does not clash with the free one). -/
@@ -123,7 +150,8 @@ end Tamari4
 /-- **P3 (added).** With A4: over the Tamari poset, where every reduction is a step,
 behaviours are bare sets. -/
 theorem tamari_beh_bare :
-    Nonempty ((⟨⊤⟩ : DynPresentation Tamari4).toPresentation.Beh.FullSubcategory ≌ Type) := by
-  sorry
+    Nonempty ((⟨⊤⟩ : DynPresentation Tamari4).toPresentation.Beh.FullSubcategory ≌ Type) :=
+  beh_equiv_type_of_terminal ⟨⊤⟩ rfl (⊤ : Tamari4)
+    (IsTerminal.ofUniqueHom (fun _ => homOfLE le_top) (fun _ _ => Subsingleton.elim _ _))
 
 end FormalComputation.Pentagon

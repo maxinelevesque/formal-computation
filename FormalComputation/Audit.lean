@@ -63,3 +63,13 @@ open FormalComputation
 #print axioms forget_isEquivalence_of_unique
 #print axioms accident
 #print axioms not_lax_orthogonal
+
+-- Tier 2: the pentagon (P1–P3)
+#print axioms Pentagon.wt_top_ne_wt_bot
+#print axioms Pentagon.top_ne_bot_localized
+#print axioms Pentagon.exists_beh_top_ne_bot
+#print axioms Pentagon.tamari_beh_bare
+
+-- Tier 2: cost equals area (G1–G3)
+#print axioms Dehn.dchain_iff_prodConj
+#print axioms Dehn.cost_eq_area
