@@ -4,8 +4,9 @@ A starting packet for a new repo: a relational, category-theoretic account of
 computation, with a blog post and a Lean 4 formalization to be built from it.
 
 Everything here came out of one long conversation (11–13 November 2026).
-**Nothing in this packet has been machine-checked.** Hand arguments, cited
-results and speculation are all present, and each is labelled.
+The packet arrived with nothing machine-checked. Since 2026-11-17 tiers 1–3 of
+`PROOF_MAP.md` are proved in Lean (`FormalComputation/`, status [LEAN]); every
+other claim keeps its label.
 
 ## Layout
 
@@ -21,6 +22,7 @@ results and speculation are all present, and each is labelled.
 
 Used throughout the notes and the proof map.
 
+- **[LEAN]** proved in Lean 4 + Mathlib in this repo, with no `sorry` and only the standard axioms (`AXIOMS.md`). The proof map gives the declaration.
 - **[HAND]** argued by hand in the conversation. Believed, not checked.
 - **[CITED]** a published result. The reference was found by search and is linked in `notes/10-prior-art.md`.
 - **[MEMORY]** a published result recalled from memory, not re-verified. Check before relying on it.

@@ -7,8 +7,14 @@ dependencies, tier and status.
 
 > Since 2026-11-17 every node of tiers 1–3 and stretch has a compiling statement in
 > `FormalComputation/` (Mathlib v4.36.0). Where the two differ, the Lean file is
-> authoritative and the difference is logged in `PROOF_CHANGELOG.md`. Statuses below are
-> updated as proofs land.
+> authoritative and the difference is logged in `PROOF_CHANGELOG.md`.
+>
+> **Status, 2026-11-17 (commit `c40763e`).** Every node of tiers 1–3 is proved in Lean
+> (status `LEAN`, with the declarations on the line below the header), with no `sorry`
+> and no axioms beyond `propext`, `Classical.choice`, `Quot.sound` (`AXIOMS.md`). The
+> pseudo-Lean signatures below are the original intent; D5, A1–A4, P2 and B7 were
+> restated for presheaves (see the changelog). Stretch nodes (D6, B7, K9 and the
+> quotient part of P3) are stated but not proved, and keep their old status.
 Mathlib names are best guesses. Universe levels are mostly omitted and will
 need care. Treat each signature as a statement of intent.
 
@@ -17,7 +23,7 @@ need care. Treat each signature as a statement of intent.
 Each node has a header line in this exact shape, which the check script reads:
 
     #### ID — name
-    kind: def|lemma|theorem|example|conjecture|cited · tier: 1|2|3|stretch|none · status: HAND|CITED|MEMORY|CONJ|SPEC · deps: ID, ID, …
+    kind: def|lemma|theorem|example|conjecture|cited · tier: 1|2|3|stretch|none · status: LEAN|HAND|CITED|MEMORY|CONJ|SPEC · deps: ID, ID, …
 
 - **kind** `cited` means a published result we rely on and do not formalize.
 - **tier** `none` means not to be formalized for the first post.
@@ -75,7 +81,8 @@ graph TD
 ## Tier 1 — `Orth`: unique lifting and coercion
 
 #### O1 — Orth
-kind: def · tier: 1 · status: HAND · deps:
+kind: def · tier: 1 · status: LEAN · deps:
+Lean: `Orth`
 
 ```lean
 variable {C : Type u} [Category.{v} C]
@@ -87,7 +94,8 @@ def Orth {A B X Y : C} (e : A ⟶ B) (p : X ⟶ Y) : Prop :=
 ```
 
 #### O2 — rOrth, lOrth
-kind: def · tier: 1 · status: HAND · deps: O1
+kind: def · tier: 1 · status: LEAN · deps: O1
+Lean: `rOrth, lOrth`
 
 ```lean
 def rOrth (S : MorphismProperty C) : MorphismProperty C :=
@@ -98,7 +106,8 @@ def lOrth (T : MorphismProperty C) : MorphismProperty C :=
 ```
 
 #### O3 — Galois connection
-kind: lemma · tier: 1 · status: HAND · deps: O2
+kind: lemma · tier: 1 · status: LEAN · deps: O2
+Lean: `le_lOrth_iff_le_rOrth`
 
 ```lean
 theorem le_lOrth_iff_le_rOrth (S T : MorphismProperty C) :
@@ -106,7 +115,8 @@ theorem le_lOrth_iff_le_rOrth (S T : MorphismProperty C) :
 ```
 
 #### O4 — closure of the right class
-kind: lemma · tier: 1 · status: HAND · deps: O2
+kind: lemma · tier: 1 · status: LEAN · deps: O2
+Lean: `rOrth_of_isIso, rOrth_comp, rOrth_of_isPullback, rOrth_cancel`
 
 ```lean
 theorem rOrth_of_isIso (S : MorphismProperty C) {X Y : C} (p : X ⟶ Y) [IsIso p] :
@@ -123,7 +133,8 @@ theorem rOrth_cancel (S) {X Y Z : C} (p : X ⟶ Y) (q : Y ⟶ Z) :
 ```
 
 #### O5 — diagonal
-kind: lemma · tier: 1 · status: HAND · deps: O4
+kind: lemma · tier: 1 · status: LEAN · deps: O4
+Lean: `rOrth_diagonal`
 
 ```lean
 theorem rOrth_diagonal [HasPullbacks C] (S) {X Y : C} (p : X ⟶ Y) :
@@ -131,7 +142,8 @@ theorem rOrth_diagonal [HasPullbacks C] (S) {X Y : C} (p : X ⟶ Y) :
 ```
 
 #### O6 — adjunctions transpose orthogonality
-kind: lemma · tier: 1 · status: HAND · deps: O1
+kind: lemma · tier: 1 · status: LEAN · deps: O1
+Lean: `orth_adj`
 
 ```lean
 theorem orth_adj {D : Type*} [Category D] {G : C ⥤ D} {R : D ⥤ C} (adj : G ⊣ R)
@@ -142,7 +154,8 @@ theorem orth_adj {D : Type*} [Category D] {G : C ⥤ D} {R : D ⥤ C} (adj : G �
 Used for function types (Frobenius) and for B5.
 
 #### O7 — sections and restriction
-kind: lemma · tier: 1 · status: HAND · deps: O1
+kind: lemma · tier: 1 · status: LEAN · deps: O1
+Lean: `Sec, restrict, orth_iff_restrict_bijective`
 
 ```lean
 /-- the fibre of `p` over a generalized point `x` -/
@@ -159,7 +172,8 @@ theorem orth_iff_restrict_bijective {X Y T T' : C} (e : T ⟶ T') (p : X ⟶ Y) 
 ```
 
 #### O8 — coercion and its functoriality
-kind: def · tier: 1 · status: HAND · deps: O7
+kind: def · tier: 1 · status: LEAN · deps: O7
+Lean: `coerce, coerce_restrict, restrict_coerce, coerce_id, coerce_comp`
 
 ```lean
 noncomputable def coe {X Y T T' : C} {e : T ⟶ T'} {p : X ⟶ Y} (h : Orth e p)
@@ -174,7 +188,8 @@ The casts come from `(e ≫ e') ≫ x = e ≫ (e' ≫ x)`. Consider stating
 functoriality for `restrict` and deriving it for `coe`.
 
 #### O9 — local objects
-kind: lemma · tier: 1 · status: HAND · deps: O2
+kind: lemma · tier: 1 · status: LEAN · deps: O2
+Lean: `rOrth_terminal_iff_isLocal`
 
 ```lean
 theorem rOrth_terminal_iff_isLocal [HasTerminal C] (S : MorphismProperty C) (X : C) :
@@ -186,7 +201,8 @@ theorem rOrth_terminal_iff_isLocal [HasTerminal C] (S : MorphismProperty C) (X :
 ## Tier 1 — `Presentation`
 
 #### D1 — Presentation
-kind: def · tier: 1 · status: HAND · deps:
+kind: def · tier: 1 · status: LEAN · deps:
+Lean: `Presentation`
 
 ```lean
 structure Presentation (P : Type u) [Category.{v} P] where
@@ -194,7 +210,8 @@ structure Presentation (P : Type u) [Category.{v} P] where
 ```
 
 #### D2 — M, E, behaviours, conversions
-kind: def · tier: 1 · status: HAND · deps: D1, O2
+kind: def · tier: 1 · status: LEAN · deps: D1, O2
+Lean: `Presentation.M, .E, .Beh, .Conv`
 
 ```lean
 namespace Presentation
@@ -208,7 +225,8 @@ def Conv : MorphismProperty P := 𝒫.Beh.isLocal
 ```
 
 #### D3 — basic inclusions
-kind: lemma · tier: 1 · status: HAND · deps: D2, O3, O9
+kind: lemma · tier: 1 · status: LEAN · deps: D2, O3, O9
+Lean: `Presentation.steps_le_E, E_le_Conv, beh_iff_M, Conv 2-out-of-3 instance`
 
 ```lean
 theorem steps_le_E : 𝒫.steps ≤ 𝒫.E
@@ -218,7 +236,8 @@ instance : 𝒫.Conv.HasTwoOutOfThreeProperty
 ```
 
 #### D4 — convergence and evaluation
-kind: def · tier: 1 · status: HAND · deps: D2
+kind: def · tier: 1 · status: LEAN · deps: D2
+Lean: `Presentation.Convergent, isRightAdjoint_of_convergent, conv_le_of_E_le, L, conv_iff_isIso_L, unit_mem_Conv`
 
 ```lean
 /-- the size condition: `(E, M)` factors every map -/
@@ -237,7 +256,8 @@ theorem unit_mem_Conv (X : P) : 𝒫.Conv ((reflectorAdjunction 𝒫.Beh.ι).uni
 terminal object) is a good first lemma: factor `X ⟶ ⊤`.
 
 #### D5 — the dynamic picture
-kind: def · tier: 1 · status: HAND · deps: D1
+kind: def · tier: 1 · status: LEAN · deps: D1
+Lean: `DynPresentation, toPresentation (presheaves), toCopresentation`
 
 ```lean
 structure DynPresentation (A : Type u) [Category.{v} A] where
@@ -271,7 +291,8 @@ theorem Trace.mem_E (t : Trace 𝒫 f) : 𝒫.E f
 ## Tier 1 — `LocalSystems`: Theorem A
 
 #### A1 — local means steps act bijectively
-kind: lemma · tier: 1 · status: HAND · deps: D5, D2
+kind: lemma · tier: 1 · status: LEAN · deps: D5, D2
+Lean: `beh_iff_map_bijective (and _co)`
 
 ```lean
 theorem beh_iff_map_bijective {A} [Category.{v} A] (𝒜 : DynPresentation A)
@@ -283,7 +304,8 @@ theorem beh_iff_map_bijective {A} [Category.{v} A] (𝒜 : DynPresentation A)
 Proof: Yoneda.
 
 #### A2 — behaviours are functors inverting the steps
-kind: theorem · tier: 1 · status: HAND · deps: A1
+kind: theorem · tier: 1 · status: LEAN · deps: A1
+Lean: `behEquivInverting (and Co)`
 
 ```lean
 noncomputable def behEquivInverting (𝒜 : DynPresentation A) :
@@ -291,7 +313,8 @@ noncomputable def behEquivInverting (𝒜 : DynPresentation A) :
 ```
 
 #### A3 — Theorem A: behaviours are local systems
-kind: theorem · tier: 1 · status: HAND · deps: A2
+kind: theorem · tier: 1 · status: LEAN · deps: A2
+Lean: `behEquivLocalSystems (and Co)`
 
 ```lean
 noncomputable def behEquivLocalSystems (𝒜 : DynPresentation A) :
@@ -302,7 +325,8 @@ Uses the universal property of localization (Mathlib:
 `Localization.functorEquivalence` or `whiskeringLeftFunctor'`).
 
 #### A4 — a terminal object makes the fibre contractible
-kind: theorem · tier: 1 · status: HAND · deps: A3
+kind: theorem · tier: 1 · status: LEAN · deps: A3
+Lean: `localization_trivial_of_terminal, beh_equiv_type_of_terminal (and _co)`
 
 ```lean
 /-- if every map is a step and `n` is terminal, the reduction groupoid is trivial -/
@@ -323,7 +347,8 @@ of values" in one direction, per connected component.
 ## Tier 1 — `Translation`: Theorem B
 
 #### B1 — right adjoints preserve local objects
-kind: lemma · tier: 1 · status: HAND · deps:
+kind: lemma · tier: 1 · status: LEAN · deps:
+Lean: `isLocal_of_adj`
 
 ```lean
 theorem isLocal_of_adj {P P'} [Category P] [Category P'] {G : P ⥤ P'} {R : P' ⥤ P}
@@ -335,7 +360,8 @@ theorem isLocal_of_adj {P P'} [Category P] [Category P'] {G : P ⥤ P'} {R : P' 
 Only conversions are needed in the hypothesis.
 
 #### B2 — simulations, and Theorem B
-kind: theorem · tier: 1 · status: HAND · deps: B1, D2, D3, D4
+kind: theorem · tier: 1 · status: LEAN · deps: B1, D2, D3, D4
+Lean: `Simulation, Simulation.onBeh, Simulation.adjOnBeh`
 
 ```lean
 structure Simulation (𝒫 : Presentation P) (𝒫' : Presentation P') where
@@ -355,7 +381,8 @@ noncomputable def Simulation.adjOnBeh [HasTerminal P'] [Reflective 𝒫'.Beh.ι]
 ```
 
 #### B3 — uniting rule sets intersects behaviours
-kind: lemma · tier: 1 · status: HAND · deps:
+kind: lemma · tier: 1 · status: LEAN · deps:
+Lean: `isLocal_sup`
 
 ```lean
 theorem isLocal_sup (S₁ S₂ : MorphismProperty P) :
@@ -363,7 +390,8 @@ theorem isLocal_sup (S₁ S₂ : MorphismProperty P) :
 ```
 
 #### B4 — completion is harmless
-kind: lemma · tier: 1 · status: HAND · deps:
+kind: lemma · tier: 1 · status: LEAN · deps:
+Lean: `isLocal_eq_of_le_of_le_conv, E_eq_of_le_of_le_E`
 
 ```lean
 theorem isLocal_eq_of_le_of_le_conv (S S' : MorphismProperty P)
@@ -371,7 +399,8 @@ theorem isLocal_eq_of_le_of_le_conv (S S' : MorphismProperty P)
 ```
 
 #### B5 — simulations preserve computations
-kind: lemma · tier: 1 · status: HAND · deps: B2, O6
+kind: lemma · tier: 1 · status: LEAN · deps: B2, O6
+Lean: `Simulation.R_preserves_M, G_preserves_E`
 
 ```lean
 theorem Simulation.R_preserves_M (σ : Simulation 𝒫 𝒫') :
@@ -381,7 +410,8 @@ theorem Simulation.G_preserves_E (σ : Simulation 𝒫 𝒫') :
 ```
 
 #### B6 — composition
-kind: def · tier: 1 · status: HAND · deps: B5
+kind: def · tier: 1 · status: LEAN · deps: B5
+Lean: `Simulation.id, Simulation.comp`
 
 ```lean
 def Simulation.id (𝒫 : Presentation P) : Simulation 𝒫 𝒫
@@ -415,7 +445,8 @@ theorem Translation.adjointTriple_of_hasConjoint : …
 ## Tier 1 — `Collapse`
 
 #### C1 — the inserter category
-kind: def · tier: 1 · status: HAND · deps:
+kind: def · tier: 1 · status: LEAN · deps:
+Lean: `Ins, Ins.forget`
 
 ```lean
 variable {Xn X : Type*} [Category Xn] [Category X] (l r : Xn ⥤ X)
@@ -433,7 +464,8 @@ def Ins.forget : Ins l r ⥤ Xn
 ```
 
 #### C2 — collapse, unfolded form
-kind: lemma · tier: 1 · status: HAND · deps: C1
+kind: lemma · tier: 1 · status: LEAN · deps: C1
+Lean: `collapse_unfolded`
 
 ```lean
 theorem collapse_unfolded (ρ : ∀ a, l.obj a ⟶ r.obj a)
@@ -445,7 +477,8 @@ theorem collapse_unfolded (ρ : ∀ a, l.obj a ⟶ r.obj a)
 Proof: take `u = 𝟙 a`.
 
 #### C3 — collapse lemma
-kind: theorem · tier: 1 · status: HAND · deps: C2
+kind: theorem · tier: 1 · status: LEAN · deps: C2
+Lean: `collapse; also lax_orthogonal_iff, forget_isEquivalence_of_unique, collapse_of_isIso_unit, collapse_of_isIso_counit`
 
 ```lean
 /-- the section of `forget` determined by a natural family `ρ` -/
@@ -465,7 +498,8 @@ Parametrizing the section by `ρ` avoids equalities between functors. The note
 that any such section is of the form `Ins.sec ρ` if time allows.
 
 #### C4 — the counterexample
-kind: example · tier: 1 · status: HAND · deps:
+kind: example · tier: 1 · status: LEAN · deps:
+Lean: `Icop, ι, accident, not_lax_orthogonal`
 
 ```lean
 /-- `I = (– × Bool)` with `ι = fst` is a copointed endofunctor on types -/
@@ -486,7 +520,8 @@ good model.
 ## Tier 2 — `Pentagon`
 
 #### P1 — the pentagon quiver
-kind: def · tier: 2 · status: HAND · deps:
+kind: def · tier: 2 · status: LEAN · deps:
+Lean: `Pentagon.V4, Edge, PentCat, top, bot`
 
 ```lean
 /-- bracketings of four letters:
@@ -506,7 +541,8 @@ def bot : (Paths.of.obj V4.a) ⟶ (Paths.of.obj V4.c)   -- ad ≫ de ≫ ec
 ```
 
 #### P2 — the free pentagon has a loop detected by ℤ
-kind: theorem · tier: 2 · status: HAND · deps: P1, A3
+kind: theorem · tier: 2 · status: LEAN · deps: P1, A3
+Lean: `Pentagon.wt_top_ne_wt_bot, top_ne_bot_localized, exists_beh_top_ne_bot`
 
 ```lean
 /-- weight 1 on `ab`, 0 elsewhere -/
@@ -524,7 +560,8 @@ through the localization. With A3: behaviours over this component include sets
 with a nontrivial automorphism.
 
 #### P3 — imposing the pentagon gives a terminal object
-kind: theorem · tier: 2 · status: HAND · deps: P1, A4
+kind: theorem · tier: 2 · status: LEAN · deps: P1, A4
+Lean: `Pentagon.Tamari4, tamari_beh_bare (pentQuotientEquiv is stretch, not proved)`
 
 ```lean
 /-- the four-variable Tamari order -/
@@ -542,7 +579,8 @@ Then A4 applies: behaviours over this component are bare sets.
 ## Tier 2 — `Dehn`
 
 #### G1 — relator deletion
-kind: def · tier: 2 · status: HAND · deps:
+kind: def · tier: 2 · status: LEAN · deps:
+Lean: `Dehn.Rsym, DStep, DChain`
 
 ```lean
 variable {X : Type*} (R : Set (FreeGroup X))
@@ -558,7 +596,8 @@ inductive DChain : ℕ → FreeGroup X → FreeGroup X → Prop
 ```
 
 #### G2 — area
-kind: def · tier: 2 · status: HAND · deps: G1
+kind: def · tier: 2 · status: LEAN · deps: G1
+Lean: `Dehn.IsProdConj`
 
 ```lean
 /-- `w` is a product of `n` conjugates of relators or their inverses -/
@@ -569,7 +608,8 @@ def IsProdConj (n : ℕ) (w : FreeGroup X) : Prop :=
 ```
 
 #### G3 — cost equals area
-kind: theorem · tier: 2 · status: HAND · deps: G1, G2
+kind: theorem · tier: 2 · status: LEAN · deps: G1, G2
+Lean: `Dehn.dchain_iff_prodConj, cost_eq_area`
 
 ```lean
 theorem dchain_iff_prodConj (n : ℕ) (w : FreeGroup X) :
@@ -586,7 +626,8 @@ Key identity: `u * r * v = (u * v) * (v⁻¹ * r * v)`.
 ## Tier 3 — `SKI`
 
 #### K1 — terms
-kind: def · tier: 3 · status: HAND · deps:
+kind: def · tier: 3 · status: LEAN · deps:
+Lean: `SKI.Tm, KFree`
 
 ```lean
 inductive Tm | S | K | I | app : Tm → Tm → Tm
@@ -597,7 +638,8 @@ def KFree : Tm → Prop
 ```
 
 #### K2 — steps, proof-relevantly
-kind: def · tier: 3 · status: HAND · deps: K1
+kind: def · tier: 3 · status: LEAN · deps: K1
+Lean: `SKI.Step, Red, kfree_of_step, kfree_of_red`
 
 ```lean
 inductive Step : Tm → Tm → Type
@@ -614,7 +656,8 @@ theorem kfree_of_step : KFree t → Step t u → KFree u
 ```
 
 #### K3 — the syntactic accident
-kind: example · tier: 3 · status: HAND · deps: K2
+kind: example · tier: 3 · status: LEAN · deps: K2
+Lean: `SKI.accident_SKI`
 
 ```lean
 /-- `I (I x)` reduces to `I x` in two different ways -/
@@ -622,7 +665,8 @@ theorem accident_SKI (x : Tm) : Step.i (.I ⬝ x) ≠ Step.appR .I (Step.i x)
 ```
 
 #### K4 — the right-spine weight
-kind: def · tier: 3 · status: HAND · deps: K2
+kind: def · tier: 3 · status: LEAN · deps: K2
+Lean: `SKI.Step.wt, Red.wt, Red.wt_comp`
 
 ```lean
 /-- 1 for an S-step whose redex is reached by argument moves only; 0 otherwise -/
@@ -638,7 +682,8 @@ theorem Red.wt_comp (p : Red t u) (q : Red u v) : (p.comp q).wt = p.wt + q.wt
 ```
 
 #### K5 — elementary squares
-kind: def · tier: 3 · status: HAND · deps: K2
+kind: def · tier: 3 · status: LEAN · deps: K2
+Lean: `SKI.Sq, PermEq`
 
 ```lean
 /-- generating equations between reductions: interchange and naturality -/
@@ -673,7 +718,8 @@ matches permutation equivalence for first-order orthogonal systems before
 relying on it; the theorem K6 is about this relation as defined.
 
 #### K6 — the weight respects permutation equivalence, without K
-kind: theorem · tier: 3 · status: HAND · deps: K4, K5
+kind: theorem · tier: 3 · status: LEAN · deps: K4, K5
+Lean: `SKI.sq_wt, wt_permEq`
 
 ```lean
 theorem wt_permEq {t u : Tm} (ht : KFree t) {p q : Red t u} :
@@ -685,7 +731,8 @@ of `s_nat₃`: both sides are `c.wt + 1`. The K squares do break the weight,
 which is expected.
 
 #### K7 — the loop at Ω has weight 1
-kind: theorem · tier: 3 · status: HAND · deps: K4, K6
+kind: theorem · tier: 3 · status: LEAN · deps: K4, K6
+Lean: `SKI.omegaLoop, omegaLoop_wt, kfree_Ω, not_absorbed`
 
 ```lean
 def sii : Tm := .S ⬝ .I ⬝ .I
@@ -706,7 +753,8 @@ theorem not_absorbed (h : Red Ω u) : ¬ PermEq (omegaLoop.comp h) h
 ```
 
 #### K8 — the loop in `K a Ω` is absorbed
-kind: theorem · tier: 3 · status: HAND · deps: K5, K7
+kind: theorem · tier: 3 · status: LEAN · deps: K5, K7
+Lean: `SKI.absorbed`
 
 ```lean
 theorem absorbed (a : Tm) :
