@@ -97,7 +97,7 @@ theorem rOrth_cancel (S : MorphismProperty C) {X Y Z : C} (p : X ⟶ Y) (q : Y �
     rOrth S (p ≫ q) → rOrth S q → rOrth S p := by
   intro hpq hq A B e he u w h
   obtain ⟨d, ⟨h₁, h₁'⟩, hd⟩ := hpq e he u (w ≫ q) (by rw [← Category.assoc, h, Category.assoc])
-  obtain ⟨-, -, hd'⟩ := hq e he (u ≫ p) (w ≫ q) (by rw [h, Category.assoc])
+  obtain ⟨c, -, hd'⟩ := hq e he (u ≫ p) (w ≫ q) (by rw [h, Category.assoc])
   have hdp : d ≫ p = w :=
     (hd' (d ≫ p) ⟨by rw [← Category.assoc, h₁], by rw [Category.assoc, h₁']⟩).trans
       (hd' w ⟨h.symm, rfl⟩).symm

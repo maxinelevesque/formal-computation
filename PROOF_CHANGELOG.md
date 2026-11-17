@@ -58,6 +58,50 @@ type-check or fixes something the map left unspecified.
 - Universe levels are explicit throughout. A4 states the point as `Discrete PUnit.{w + 1}`
   for every `w`.
 
+## Tier 1 (2026-11-17)
+
+### Statement changes
+
+The variance change was decided with Maxine before any tier-1 proof was written. None of
+these weakens a statement: each old statement is still proved, under a new name.
+
+| Node | Old | New | Why |
+|---|---|---|---|
+| D5 `toPresentation` | `Presentation (A ⥤ Type v)`, steps the arrows isomorphic to `coyoneda.map s.op` | `Presentation (Aᵒᵖ ⥤ Type v)`, steps `𝒜.steps.map yoneda` (Mathlib's `MorphismProperty.map`: arrows isomorphic to `yoneda.map s`) | `notes/03` §3.4 says descriptions are presheaves. Under covariant families a step map runs `Hom(t′, –) → Hom(t, –)`, contractum to redex, so `E` and traces point backwards. The old presentation is kept as `toCopresentation` (`𝒜.steps.op.map coyoneda`, the map's definition up to the direction of the arrow isomorphism). |
+| A1 `beh_iff_map_bijective` | `B : A ⥤ Type v`, `Bijective (B.map s)` | `B : Aᵒᵖ ⥤ Type v`, `Bijective (B.map s.op)` | Follows D5. An observation acts on a step contravariantly (Yoneda). Old statement: `beh_iff_map_bijective_co`. |
+| A2 `behEquivInverting` | `≌ 𝒜.steps.FunctorsInverting (Type v)` | `≌ 𝒜.steps.op.FunctorsInverting (Type v)` | Follows D5. Old: `behEquivInvertingCo`. |
+| A3 `behEquivLocalSystems` | `≌ (𝒜.steps.Localization ⥤ Type v)` | `≌ (𝒜.steps.op.Localization ⥤ Type v)`, the localization of `Aᵒᵖ` | Follows D5. Old: `behEquivLocalSystemsCo`. Identifying this localization with `(A[S⁻¹])ᵒᵖ`, and with `A[S⁻¹]` when that is a groupoid, is not formalized. |
+| A4 `beh_equiv_type_of_terminal` | about `A ⥤ Type v` | same statement about presheaves | Uses the initial object `op n` of `Aᵒᵖ`. Old: `beh_equiv_type_of_terminal_co`. `localization_trivial_of_terminal` is unchanged. |
+| P2 `exists_beh_top_ne_bot` | `B : PentCat ⥤ Type`, `B.map top ≠ B.map bot` | `B : PentCatᵒᵖ ⥤ Type`, `B.map top.op ≠ B.map bot.op` | Follows D5 (tier 2; not yet proved). |
+| B7 `Translation`, `HasConjoint` | `coyoneda.map (F.map s).op`; restriction along `F` on `A' ⥤ Type v` | `yoneda.map (F.map s)`; restriction along `F.op` on `A'ᵒᵖ ⥤ Type v` | Follows D5 (tier stretch). |
+
+### Additions
+
+| Node | Statement | Why |
+|---|---|---|
+| O4 | `Orth.comp_right` | Composition in the right variable; gives `rOrth_comp`. |
+| O9 | `orth_terminal_iff : Orth f (terminal.from X) ↔ Bijective (f ≫ ·)` | Shared by O9 and D3. |
+| O | `lOrth_of_isIso` | Isomorphisms are computations; used by `conv_le_of_E_le`. |
+| D3 | `beh_of_M`, `conv_iff_range` | `conv_iff_range` restates `Conv` in the form Mathlib's Bousfield lemmas use (`ObjectProperty.isLocal (· ∈ Set.range ι.obj)`). |
+| D4 | `conv_le_of_E_le [HasTerminal P] [Convergent] (W) [W.HasTwoOutOfThreeProperty] : 𝔓.E ≤ W → 𝔓.Conv ≤ W` | Makes "conversions are the 2-out-of-3 closure of `E`" precise. It needs convergence; `notes/03` and `SUMMARY.md` now say so. |
+| D4 | `attribute [instance] Convergent.fac` | Lets Mathlib's `factorizationData` find the factorization. |
+| A | `bijective_precomp_iff`, `isLocal_map_iff`, `beh_eq_isInvertedBy` | Locality is invariant under isomorphism of arrows, so the steps of D5 can be taken up to isomorphism. |
+| A4 | `starAdjOfTerminal`, `fromPUnitAdjOfInitial`, `localization_trivial_of_terminal'`, `localization_trivial_of_initial'` | A4 for any class equal to `⊤`, via Mathlib's `Adjunction.isLocalization`: the functor to the point is a localization because it has a fully faithful adjoint. |
+| A1–A4 | `beh_iff_map_bijective_co`, `behEquivInvertingCo`, `behEquivLocalSystemsCo`, `beh_equiv_type_of_terminal_co` | Theorem A for the covariant presentation. |
+| C3′ | `secAdjOfUnique`, `lax_orthogonal_iff : (∃ adj : sec ρ ⊣ forget, ∀ a, adj.unit.app a = 𝟙 a) ↔ ∀ a φ, φ = ρ.app a`, `forget_isEquivalence_of_unique` | The collapse lemma is a characterization: lax orthogonality to a free rule is exactly uniqueness of arrows `l a ⟶ r a`, and then `forget` is an equivalence. |
+| C3″ | `collapse_of_isIso_unit`, `collapse_of_isIso_counit` | The collapse does not depend on the convention: an invertible unit, or a right adjoint section with invertible counit, collapses the same way. `collapse` is now derived from `collapse_of_isIso_unit`. |
+| C4 | `accident_app` | The accident at `a = Unit`; `accident` and `not_lax_orthogonal` use it. |
+
+### Notes changed
+
+- `notes/03` §3.2 item 9 and `SUMMARY.md`: conversions are the 2-out-of-3 closure of `E`
+  *when the presentation is convergent*.
+- `notes/03` §3.4: the two variances agree on behaviours when the steps generate `A`;
+  Theorem A is formalized in both.
+- `notes/03` §3.6: convergence implies the reflector exists; the claimed equivalence is
+  only one direction.
+- `notes/11` §11.1: rows 15–18 record these.
+
 ## Mathlib anchors (checked against v4.36.0 source)
 
 | Anchor | Status |

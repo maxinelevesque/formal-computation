@@ -30,7 +30,8 @@ From `(P, S)` everything else is derived.
   map is the big step.
 - A **trace** is a decomposition of `X → LX` into pushouts of steps. That is
   small-step evaluation.
-- **Conversions** are the maps inverted by `L`, the 2-out-of-3 closure of `E`.
+- **Conversions** are the maps inverted by `L`. When the presentation is
+  convergent (every map factors), they are the 2-out-of-3 closure of `E`.
 
 The model is the pair `(P, E)`. Keeping only the behaviours loses the
 direction.

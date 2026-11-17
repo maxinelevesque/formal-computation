@@ -43,7 +43,11 @@ Derived:
    step.
 8. A **trace** is a decomposition of `X → LX` into pushouts of steps (and
    composites of such). That is small-step evaluation.
-9. **Conversions** are the maps `L` inverts: the 2-out-of-3 closure of `E`.
+9. **Conversions** are the maps `L` inverts. When the presentation is
+   convergent, they are the 2-out-of-3 closure of `E` [LEAN:
+   `Presentation.conv_le_of_E_le`]. Without convergence, `E ≤ Conv` and
+   `Conv` has 2-out-of-3, but nothing shown here makes it the least such
+   class.
 
 **The model is the pair `(P, E)`, not the quotient `C`.**
 
@@ -115,9 +119,16 @@ Two variances are in play, and both are needed.
   `Hom(t′, –) → Hom(t, –)`, and `B` is local for it exactly when `B(s)` is a
   bijection.
 
-For local objects the two agree, since they factor through a groupoid. So
-Theorem A can be stated in either variance; the proof map states it for
-`A ⥤ Type`.
+For local objects the two agree when the steps generate `A` (every
+reduction is a composite of steps): then the localization at the steps is a
+groupoid, isomorphic to its opposite [HAND]. Theorem A is formalized in both
+variances; the main statement is for presheaves, where computations run
+forward and an observation `Z` acts on a step `s : t → t′` contravariantly,
+by `Z(s) : Z(t′) → Z(t)` (Yoneda). Behaviours are the observers that cannot
+see the direction of a step. Under covariant families the step map runs
+`Hom(t′, –) → Hom(t, –)`, so `E` points from contractum to redex there; that
+presentation is the one for type families and coercion. See
+`PROOF_CHANGELOG.md` (tier 1).
 
 The difference matters for exactness of `L` (`08` §8.6). For covariant
 families, `(LB)(t)` is a colimit over reducts of `t`, which confluence makes
@@ -149,8 +160,16 @@ Worked example: group presentations and the Dehn function, `04` §4.3.
 
 ## 3.6 Convergence and size
 
-Item 4 is the size condition. It is acceptable in this form because it is
-equivalent to something structural: existence of the reflector.
+Item 4 is the size condition. What it buys is structural. With a terminal
+object, convergence makes behaviours reflective: every description has a
+denotation `LX` [LEAN: `Presentation.isRightAdjoint_of_convergent`]. It also
+makes conversions the 2-out-of-3 closure of `E` [LEAN:
+`Presentation.conv_le_of_E_le`].
+
+An earlier version said convergence is *equivalent* to existence of the
+reflector. Only one direction is shown. A reflector gives `X → LX → 1` with
+`LX → 1` in `M`; whether `X → LX` is in `E`, and whether every other map
+factors, needs the reflection to work in every slice. Open (`11` row 18).
 
 - [CITED] This is Freyd and Kelly's orthogonal subcategory problem.
 - [CITED] How definable the class of steps is decides the set-theoretic

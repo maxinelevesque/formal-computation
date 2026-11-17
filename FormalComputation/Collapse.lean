@@ -95,7 +95,7 @@ theorem collapse (ρ : l ⟶ r) (adj : Ins.sec l r ρ ⊣ Ins.forget l r)
     ∀ (a : Xn) (φ : l.obj a ⟶ r.obj a), φ = ρ.app a :=
   collapse_of_isIso_unit l r ρ adj fun a => by
     rw [hunit a]
-    infer_instance
+    exact IsIso.id a
 
 /-- **C3″ (added).** The collapse lemma with the section on the other side: a right adjoint
 section with invertible counit (identity counit is the special case). -/
@@ -109,7 +109,8 @@ theorem collapse_of_isIso_counit (ρ : l ⟶ r) (adj : Ins.forget l r ⊣ Ins.se
     rw [adj.homEquiv_counit] at h1
     exact (cancel_mono (adj.counit.app a)).1 (h1.trans (Category.id_comp _).symm)
   have := (adj.homEquiv (⟨a, φ⟩ : Ins l r) a (adj.counit.app a)).w
-  rw [hg, Functor.map_id, Functor.map_id, Category.comp_id, Category.id_comp] at this
+  rw [hg] at this
+  erw [Functor.map_id, Functor.map_id, Category.comp_id, Category.id_comp] at this
   exact this
 
 /-- **C3′ (added).** Conversely, if `ρ a` is the only arrow `l a ⟶ r a` for every `a`, the

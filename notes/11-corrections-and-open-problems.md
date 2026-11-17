@@ -20,6 +20,10 @@ Kept on purpose. The Lean work should add to this list.
 | 12 | First design of proof-relevant conversion | Canonicity fails: coercion gets stuck | Coercion computes by type former (`08`) |
 | 13 | Martin-Löf type theory is "type-theoretic" in the sense of `07` §7.2 | Positive η-laws hold only propositionally | Relative definition (`07` §7.5) |
 | 14 | "Ind-object of reducts" stated under covariant families | The statement is about representable presheaves | Fixed in `06` §6.5 |
+| 15 | The proof map stated D5 and Theorem A for covariant families `A ⥤ Type` | There the step maps run contractum → redex, so `E` and traces point backwards; descriptions are presheaves (`03` §3.4) | D5 and A1–A4 for presheaves `Aᵒᵖ ⥤ Type`; the covariant version kept alongside (`PROOF_CHANGELOG.md`, tier 1) |
+| 16 | "Conversions are the 2-out-of-3 closure of `E`" | Proved only under convergence | Stated under convergence (`03` §3.2 item 9; Lean `conv_le_of_E_le`) |
+| 17 | "For local objects the two variances agree, since they factor through a groupoid" | The localization at the steps is a groupoid only when the steps generate `A` | Hypothesis added (`03` §3.4) |
+| 18 | "Convergence is equivalent to existence of the reflector" | Only convergence ⇒ reflector is shown | One direction stated, converse open (`03` §3.6) |
 
 ## 11.2 Claims that most need independent checking
 
