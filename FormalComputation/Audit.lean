@@ -73,3 +73,14 @@ open FormalComputation
 -- Tier 2: cost equals area (G1–G3)
 #print axioms Dehn.dchain_iff_prodConj
 #print axioms Dehn.cost_eq_area
+
+-- Tier 3: SKI (K1–K8)
+#print axioms SKI.kfree_of_step
+#print axioms SKI.accident_SKI
+#print axioms SKI.Red.wt_comp
+#print axioms SKI.omegaLoop_wt
+#print axioms SKI.kfree_Ω
+#print axioms SKI.sq_wt
+#print axioms SKI.wt_permEq
+#print axioms SKI.not_absorbed
+#print axioms SKI.absorbed

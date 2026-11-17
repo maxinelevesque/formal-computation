@@ -43,11 +43,19 @@ abbrev Red (t u : Tm) := Quiver.Path t u
 
 /-- **K2.** A step leaves the K-free fragment invariant. -/
 theorem kfree_of_step {t u : Tm} : KFree t → Step t u → KFree u := by
-  sorry
+  intro h st
+  induction st <;> simp_all [KFree]
 
 /-- **K3.** `I (I x)` reduces to `I x` in two different ways. -/
 theorem accident_SKI (x : Tm) : Step.i (.I ⬝ x) ≠ Step.appR .I (Step.i x) := by
-  sorry
+  intro h
+  cases h
+
+/-- **K2.** Reduction leaves the K-free fragment invariant. -/
+theorem kfree_of_red {t u : Tm} (h : KFree t) (p : Red t u) : KFree u := by
+  induction p with
+  | nil => exact h
+  | cons _ s ih => exact kfree_of_step ih s
 
 /-! Paths built from listed steps (`⟦…⟧` in PROOF_MAP). -/
 

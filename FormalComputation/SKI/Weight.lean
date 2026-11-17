@@ -29,7 +29,23 @@ def Red.wt : {t u : Tm} → Red t u → ℤ
 /-- **K4.** The weight is additive. -/
 theorem Red.wt_comp {t u v : Tm} (p : Red t u) (q : Red u v) :
     Red.wt (p.comp q) = Red.wt p + Red.wt q := by
-  sorry
+  induction q with
+  | nil => simp [Red.wt]
+  | cons q s ih => simp [Red.wt, ih, add_assoc]
+
+/-- A reduction in function position has weight 0. -/
+theorem Red.wt_mapAppL (u : Tm) {t t' : Tm} (p : Red t t') :
+    Red.wt (Red.mapAppL u p) = 0 := by
+  induction p with
+  | nil => rfl
+  | cons p s ih => simp [Red.mapAppL, Red.wt, Step.wt, ih]
+
+/-- A reduction in argument position keeps its weight. -/
+theorem Red.wt_mapAppR (t : Tm) {u u' : Tm} (p : Red u u') :
+    Red.wt (Red.mapAppR t p) = Red.wt p := by
+  induction p with
+  | nil => rfl
+  | cons p s ih => simp [Red.mapAppR, Red.wt, Step.wt, ih]
 
 /-- **K7.** `S I I`. -/
 def sii : Tm := .S ⬝ .I ⬝ .I
@@ -44,10 +60,10 @@ def omegaLoop : Red Ω Ω :=
 
 /-- **K7.** The loop has weight 1. -/
 theorem omegaLoop_wt : Red.wt omegaLoop = 1 := by
-  sorry
+  rfl
 
 /-- **K7.** `Ω` is K-free. -/
 theorem kfree_Ω : KFree Ω := by
-  sorry
+  simp [Ω, sii, KFree]
 
 end FormalComputation.SKI
