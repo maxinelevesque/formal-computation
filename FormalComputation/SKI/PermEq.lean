@@ -58,13 +58,13 @@ The two K-naturality squares are excluded by K-freeness: `k_nat₂` erases an ar
 which can carry weight. -/
 theorem sq_wt {t u : Tm} {p q : Red t u} (h : Sq p q) : KFree t → Red.wt p = Red.wt q := by
   induction h with
-  | disjoint a b => intro _; simp [Red.wt, Step.wt]
-  | i_nat a => intro _; simp [Red.wt, Step.wt]
+  | disjoint a b => intro _; simp [r3, r2, r1, Red.wt, Step.wt]
+  | i_nat a => intro _; simp [r3, r2, r1, Red.wt, Step.wt]
   | k_nat₁ a y => intro hk; simp [KFree] at hk
   | k_nat₂ x b => intro hk; simp [KFree] at hk
-  | s_nat₁ a y z => intro _; simp [Red.wt, Step.wt]
-  | s_nat₂ x b z => intro _; simp [Red.wt, Step.wt]
-  | s_nat₃ x y c => intro _; simp [Red.wt, Step.wt] <;> omega
+  | s_nat₁ a y z => intro _; simp [r3, r2, r1, Red.wt, Step.wt]
+  | s_nat₂ x b z => intro _; simp [r3, r2, r1, Red.wt, Step.wt]
+  | s_nat₃ x y c => intro _; simp [r3, r2, r1, Red.wt, Step.wt] <;> omega
   | ctxL u _ _ => intro _; simp [Red.wt_mapAppL]
   | ctxR t _ ih =>
     intro hk

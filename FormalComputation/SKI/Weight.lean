@@ -60,7 +60,7 @@ def omegaLoop : Red Ω Ω :=
 
 /-- **K7.** The loop has weight 1. -/
 theorem omegaLoop_wt : Red.wt omegaLoop = 1 := by
-  simp [omegaLoop, Red.wt, Step.wt]
+  simp [omegaLoop, r3, r2, r1, Red.wt, Step.wt]
 
 /-- **K7.** `Ω` is K-free. -/
 theorem kfree_Ω : KFree Ω := by
