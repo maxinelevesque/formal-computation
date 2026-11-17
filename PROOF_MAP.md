@@ -4,6 +4,11 @@ Every definition, lemma, theorem and conjecture, with a typed statement,
 dependencies, tier and status.
 
 **The Lean in this file is pseudo-Lean. None of it has been compiled.**
+
+> Since 2026-11-17 every node of tiers 1–3 and stretch has a compiling statement in
+> `FormalComputation/` (Mathlib v4.36.0). Where the two differ, the Lean file is
+> authoritative and the difference is logged in `PROOF_CHANGELOG.md`. Statuses below are
+> updated as proofs land.
 Mathlib names are best guesses. Universe levels are mostly omitted and will
 need care. Treat each signature as a statement of intent.
 
