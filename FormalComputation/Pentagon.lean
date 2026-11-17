@@ -1,10 +1,9 @@
 import FormalComputation.LocalSystems
 import Mathlib.CategoryTheory.PathCategory.Basic
 import Mathlib.CategoryTheory.SingleObj
-import Mathlib.Algebra.Group.TypeTags.Basic
+import Mathlib.Algebra.Group.Int.TypeTags
 import Mathlib.Order.BoundedOrder.Basic
 import Mathlib.CategoryTheory.Category.Preorder
-import Mathlib.Tactic.DeriveFintype
 
 /-!
 # Associativity and the pentagon (PROOF_MAP P1–P3)
@@ -27,7 +26,7 @@ open CategoryTheory
 /-- **P1.** Bracketings of four letters:
 `a = ((xy)z)w`, `b = (xy)(zw)`, `c = x(y(zw))`, `d = (x(yz))w`, `e = x((yz)w)`. -/
 inductive V4 | a | b | c | d | e
-  deriving DecidableEq, Fintype
+  deriving DecidableEq
 
 /-- **P1.** The five rule instances. -/
 inductive Edge : V4 → V4 → Type

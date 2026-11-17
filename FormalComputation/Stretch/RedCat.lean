@@ -2,7 +2,7 @@ import FormalComputation.SKI.PermEq
 import Mathlib.CategoryTheory.Localization.Construction
 import Mathlib.CategoryTheory.Endomorphism
 import Mathlib.CategoryTheory.SingleObj
-import Mathlib.Algebra.Group.TypeTags.Basic
+import Mathlib.Algebra.Group.Int.TypeTags
 
 /-!
 # The K-free reduction category (PROOF_MAP K9, tier stretch)
@@ -38,8 +38,8 @@ def ΩObj : RedCat := ⟨Ω, kfree_Ω⟩
 /-- **K9.** The loop at `Ω` has infinite order in the reduction groupoid. -/
 theorem omegaLoop_infinite_order (loop : ΩObj ⟶ ΩObj)
     (hloop : wtFunctor.map loop = Multiplicative.ofAdd (1 : ℤ)) (m n : ℕ)
-    (h : (⊤ : MorphismProperty RedCat).Q.map ((loop : End ΩObj) ^ m) =
-      (⊤ : MorphismProperty RedCat).Q.map ((loop : End ΩObj) ^ n)) : m = n := by
+    (h : (⊤ : MorphismProperty RedCat).Q.map (End.of loop ^ m).asHom =
+      (⊤ : MorphismProperty RedCat).Q.map (End.of loop ^ n).asHom) : m = n := by
   sorry
 
 end FormalComputation.SKI

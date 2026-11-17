@@ -48,6 +48,7 @@ type-check or fixes something the map left unspecified.
 - C4: morphisms in `Type` are now a wrapper structure in Mathlib (`TypeCat.Hom`), so
   functions are promoted with `↾`: `map f := ↾(Prod.map f id)`, `app _ := ↾Prod.fst`.
   `whiskerLeft`/`whiskerRight` are `Functor.whiskerLeft`/`Functor.whiskerRight`.
+- P1: `V4` derives `DecidableEq` only (`deriving Fintype` failed to elaborate and is not needed).
 - P1: `Paths.of.obj V4.a` → `pv .a` (`Paths.of` takes the quiver explicitly); edges as
   morphisms are `ed .ab` etc.
 - K5: `⟦a, b⟧` is written `r2 a b` (also `r1`, `r3`); `EqvGen` → `Relation.EqvGen`;
@@ -81,4 +82,5 @@ type-check or fixes something the map left unspecified.
 | `SingleObj`, `Multiplicative` | present (`SingleObj` abbreviates `Quiver.SingleObj`; it is a groupoid for a group) |
 | `FreeGroup` | present |
 | `EqvGen` | renamed: `Relation.EqvGen` (`Logic/Relation.lean`) |
+| `End X` | changed: a structure (`End.of`, `.asHom`), no longer a synonym for `X ⟶ X` |
 | Morphisms in `Type` | changed since the map was written: a wrapper `TypeCat.Hom`, coerced to functions; `↾f` promotes a function |
