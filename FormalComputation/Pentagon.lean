@@ -75,10 +75,11 @@ theorem top_ne_bot_localized :
 /-- The dynamic presentation in which every reduction is a step. -/
 def pentDyn : DynPresentation PentCat := ⟨⊤⟩
 
-/-- **P2 (added).** With A1: a behaviour on which the two routes act differently. Evaluation
-of `((xy)z)w` remembers which way one reduced. -/
+/-- **P2 (added).** With A1: a behaviour (a presheaf on which every step acts bijectively)
+on which the two routes act differently. Evaluation of `((xy)z)w` remembers which way one
+reduced. -/
 theorem exists_beh_top_ne_bot :
-    ∃ B : PentCat ⥤ Type, pentDyn.toPresentation.Beh B ∧ B.map top ≠ B.map bot := by
+    ∃ B : PentCatᵒᵖ ⥤ Type, pentDyn.toPresentation.Beh B ∧ B.map top.op ≠ B.map bot.op := by
   sorry
 
 /-- **P3.** The four-variable Tamari order, on a copy of the vertex type (so that its
