@@ -35,7 +35,7 @@ fi
 echo "==== AXIOMS ===="
 # One line per declaration; long axiom lists are folded by Lean, so join continuation lines.
 awk '/depends on axioms|does not depend on any axioms/{if (cur) print cur; cur=$0; next} /^ /{cur=cur $0; next} {if (cur) print cur; cur=""} END{if (cur) print cur}' "$AUDIT" \
-  | sed -E 's/  +/ /g' | cut -c1-220 | head -80
+  | sed -E 's/  +/ /g' | cut -c1-220 | head -200
 grep -E "^error" "$AUDIT" | head -10 || true
 
 echo "==== SUMMARY ===="

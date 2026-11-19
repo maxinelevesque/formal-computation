@@ -131,6 +131,27 @@ Green at `95590cb` (CI job 3099), axioms in `AXIOMS.md`.
 - Observation: the fundamental lemmas use only the backward half of non-leaking (subject
   expansion), and `fundamental_S` needs only its result predicate to be a type.
 
+## Probe layer (2026-11-19)
+
+Green at `e49a4da` (CI job 3106).
+
+- **K1 changed (statement): `Tm` gains variables** (`Tm.var : ℕ → Tm`), and `KFree` is
+  extended (`var` is K-free). Reason: the essay's probes supply variables and read them
+  back. No other statement changed; every earlier proof goes through unchanged.
+- `FormalComputation/SKI/Confluence.lean` (additions): `Par`, `par_diamond`, `confluent`,
+  `conv_join`, `IsNormal`, `reds_normal`, `conv_normal_eq`, `reds_of_conv_normal`,
+  `three_fibres`.
+- `FormalComputation/SKI/Probes.lean` (additions): `InVars`, `Probe` (multi-hole contexts),
+  `Reads`, `ProbeEq`, `probeEq_plug`, `reads_unique`, `probeEq_of_conv`, `Sim`,
+  `probeEq_of_sim`, `probeEq_SK`, `six_terms`, `probes_not_running`, `ProbePred`,
+  `isType_probePred`, `probePred_respects`, `isType_runsToI`, `runsToI_not_probe`,
+  `ReadsCode`, `CodeEq`, `codeEq_of_conv`, `codeEq_iff_conv`, `not_codeEq_I_SKK`,
+  `codeEq_Ia_a`.
+- Design choice, logged: probes are contexts with any number of holes, and a probe reads an
+  outcome when the run reaches a term written in variables alone. This matches the essay's
+  figure (its reducer reads any outcome free of `S`, `K`, `I`). With multi-hole contexts,
+  "same under every probe" is at least as strong as with single-hole contexts.
+
 ## Mathlib anchors (checked against v4.36.0 source)
 
 | Anchor | Status |

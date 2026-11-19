@@ -9,11 +9,13 @@ claim by claim, what the essay says, its status, and what backs it. Statuses as 
 
 | § | Claim | Status | Backing |
 |---|---|---|---|
-| Atoms and probes | `I`, `S K K`, `S K S` agree under every probe; `K I`, `K (S K K)` likewise; the three columns suffice for the six rows | HAND (essay) | Standard simulation argument; not in Lean. Candidate for the probe layer (§4). |
+| Atoms and probes | `I`, `S K K`, `S K S` agree under every probe; `K I`, `K (S K K)` likewise; the three groups are separated | Lean | `SKI.six_terms` (simulation `SKI.Sim`, separation by `[ ] x y`) |
 | Running | CL is confluent | CITED | Huet–Lévy, in the essay's note 7 |
-| Three equalities | Sameness after running implies sameness under probes | CITED/HAND | Follows from confluence; not in Lean (needs Church–Rosser for CL) |
-| Three equalities | `I`, `S K K`, `S K S` lie in different fibres | CITED | Distinct normal forms + confluence. **Text fixed** (§2, E2) |
-| Three equalities | `S K y → I` is sound | Lean | `SKI.skRun` |
+| Running | CL is confluent | Lean | `SKI.confluent`, `SKI.conv_join` (parallel reduction) |
+| Three equalities | Sameness after running implies sameness under probes | Lean | `SKI.probeEq_of_conv`; congruence `SKI.probeEq_plug` |
+| Three equalities | `I`, `S K K`, `S K S` lie in different fibres | Lean | `SKI.three_fibres`, `SKI.probes_not_running`. **Text fixed** (§2, E2) |
+| Three equalities | `S K y → I` is sound | Lean | `SKI.probeEq_SK` (same under every probe), `SKI.skRun` |
+| Types | A probe-defined predicate is a type and respects probes; 'runs to I' is a type no probe defines | Lean | `SKI.isType_probePred`, `SKI.probePred_respects`, `SKI.runsToI_not_probe` |
 | Types | A type shades whole fibres | Lean | `SKI.IsType.conv`, `SKI.isType_of_conv` |
 | Types | "Close it" gives the least type containing a predicate | Lean | `SKI.isType_close`, `SKI.le_close`, `SKI.close_le` |
 | Types | A predicate defined by a probe is a type | Lean | `SKI.isType_arr` |
@@ -24,7 +26,7 @@ claim by claim, what the essay says, its status, and what backs it. Statuses as 
 | Definition, note 14 | The steps generate an orthogonal factorization system on families | CITED | Freyd–Kelly (small category, set of steps). Lean has the classes, not the factorization |
 | Two fibres from the inside | Two routes in the bracketing calculus | Lean | `Pentagon.top`, `Pentagon.bot`, `top_ne_bot_localized` |
 | Two fibres from the inside | `K a (I b)` reaches `a` by two runs counted as one | Lean | `SKI.kaib_one_run` |
-| Reading code | Sameness under probes falls back to sameness after running | HAND, **qualified** | True for terms with a value. Two non-convertible terms with no value need not be separated (genericity). **Text fixed** (§2, E4) |
+| Reading code | Sameness under probes falls back to sameness after running | Lean, **qualified** | `SKI.codeEq_iff_conv` (terms with a value), `SKI.not_codeEq_I_SKK`, `SKI.codeEq_Ia_a`. Terms without a value need not be separated (genericity, HAND). **Text fixed** (§2, E4) |
 | Cards | Group words: cost of a run is an area | Lean | `cost_eq_area` (relator deletions, conjugation free) |
 | Cards | Grid figure: least number of swaps = area between paths | standard | Inversion count. Not the Lean statement, which is about groups |
 | Cards | Associativity: evidence can come back changed | Lean | `exists_beh_top_ne_bot` (ℤ-valued behaviour separates the routes) |
@@ -69,7 +71,7 @@ to Theorem A by a proved statement.
 
 ## 4. Not done; options
 
-- **The probe layer.** The essay's third ingredient, observation, is not in the formal
+- **The probe layer** (done 2026-11-19, `SKI/Confluence.lean`, `SKI/Probes.lean`; kept below for the record). The essay's third ingredient, observation, is not in the formal
   definition. In Lean a presentation is `(P, S)`, the kind of answer is fixed to sets, and
   probes are not modelled. Formalizing it for CL would need:
   - Church–Rosser for CL (not in Mathlib);
@@ -93,3 +95,11 @@ to Theorem A by a proved statement.
   runs, which they do in the essay's category of runs. No change needed.
 - **Direction.** The essay does not use the "(P, E), not C" slogan, so the concern from the
   2026-11-18 assessment does not touch it.
+
+## 6. Lean links (2026-11-19)
+
+The essay has 28 inline marks (`<a class="lean" data-lean=…>`) and a section "What has been
+checked by machine". `post/post.md` keeps its reference links. All point at the public
+mirror https://github.com/maxinelevesque/formal-computation at one pinned commit, set by
+`python3 -I scripts/lean-links.py SHA` (`--check` to verify). Re-run it after any Lean change
+that moves a declaration.
