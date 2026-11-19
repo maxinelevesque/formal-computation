@@ -26,8 +26,10 @@
 - [x] Essay 1: tree calculus (S K △ / S K K separated by a triage probe, mechanized) and
       interaction nets (Lévy sidenote, cost card). `notes/14`.
 - [ ] Essay 1: the classification sentence and the card sort (`post/SERIES.md`).
-- [ ] Decide: is `tree-semantics` to be public? It is private on GitHub, so the essay
-      cannot link to its proofs; tree facts the essay uses are re-proved here.
+- [x] `tree-semantics` will be made public (Maxine, 2026-11-19). Link it pinned to `5147cfa`;
+      the links are broken until then.
+- [ ] **The calculus switch** (`notes/15`): every SKI interactive in essay 1 also in tree
+      calculus and interaction nets, behind one toggle.
 - [ ] Lean next: the three-classes theorem for families (Yoneda); V-valued pairings
       (directed observers); a calculus with a one-step diamond has step count as a
       behaviour (interaction nets, abstractly); SKI runs as a DynPresentation.
