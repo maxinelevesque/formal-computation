@@ -110,7 +110,7 @@ this list on every push (section `==== AXIOMS ====` of the job log).
 'FormalComputation.SKI.probePred_iff_mem_orth' depends on axioms: [propext]
 'FormalComputation.SKI.arr_iff_mem_orth' depends on axioms: [propext, Quot.sound]
 
--- calculi with probes in general; SKI and tree calculus as instances (CI job 3131; Lean sources as at development commit ecdb1cc)
+-- calculi with probes in general; SKI and tree calculus as instances (CI job 3131; Lean sources as at mirror commit af9324e)
 'FormalComputation.Calculus.probeEq_of_conv' depends on axioms: [propext, Classical.choice, Quot.sound]
 'FormalComputation.Calculus.probeEq_plug' does not depend on any axioms
 'FormalComputation.Calculus.probes_invariant' depends on axioms: [propext, Classical.choice, Quot.sound]
