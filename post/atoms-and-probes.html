@@ -1,0 +1,2256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atoms and Probes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Layout idea: a Tufte page. A text column with numbered sidenotes in the right margin; figures span both.
+     One colour for each ingredient, used the same way in every figure:
+     ochre = descriptions (atoms and the text they make), green = steps and runs,
+     blue = observation (probes, their readings, evidence), ink = what is kept (the line and its points).
+     Red marks a leak or a clash. */
+  --paper: #fffff8;
+  --ink: #151515;
+  --muted: #66665c;
+  --rule: #d8d6c6;
+  --wash: #ecebdc;
+  --atom: #8a5a12;
+  --atom-wash: #f4e9cc;
+  --probe: #1f5f80;
+  --probe-wash: #dbeaf2;
+  --run: #2c7a4d;
+  --run-wash: #dcefdf;
+  --alarm: #a3312a;
+  --serif: "Source Serif 4", "Iowan Old Style", Charter, Georgia, serif;
+  --sans: "IBM Plex Sans", "Gill Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #161512;
+    --ink: #ecebe3;
+    --muted: #a3a296;
+    --rule: #38362e;
+    --wash: #2b2a23;
+    --atom: #d9a94f;
+    --atom-wash: #3a2e13;
+    --probe: #72bbd9;
+    --probe-wash: #12303c;
+    --run: #7fcf9c;
+    --run-wash: #17361f;
+    --alarm: #ec8279;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #161512;
+  --ink: #ecebe3;
+  --muted: #a3a296;
+  --rule: #38362e;
+  --wash: #2b2a23;
+  --atom: #d9a94f;
+  --atom-wash: #3a2e13;
+  --probe: #72bbd9;
+  --probe-wash: #12303c;
+  --run: #7fcf9c;
+  --run-wash: #17361f;
+  --alarm: #ec8279;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.52;
+  font-feature-settings: "kern", "liga", "onum";
+  text-rendering: optimizeLegibility;
+  counter-reset: sn;
+}
+.essay { max-width: 1080px; margin: 0 auto; padding: 72px 28px 96px; }
+header, section, footer { display: flow-root; }
+section { margin-top: 3.6rem; }
+/* the text column */
+header > *, section > *, footer > * { width: 58%; max-width: 620px; margin: 0; }
+header > * + *, section > * + *, footer > * + * { margin-top: 1.05rem; }
+p { hyphens: auto; }
+h1, h2 { font-weight: 400; text-wrap: balance; line-height: 1.15; }
+h1 { font-size: 3.1rem; letter-spacing: -0.012em; }
+.subtitle { font-size: 1.5rem; font-style: italic; line-height: 1.25; }
+h2 { font-size: 1.7rem; font-style: italic; }
+h3 { font-family: var(--sans); font-size: 0.88rem; font-weight: 600; margin: 0; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; font-feature-settings: normal; }
+a { color: inherit; text-decoration-color: var(--muted); text-underline-offset: 3px; }
+.atom { color: var(--atom); }
+.probe { color: var(--probe); }
+.run { color: var(--run); }
+:focus-visible { outline: 2px solid var(--probe); outline-offset: 3px; }
+
+/* sidenotes, after Tufte: numbered in the text, set in the margin */
+.sn-num { counter-increment: sn; }
+.sn-num::after {
+  content: counter(sn);
+  font-size: 0.68em; position: relative; top: -0.55em; left: 0.06em; margin-right: 0.12em;
+  font-feature-settings: "lnum";
+}
+.sidenote {
+  float: right; clear: right;
+  width: 52%; margin-right: -62%;
+  margin-top: 0.2rem; margin-bottom: 0.9rem;
+  font-size: 0.8rem; line-height: 1.42; color: var(--muted);
+  hyphens: manual; position: relative;
+}
+.sidenote::before {
+  content: counter(sn) "\2002";
+  font-size: 0.82em; position: relative; top: -0.4em;
+  font-feature-settings: "lnum";
+}
+.sidenote em { font-style: italic; }
+.sn-toggle { display: none; }
+/* When the script is running, the notes are placed by it and no longer float, so that a long note
+   cannot push a figure down. Without the script they float as before. */
+@media (min-width: 821px) {
+  .sn-js .sidenote { float: none; clear: none; position: absolute; left: 110%; width: 52%; margin: 0; }
+  /* captions and readouts keep to the text column, so the margin beside a narrow figure stays free for notes */
+  figure.wide > figcaption, figure.wide > .readout { max-width: min(620px, 58%); }
+  /* a figure that stays in the text column draws its top rule only that far, so the rule does not cross a note */
+  figure.wide.in-column { border-top: 0; padding-top: 0; }
+  figure.wide.in-column::before { content: ""; display: block; width: min(620px, 58%); border-top: 1px solid var(--rule); margin-bottom: 2px; }
+}
+
+/* paired columns */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.pair > div { border-top: 1px solid var(--ink); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.pair .is-atom { border-color: var(--atom); }
+.pair .is-probe { border-color: var(--probe); }
+.pair .is-atom h3 { color: var(--atom); }
+.pair .is-probe h3 { color: var(--probe); }
+.pair p { font-size: 0.95rem; margin: 0; hyphens: manual; }
+.judgment { font-family: var(--mono); font-size: 1.25rem; white-space: nowrap; }
+
+/* figures */
+figure.wide { width: 100%; max-width: none; clear: both; margin: 2.2rem 0 0; border-top: 1px solid var(--rule); padding-top: 14px; display: flex; flex-direction: column; gap: 12px; }
+.fig-title { font-style: italic; font-size: 1.1rem; }
+.stage svg { display: block; width: 100%; height: auto; color: var(--ink); }
+.stage svg[data-lay="tall"] { max-width: 440px; margin: 0 auto; }
+.stage.narrow svg { max-width: 560px; }
+figcaption { font-size: 0.82rem; line-height: 1.42; color: var(--muted); max-width: 620px; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; font-family: var(--sans); font-size: 0.86rem; }
+.tab {
+  font: inherit; font-weight: 500; color: var(--muted); background: none; border: 0;
+  border-bottom: 2px solid transparent; padding: 6px 1px; cursor: pointer;
+}
+.tab[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.btn {
+  font: inherit; font-weight: 500; color: var(--ink); background: none;
+  border: 1px solid var(--ink); border-radius: 3px; padding: 5px 14px; cursor: pointer; min-width: 4.6em;
+}
+.btn.go { background: var(--run); border-color: var(--run); color: var(--paper); }
+.btn:disabled, .tab:disabled { opacity: 0.4; cursor: default; }
+.tab[data-m="syntax"][aria-pressed="true"] { color: var(--atom); border-bottom-color: var(--atom); }
+.tab[data-m="run"][aria-pressed="true"] { color: var(--run); border-bottom-color: var(--run); }
+.tab[data-m="test"][aria-pressed="true"] { color: var(--probe); border-bottom-color: var(--probe); }
+.check { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+.check input { width: 17px; height: 17px; accent-color: var(--ink); margin: 0; flex: none; }
+input[type="range"] { accent-color: var(--ink); width: min(220px, 50vw); }
+select { font-family: var(--sans); font-size: 0.86rem; color: var(--ink); background: var(--paper); border: 0; border-bottom: 1px solid var(--ink); padding: 5px 2px; max-width: 100%; }
+select.mono { font-family: var(--mono); font-size: 0.82rem; }
+.readout { font-size: 1rem; max-width: 620px; min-height: 3em; }
+.now { font-family: var(--mono); font-size: 1.2rem; min-height: 1.9em; overflow-x: auto; white-space: nowrap; color: var(--atom); }
+.now mark, .runline mark { background: var(--atom-wash); color: inherit; border-bottom: 2px solid var(--atom); padding: 1px 3px; }
+.verdict { font-family: var(--sans); font-weight: 600; font-size: 0.9rem; }
+.verdict.bad { color: var(--alarm); }
+
+/* svg vocabulary */
+svg text { font-family: var(--mono); font-size: 12.5px; fill: var(--ink); }
+svg .lab { font-family: var(--sans); font-size: 11.5px; }
+svg .lab.blue, svg text.t-probe { fill: var(--probe); }
+svg .lab.green { fill: var(--run); }
+.hit { fill: transparent; }
+svg text.t-atom { fill: var(--atom); }
+.fade { transition: opacity 0.4s ease; }
+.n-rect { fill: var(--paper); stroke: var(--rule); stroke-width: 1; transition: fill 0.35s ease, stroke 0.35s ease; }
+.n-rect.nf { stroke: var(--ink); stroke-width: 1.4; }
+.n-rect.paint { fill: var(--wash); stroke: var(--ink); stroke-width: 1.4; }
+.n-rect.spread { fill: var(--wash); stroke: var(--ink); stroke-dasharray: 4 3; }
+.n-rect.paint.pb, .n-rect.spread.pb { fill: var(--probe-wash); stroke: var(--probe); }
+.n-rect.paint.pa, .n-rect.spread.pa { fill: var(--atom-wash); stroke: var(--atom); }
+.n-rect.paint.pr, .n-rect.spread.pr { fill: var(--run-wash); stroke: var(--run); }
+.n-rect.cur { fill: var(--run-wash); stroke: var(--run); stroke-width: 2; }
+.pick { cursor: pointer; }
+.edge { stroke: var(--run); stroke-width: 1.1; fill: none; }
+.edge.focus { stroke: var(--run); stroke-width: 2.6; }
+.edge.run { stroke: var(--run); stroke-width: 1.6; }
+.edge.leak { stroke: var(--alarm); stroke-width: 2.4; }
+.edge.thin { stroke-width: 0.8; }
+.edge.blue { stroke: var(--probe); stroke-dasharray: 5 4; }
+.ah { fill: var(--run); }
+.ah-alarm { fill: var(--alarm); }
+.ah-blue { fill: var(--probe); }
+.ah-run { fill: var(--run); }
+.proj { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 4; fill: none; }
+.baseline { stroke: var(--ink); stroke-width: 1.2; }
+.basept { fill: var(--ink); }
+.basept.k-atom { fill: var(--atom); }
+.basept.k-run { fill: var(--run); }
+.basept.k-probe { fill: var(--probe); }
+.basept.hollow { fill: var(--paper); stroke: var(--muted); stroke-width: 1.4; }
+.token { fill: var(--run); stroke: var(--paper); stroke-width: 2; }
+.ring { fill: var(--paper); stroke: var(--run); stroke-width: 2.6; }
+.evid { fill: var(--probe); stroke: var(--paper); stroke-width: 2; }
+.state { fill: var(--atom); }
+.hole { fill: var(--run-wash); opacity: 0; transition: opacity 0.4s ease; }
+.hole.on { opacity: 1; }
+.tl { stroke-width: 1.2; fill: none; }
+.tl.a { stroke: var(--atom); }
+.tl.p { stroke: var(--probe); }
+.tn.a { fill: var(--atom); }
+.tn.p { fill: var(--probe); }
+.holebox { fill: var(--probe-wash); stroke: var(--probe); stroke-width: 1; stroke-dasharray: 4 3; }
+
+/* the probe bench */
+.bench { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 14px 36px; align-items: start; }
+.bench > div { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.bench svg { display: block; width: 100%; max-width: 380px; height: auto; }
+.bench p { margin: 0; font-size: 0.95rem; hyphens: manual; }
+.runline { font-family: var(--mono); font-size: 0.95rem; line-height: 1.7; }
+.grid { min-width: 0; font-size: 0.88rem; }
+.grid th, .grid td { padding: 3px 8px 3px 0; vertical-align: middle; }
+.grid thead th { padding-bottom: 6px; }
+.grid code { font-size: 1em; }
+.grid th[scope="row"] { font-family: var(--mono); font-size: 0.94em; color: var(--atom); white-space: nowrap; }
+.grid tr.gstart th, .grid tr.gstart td { border-top: 1px solid var(--rule); }
+.cell {
+  font-family: var(--mono); font-size: 0.94em; width: 100%; min-height: 34px; text-align: left; white-space: nowrap;
+  background: none; color: var(--ink); border: 1px solid var(--rule); border-radius: 3px; padding: 6px 7px; cursor: pointer;
+}
+.cell.own { color: var(--probe); }
+.cell.text { color: var(--atom); }
+.cell.sealed { color: var(--muted); font-family: var(--sans); font-style: italic; }
+.cell[aria-pressed="true"] { border-color: var(--ink); background: var(--wash); }
+.pt { font-family: var(--sans); font-weight: 600; text-align: center; font-feature-settings: "lnum"; }
+
+/* tables: rules only */
+.table-wrap { overflow-x: auto; clear: both; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; line-height: 1.35; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+th, td { text-align: left; vertical-align: top; padding: 8px 18px 8px 0; hyphens: manual; }
+thead th { font-family: var(--sans); font-weight: 600; font-size: 0.82rem; border-bottom: 1px solid var(--rule); }
+th[scope="row"] { font-family: var(--sans); font-weight: 400; font-size: 0.8rem; color: var(--muted); }
+th.h-atom { color: var(--atom); }
+th.h-probe { color: var(--probe); }
+
+.table-wrap.full { width: 100%; max-width: none; }
+.stack th:nth-child(1), .stack td:nth-child(1) { width: 31%; }
+.stack th:nth-child(2), .stack td:nth-child(2) { width: 24%; }
+
+.gridline { stroke: var(--rule); stroke-width: 1; }
+.swept { fill: var(--run-wash); }
+.wordpath { stroke: var(--atom); stroke-width: 2.8; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.corner { fill: var(--paper); stroke: var(--run); stroke-width: 2.6; }
+.corner.moving { fill: var(--run); }
+.cornerping { fill: none; stroke: var(--run); stroke-width: 2; opacity: 0; }
+.cornerhit { fill: transparent; }
+g.cornerg, g.cornerg * { cursor: pointer; }
+g.cornerg, .pick, .cell, .btn, .tab { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.roundtrip { fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-dasharray: 5 4; stroke-linejoin: round; }
+.zhole { fill: var(--paper); stroke: var(--ink); stroke-width: 1.3; }
+g.cornerg:hover .corner, g.cornerg:focus .corner { fill: var(--run-wash); }
+svg .lab.bad { fill: var(--alarm); font-weight: 600; }
+svg text.halo { paint-order: stroke; stroke: var(--paper); stroke-width: 6px; stroke-linejoin: round; }
+svg text.ev { font-size: 21px; font-weight: 500; fill: var(--probe); }
+.says { min-height: 7.4em; }
+
+/* the zoo of settings: one small picture to a card */
+.legend { width: 100%; max-width: none; display: flex; flex-wrap: wrap; gap: 4px 22px; font-family: var(--sans); font-size: 0.8rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.legend svg { width: 28px; height: 14px; flex: none; }
+.zoo { width: 100%; max-width: none; clear: both; display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px 24px; }
+.card { border-top: 2px solid var(--ink); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.card.c-obs { border-top-color: var(--probe); }
+.card.c-step { border-top-color: var(--run); }
+.card svg { display: block; width: 100%; max-width: 270px; height: auto; margin-bottom: 2px; }
+.tag { font-family: var(--sans); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.02em; }
+.c-obs .tag { color: var(--probe); }
+.c-step .tag { color: var(--run); }
+.card h3 { font-size: 0.9rem; line-height: 1.3; }
+.card p { margin: 0; hyphens: manual; }
+.card .where { font-size: 0.8rem; line-height: 1.35; font-style: italic; color: var(--muted); }
+.card .what { font-size: 0.84rem; line-height: 1.42; }
+.zdesc { fill: var(--atom-wash); stroke: var(--atom); stroke-width: 1; }
+svg text.zt { font-size: 10.5px; }
+.zprobe { fill: none; stroke: var(--probe); stroke-width: 1.2; stroke-dasharray: 4 3; }
+.zlens { fill: none; stroke: var(--probe); stroke-width: 1.7; }
+.zproof { fill: none; stroke: var(--probe); stroke-width: 1.5; }
+.zkept { fill: none; stroke: var(--ink); stroke-width: 1.7; }
+@media (max-width: 1040px) { .zoo { grid-template-columns: repeat(2, 1fr); } }
+
+/* small multiples */
+.multiples { display: grid; grid-template-columns: repeat(2, 1fr); gap: 36px; }
+.multiples > div { display: flex; flex-direction: column; gap: 6px; }
+.multiples svg { width: 100%; height: auto; max-width: 400px; display: block; color: var(--ink); }
+.multiples p { font-size: 0.86rem; line-height: 1.4; color: var(--muted); margin: 0; hyphens: manual; }
+.multiples .check { color: var(--ink); font-family: var(--sans); }
+.multiples.four { grid-template-columns: repeat(4, 1fr); gap: 22px; }
+
+footer { margin-top: 4rem; border-top: 1px solid var(--rule); padding-top: 1.3rem; font-size: 0.86rem; color: var(--muted); }
+
+/* narrow screens: one column; a sidenote opens when its number is tapped */
+@media (max-width: 820px) {
+  body { font-size: 17.5px; }
+  .essay { padding: 36px 18px 72px; }
+  header > *, section > *, footer > * { width: 100%; }
+  h1 { font-size: 2.3rem; }
+  .subtitle { font-size: 1.3rem; }
+  h2 { font-size: 1.5rem; }
+  .pair { grid-template-columns: 1fr; gap: 18px; }
+  .multiples { grid-template-columns: 1fr; }
+  .zoo { grid-template-columns: 1fr; gap: 26px; }
+  .multiples.four { grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+  .says { min-height: 0; }
+  .bench { grid-template-columns: 1fr; }
+  .tab { padding: 10px 2px; }
+  .btn { padding: 9px 16px; }
+  th, td { padding-right: 12px; }
+  .stack thead { display: none; }
+  .stack, .stack tbody, .stack tr, .stack td { display: block; }
+  .stack th:nth-child(n), .stack td:nth-child(n) { width: auto; }
+  .stack tr { padding: 10px 0; border-top: 1px solid var(--rule); }
+  .stack tbody tr:first-child { border-top: 0; }
+  .stack td { padding: 2px 0; }
+  .stack td:nth-child(1) { font-family: var(--sans); font-weight: 600; font-size: 0.86rem; }
+  .stack td:nth-child(2) { font-style: italic; }
+  .sn-num { cursor: pointer; color: var(--probe); padding: 5px 8px; margin: -5px -2px; }
+  .sidenote { display: none; }
+  .sn-toggle:checked + .sidenote {
+    display: block; float: none; width: auto; margin: 0.7rem 0 0.7rem 0;
+    padding-left: 12px; border-left: 2px solid var(--rule);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .edge.leak { animation: pulse 1.1s ease-in-out infinite alternate; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.35; } }
+  /* short cues: a point reached, a reading landed, a number changed, a square swept */
+  /* drawn with stroke width and type size, which every browser animates alike */
+  .arrive { stroke: var(--run); animation: arrive 0.9s ease-out 1 forwards; }
+  .k-probe.arrive, .evid.arrive { stroke: var(--probe); }
+  .k-atom.arrive { stroke: var(--atom); }
+  @keyframes arrive { 0% { stroke-width: 0; stroke-opacity: 0.9; } 40% { stroke-width: 16px; stroke-opacity: 0.45; } 100% { stroke-width: 16px; stroke-opacity: 0; } }
+  svg text.ev.pop { animation: popev 0.7s ease-out 1; }
+  @keyframes popev { 0% { font-size: 36px; } 100% { font-size: 21px; } }
+  svg text.lab.pop { animation: poplab 0.7s ease-out 1; }
+  @keyframes poplab { 0% { font-size: 19px; } 100% { font-size: 11.5px; } }
+  .cornerping { animation: ping 1.6s ease-out infinite; }
+  @keyframes ping { 0% { stroke-width: 2px; opacity: 0.85; } 100% { stroke-width: 26px; opacity: 0; } }
+  .cell.land { animation: land 0.9s ease-out 1; }
+  @keyframes land { 0% { box-shadow: 0 0 0 0 currentColor; transform: scale(1.12); } 100% { box-shadow: 0 0 0 12px transparent; transform: scale(1); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fade, .n-rect, .hole { transition: none; }
+}
+</style>
+</head>
+<body>
+<article class="essay">
+
+<header>
+  <h1>Atoms and Probes</h1>
+  <p class="subtitle">Computation is what a type forgets.</p>
+  <p>A typed program can be given two accounts. A typing derivation says how the program was put together, and a semantic type, which is a predicate on terms, says what the program does when it is used. A good part of the theory of programming languages consists of showing that the two accounts agree.<label for="sn1" class="sn-num"></label><input type="checkbox" id="sn1" class="sn-toggle"><span class="sidenote">For the syntactic method see A. K. Wright and M. Felleisen, ‘A syntactic approach to type soundness’, <em>Information and Computation</em> 115(1), 1994, 38–94. For types as predicates see R. Milner, ‘A theory of type polymorphism in programming’, <em>Journal of Computer and System Sciences</em> 17(3), 1978, 348–375, and, for a recent use at scale, R. Jung, J.-H. Jourdan, R. Krebbers and D. Dreyer, ‘RustBelt: securing the foundations of the Rust programming language’, <em>Proceedings of the ACM on Programming Languages</em> 2(POPL), 2018, article 66.</span></p>
+  <p>This essay explains a framework, still in draft, that draws the same line one level lower, through terms themselves. It separates the <span class="atom">atoms</span> from which a term is written from the <span class="probe">probes</span> by which a term is tested. In full these are description atoms and behaviour probes. The distinction is easy to miss, because a probe is itself written with atoms, and so the two never look different on the page. Once they are separated, a third thing can be seen between them, which is <span class="run">computation</span>.</p>
+  <p>The distinction bears on decisions that a language designer makes in any case. It settles which equalities a type checker can decide by running terms and which have to be proved. It explains why an operator that inspects code destroys abstraction. It says what a type is unable to record, which includes the cost of a program. And it shows the usual notion of computation as one setting among several.</p>
+  <p>The essay goes in this order. It first recalls the two ways of giving a type, by rules and by tests. It defines atoms and probes for a small calculus, with a figure in which probes can be tried on terms. It then draws the running of terms, and shows that one picture of running supports three different equalities. A type is defined as a predicate that running cannot change. The framework’s definition follows, in the vocabulary of operational semantics. Two further sections say what a type cannot see, and what happens when a probe can read code. The section before the summary changes the ingredients one at a time, and shows where the usual notion of computation, that of Turing machines, sits among the results.</p>
+  <p>Each ingredient keeps one colour through all the figures. <span class="atom">Ochre</span> is for descriptions: atoms and the text made from them. <span class="run">Green</span> is for steps and runs. <span class="probe">Blue</span> is for observation: probes, what they read, and evidence. Black is for what is kept, which is the line and its points. Red marks a leak or a clash, and a filled green button sets something running.</p>
+  <div class="legend">
+    <span><svg viewBox="0 0 28 14" aria-hidden="true"><rect x="3" y="2" width="22" height="10" rx="2" class="zdesc"/></svg>a description</span>
+    <span><svg viewBox="0 0 28 14" aria-hidden="true"><line x1="2" y1="7" x2="19" y2="7" class="edge"/><path d="M18 3 L26 7 L18 11 z" class="ah"/></svg>a step</span>
+    <span><svg viewBox="0 0 28 14" aria-hidden="true"><line x1="2" y1="7" x2="19" y2="7" class="edge blue"/><path d="M18 3 L26 7 L18 11 z" class="ah-blue"/></svg>a probe, and what it reads</span>
+    <span><svg viewBox="0 0 28 14" aria-hidden="true"><line x1="1" y1="7" x2="27" y2="7" class="baseline"/><circle cx="14" cy="7" r="3.5" class="basept"/></svg>what is kept</span>
+  </div>
+</header>
+
+<section>
+  <h2>Two accounts of a typed program</h2>
+  <p>This section is for readers who know typing judgments. Others can pass over it and take from it one thing: a type can be given by rules for building a term, or by tests applied to a finished one.</p>
+  <div class="pair">
+    <div class="is-atom">
+      <h3>Syntactic typing</h3>
+      <div class="judgment">Γ ⊢ t : A</div>
+      <p>Read: under the assumptions Γ, the term <code>t</code> has type <code>A</code>. The statement is established by a derivation built from rules, one rule for each way of forming a term, and one reasons about it by induction on the derivation.</p>
+    </div>
+    <div class="is-probe">
+      <h3>Semantic typing</h3>
+      <div class="judgment">t ∈ ⟦A⟧</div>
+      <p>Read: <code>t</code> belongs to the set of terms that pass the tests for <code>A</code>. The set is a predicate on terms. A term belongs to ⟦A → B⟧ if applying it to any member of ⟦A⟧ yields a member of ⟦B⟧.</p>
+    </div>
+  </div>
+  <p>The two are connected by the fundamental lemma of logical relations, which states that every typing rule preserves membership in the semantic type. A term that can be derived therefore passes every test that its type imposes.<label for="sn2" class="sn-num"></label><input type="checkbox" id="sn2" class="sn-toggle"><span class="sidenote">W. W. Tait, ‘Intensional interpretations of functionals of finite type I’, <em>Journal of Symbolic Logic</em> 32(2), 1967, 198–212; G. D. Plotkin, ‘Lambda-definability and logical relations’, Memorandum SAI-RM-4, University of Edinburgh, 1973; R. Statman, ‘Logical relations and the typed λ-calculus’, <em>Information and Control</em> 65(2–3), 1985, 85–97.</span></p>
+  <p>The framework applies the same division to terms. A term considered as a piece of text is called a <em class="atom">description</em>. This is the object that a parser returns, and two descriptions are equal only if they are the same tree. Descriptions are made of atoms. What a term does when it is used is a separate matter, and it is found out by probes. The next section defines both words.</p>
+</section>
+
+<section>
+  <h2>Atoms and probes</h2>
+  <p>The examples are written in combinatory logic, a calculus with three constants and no binding of variables.<label for="sn3" class="sn-num"></label><input type="checkbox" id="sn3" class="sn-toggle"><span class="sidenote">M. Schönfinkel, ‘Über die Bausteine der mathematischen Logik’, <em>Mathematische Annalen</em> 92, 1924, 305–316; H. B. Curry and R. Feys, <em>Combinatory Logic</em>, vol. I, North-Holland, 1958.</span> Two terms written side by side form an application of the first to the second, and applications group to the left, so that <code>S K K a</code> means <code>((S K) K) a</code>. The constants are defined by three rules: <code>I x → x</code>, <code>K x y → x</code> and <code>S x y z → x z (y z)</code>. In a functional language <code>I</code> is the identity function and <code>K</code> is <code>const</code>, and <code>S</code> passes one argument to two functions and applies the first result to the second. A term is run by using the rules until none applies. The letters <code>a</code>, <code>b</code>, <code>x</code> and <code>y</code> are variables, which have no rules of their own, and <code>ω</code> abbreviates <code>S I I</code>.</p>
+  <p>An <em class="atom">atom</em> is a node of syntax. Here the atoms are the constants, the variables, and application. A term is a tree of atoms and nothing else, and to ask about its atoms is to ask what the text consists of. A programmer would call this the white-box view.</p>
+  <p>A <em class="probe">probe</em> is an experiment performed on a term, and it is the black-box view. The probe supplies a context with a hole, such as <code>[ ] x y</code>. The term is put in the hole and the result is run. The probe then reads the outcome, under one restriction: it may read only what it supplied. If the outcome is written entirely in the probe’s own variables, as <code>x y</code> is, the probe reads it. If the outcome still contains <code>S</code>, <code>K</code> or <code>I</code>, those symbols are part of the term’s text, and the probe may not look at them. It can only supply another argument and try again. This restriction is a decision about observation. It does not follow from the three rules, and it can be changed while they stay as they are.<label for="sn4" class="sn-num"></label><input type="checkbox" id="sn4" class="sn-toggle"><span class="sidenote">The definition follows J. H. Morris, <em>Lambda-Calculus Models of Programming Languages</em>, PhD thesis, Massachusetts Institute of Technology, 1968, in which two terms are equivalent if no context distinguishes them. Morris observes only whether a run ends. Reading back the probe’s own variables is a variant suited to a calculus with free variables.</span></p>
+  <p>Two terms are the same under every probe if no context, however elaborate, leads to different readings. The figure tries three simple contexts on six terms. For these six the three contexts are enough: terms that agree in the figure agree under every probe.</p>
+  <figure class="wide">
+    <div class="fig-title">Six terms under three probes</div>
+    <div class="controls" role="group" aria-label="Reading">
+      <button type="button" class="tab" data-r="probe" aria-pressed="true">Read as an experiment</button>
+      <button type="button" class="tab" data-r="text" aria-pressed="false">Read as text</button>
+      <label class="check" for="benchcode"><input type="checkbox" id="benchcode"> Let probes read code</label>
+    </div>
+    <div class="bench">
+      <div>
+        <svg id="svg-tree" viewBox="0 0 340 176" role="img" aria-label="The syntax tree of the term placed in the probe’s context. In the reading as an experiment the term is ochre and sits in a blue box, and the probe’s own symbols are blue. In the reading as text every node is ochre."></svg>
+        <p id="benchsay"></p>
+        <div class="runline" id="benchrun"></div>
+        <p id="benchverdict"></p>
+      </div>
+      <div>
+        <table class="grid" id="grid"></table>
+        <p class="readout" id="benchread"></p>
+      </div>
+    </div>
+    <figcaption>Each row is a term and each column a probe. Select a cell to run that experiment: the term is placed in the probe, the run is played a step at a time, and the reading lands in the cell. The last column numbers the points: rows with the same readings in every column have the same number.</figcaption>
+  </figure>
+  <p>Application is the plainest case of a symbol with two roles. Read as text, <code>S K K x</code> is a tree with an application node at its root, and that node is an atom like any other. Read as an experiment, the same expression is the probe <code>[ ] x</code> used on <code>S K K</code>. The syntax is the same in both readings. What differs is the question asked of it: in the first reading what the text consists of, and in the second what <code>S K K</code> does.</p>
+  <p>The checkbox lifts the restriction. With it ticked, a probe may read any outcome, including the term itself as it stands, and the six rows separate.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th></th><th class="h-atom">Atom</th><th class="h-probe">Probe</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">What it is</th><td>A node of syntax</td><td>A context with a hole, and a rule for what may be read</td></tr>
+        <tr><th scope="row">Question</th><td>What does the text consist of?</td><td>What does the term do when used?</td></tr>
+        <tr><th scope="row">Equality</th><td>The same tree</td><td>The same readings under every probe</td></tr>
+        <tr><th scope="row">Method</th><td>Induction on the text</td><td>Extensionality: terms are equal if every use of them gives equal results</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Type theory already has names for the atoms that do each job. An introduction form is an atom that builds a value of a type, and an elimination form is an atom that builds a probe for one. In a functional language the constructors and <code>λ</code> are introduction forms, and application, projection and pattern matching are elimination forms. A positive type, such as a sum or the natural numbers, is determined by its introduction forms. A negative type, such as a function or a record, is determined by its eliminations.<label for="sn5" class="sn-num"></label><input type="checkbox" id="sn5" class="sn-toggle"><span class="sidenote">J.-M. Andreoli, ‘Logic programming with focusing proofs in linear logic’, <em>Journal of Logic and Computation</em> 2(3), 1992, 297–347; P. B. Levy, <em>Call-by-Push-Value</em>, Springer, 2003; N. Zeilberger, <em>The Logical Basis of Evaluation Order and Pattern-Matching</em>, PhD thesis, Carnegie Mellon University, 2009. For a language in which negative types are defined by their observations see A. Abel, B. Pientka, D. Thibodeau and A. Setzer, ‘Copatterns: programming infinite structures by observations’, <em>POPL</em> 2013, 27–38.</span></p>
+  <p>An atom, then, is a part, and a probe is an experiment. The experiment is assembled from parts, which is why the two are confused.</p>
+</section>
+
+<section>
+  <h2>Running a term</h2>
+  <p>Between writing a term and probing it comes running it. A part of a term that matches the left side of a rule is a <em>redex</em>. A <em class="run">step</em> replaces one redex by the right side of its rule, and a <em class="run">run</em> is a sequence of steps. The framework’s word for a run is <em class="run">computation</em>. A term with no redex is a <em>normal form</em>, and when a run ends in a normal form, that normal form is a <em>value</em> of the term the run began with.<label for="sn6" class="sn-num"></label><input type="checkbox" id="sn6" class="sn-toggle"><span class="sidenote">Small-step and big-step presentations are due to G. D. Plotkin, ‘A structural approach to operational semantics’, Report DAIMI FN-19, Aarhus University, 1981, and G. Kahn, ‘Natural semantics’, in <em>STACS 87</em>, Lecture Notes in Computer Science 247, Springer, 1987, 22–39.</span></p>
+  <p>A term can have more than one redex, and so more than one run. The term <code>K a (I b)</code> has two. The K-rule can be used at once, which discards <code>I b</code> and gives <code>a</code> in one step. Or <code>I b</code> can be run first, which gives <code>K a b</code> and then <code>a</code>, in two steps. Both runs end at <code>a</code>. In this calculus that always happens: two runs that leave the same term can be continued until they meet, a property called confluence.<label for="sn7" class="sn-num"></label><input type="checkbox" id="sn7" class="sn-toggle"><span class="sidenote">G. Huet and J.-J. Lévy, ‘Computations in orthogonal rewriting systems, I and II’, in J.-L. Lassez and G. Plotkin (eds), <em>Computational Logic: Essays in Honor of Alan Robinson</em>, MIT Press, 1991, 395–443.</span> A term therefore has at most one value, though its runs may differ in length.</p>
+  <p>The figure shows running from four distances. Closest, there is one term and the step it is about to take. One stage back, the whole run of that term is shown. Further back, fourteen terms are shown with every step between them. In the last view the terms and steps are faded and only the values remain. The term and the order of evaluation can be changed in the figure.</p>
+  <figure class="wide">
+    <div class="fig-title">Four views of running</div>
+    <div class="controls" role="group" aria-label="View">
+      <button type="button" class="tab" data-l="1" aria-pressed="false">One step</button>
+      <button type="button" class="tab" data-l="2" aria-pressed="false">One run</button>
+      <button type="button" class="tab" data-l="3" aria-pressed="true">All the terms</button>
+      <button type="button" class="tab" data-l="4" aria-pressed="false">Only the values</button>
+    </div>
+    <div class="controls">
+      <label class="check" for="focus">Term <select id="focus" class="mono"></select></label>
+      <label class="check" for="order">Order <select id="order"><option value="outer">outermost redex first</option><option value="inner">arguments first</option></select></label>
+    </div>
+    <div class="now" id="now"></div>
+    <div class="controls">
+      <button type="button" class="btn go" id="play">Play</button>
+      <label class="check" for="time">Time <input type="range" id="time" min="0" max="2" step="0.01" value="0"></label>
+      <span id="stepinfo"></span>
+    </div>
+    <div class="stage"><svg id="svg-hero" role="img" aria-label="Fourteen terms drawn beside the values they run to. Each arrow is one step. Terms joined by steps are grouped over one point on a line."></svg></div>
+    <p class="readout" id="heroread"></p>
+    <figcaption>Each box is a term and each arrow is a step. A box with a dark outline is a normal form. The line has one point for each value, and a hollow point for terms that have none. The green arrows are the run of the chosen term under the chosen order, and the green dot is the term reached so far. Select any box to run that term.</figcaption>
+  </figure>
+  <p>The last view is the classical account of what a program means. A program denotes a value, and a type sorts programs by their values.<label for="sn8" class="sn-num"></label><input type="checkbox" id="sn8" class="sn-toggle"><span class="sidenote">D. S. Scott and C. Strachey, ‘Toward a mathematical semantics for computer languages’, Technical Monograph PRG-6, Oxford University Computing Laboratory, 1971.</span> Nothing in that account is false. It is obtained from the fuller picture by discarding everything except the line and its points.</p>
+  <p>The framework takes the whole picture as its object of study. The terms that are joined to one another by steps, taken forwards or backwards, form a <em>fibre</em>. The figure has five. Four of them contain a normal form, which is the value of every term in the fibre and the term to which each of them can run. The fifth holds the three terms of the loop <code>ω ω</code>, which run only to one another and have no value.<label for="sn9" class="sn-num"></label><input type="checkbox" id="sn9" class="sn-toggle"><span class="sidenote">The fourteen terms were chosen by hand, and every arrow is computed. An arrow is drawn for each step whose result is among the fourteen. The three <code>ω ω</code> terms have further steps that lead outside the figure, and their run is always shown arguments-first, because that order returns to its start.</span></p>
+</section>
+
+<section>
+  <h2>Three equalities</h2>
+  <p>The figure of fourteen terms has three kinds of mark: boxes for descriptions, arrows for steps, and a line of points underneath. The boxes and arrows are fixed by the calculus. Once the atoms and the rules are chosen, the descriptions and the steps are determined. The line is another matter. It records which descriptions are to count as the same, and that question has three reasonable answers.</p>
+  <figure class="wide">
+    <div class="fig-title">Three equalities on the same terms</div>
+    <div class="controls" role="group" aria-label="Equality">
+      <button type="button" class="tab" data-m="syntax" aria-pressed="false">Same text</button>
+      <button type="button" class="tab" data-m="run" aria-pressed="true">Same after running</button>
+      <button type="button" class="tab" data-m="test" aria-pressed="false">Same under every probe</button>
+      <label class="check" for="addrule"><input type="checkbox" id="addrule"> Add the rule <code>S K y → I</code></label>
+    </div>
+    <div class="stage"><svg id="svg-base" role="img" aria-label="The same fourteen terms. A dotted line joins each one to a point on the line. Changing the equality slides the points together or apart."></svg></div>
+    <p class="readout" id="baseread"></p>
+    <figcaption>The boxes do not move. Only the points on the line do, and they take the colour of what decides the equality: ochre for text, green for running, blue for probes. Each equality is coarser than the one before it.</figcaption>
+  </figure>
+  <p>The three are named here by what decides them, and each name keeps its colour for the rest of the essay. <span class="atom">Sameness of text</span> identifies two descriptions only when they are the same tree. It is the equality that atoms give. <span class="run">Sameness after running</span> identifies descriptions that lie in one fibre, that is, descriptions joined to one another by steps. It is the only one of the three defined by running. A proof assistant decides this equality by running both sides, and calls it definitional. <span class="probe">Sameness under probes</span> identifies descriptions that no probe can tell apart. It is the equality that probes give, and it is usually called contextual or observational equivalence.<label for="sn10" class="sn-num"></label><input type="checkbox" id="sn10" class="sn-toggle"><span class="sidenote">Morris, cited in note 4, and G. D. Plotkin, ‘LCF considered as a programming language’, <em>Theoretical Computer Science</em> 5(3), 1977, 223–255.</span></p>
+  <p><span class="run">Sameness after running</span> implies <span class="probe">sameness under probes</span>: two terms joined by steps cannot be told apart by any probe. The reason is that a step inside a term is still a step when the term sits in a context. So if <code>t</code> steps to <code>u</code>, a probe’s run on <code>t</code> can begin with that step and continue as its run on <code>u</code>. By confluence, the property that two runs from one term can always be continued until they meet, the two runs end alike, and the probe reads the same thing from both.</p>
+  <p>The converse fails, and the terms <code>I</code>, <code>S K K</code> and <code>S K S</code> show it. In the table of six terms and three probes, in the section on atoms and probes, the three had the same readings in every column, so <span class="probe">sameness under probes</span> puts them on one point. Each is also a normal form already, so no step leads from one to another, and <span class="run">sameness after running</span> keeps them apart.</p>
+  <p>Where <span class="probe">sameness under probes</span> holds and running does not show it, the equality has to be proved. With addition defined by recursion on its first argument, <code>0 + x</code> steps to <code>x</code>, but <code>x + 0</code> does not step at all, because the recursion is waiting on the variable <code>x</code>. The two sides of <code>x + 0 = x</code> agree under every probe, yet no step joins them. In a proof assistant the equation is proved by induction, and an equality established in that way is called propositional. A compiler’s optimiser works with <span class="probe">sameness under probes</span> from the other side. It may replace a term by any other over the same point, and it looks for one with a shorter run.</p>
+  <p>A rule can be added to bring <span class="run">sameness after running</span> closer to <span class="probe">sameness under probes</span>. Tick the box in the figure. The rule <code>S K y → I</code> is sound, since <code>S K y x</code> runs to <code>x</code> whatever <code>y</code> is. With it, <code>S K K</code> and <code>S K S</code> step to <code>I</code>, and their three separate points become one, as they were under probes. Something that only a probe could find out is now found by running.</p>
+  <p>The η-rule of the lambda calculus is a rule of this kind. Combinatory logic is the lambda calculus with its bound variables compiled away, and η makes a function <code>f</code> interchangeable with the abstraction <code>λx. f x</code>, which says that a function is no more than what it returns when applied.<label for="sn11" class="sn-num"></label><input type="checkbox" id="sn11" class="sn-toggle"><span class="sidenote">H. P. Barendregt, <em>The Lambda Calculus: Its Syntax and Semantics</em>, revised edition, North-Holland, 1984, treats η and extensionality. For η as an expansion see C. B. Jay and N. Ghani, ‘The virtues of eta-expansion’, <em>Journal of Functional Programming</em> 5(2), 1995, 135–154.</span> Where a type has such a rule among its steps, a checker decides by running what would otherwise need a proof. Function and record types, which are known by their probes, usually have one. Sums and the natural numbers have laws of the same kind, but those laws are hard to use as steps, and most checkers leave them to be proved.<label for="sn12" class="sn-num"></label><input type="checkbox" id="sn12" class="sn-toggle"><span class="sidenote">T. Altenkirch, P. Dybjer, M. Hofmann and P. Scott, ‘Normalization by evaluation for typed lambda calculus with coproducts’, <em>LICS</em> 2001, 303–310, shows how much machinery the η-law for sums requires.</span></p>
+</section>
+
+<section>
+  <h2>Types</h2>
+  <p>Any property of terms is a predicate on descriptions, and it can be drawn as shading on the boxes of the figure of fourteen terms. The property of mentioning <code>K</code> is such a predicate. It would make a poor type, because <code>K a (K a)</code> has the property and the term <code>a</code>, to which it steps, does not. A program would belong to the type before a step and not after it. A predicate of this kind will be said to <em>leak</em>.</p>
+  <p>In this essay a <em>type</em> is a predicate that does not leak: no step leads from a term that satisfies it to a term that does not, in either direction. A fibre, as before, is a set of terms joined to one another by steps, and a predicate that does not leak shades each fibre entirely or not at all. It can therefore be stated by naming points on the line, when the line is drawn for <span class="run">sameness after running</span> and has one point for each fibre. The framework’s word is <em>behaviour</em>, and it is slightly wider: a behaviour may attach evidence to a term, and not only a yes or a no. Until the section on changing the ingredients the two coincide.</p>
+  <p>Every account of types as predicates has a condition of this sort. Tait’s saturated sets are closed under head expansion. Girard’s reducibility candidates are closed under reduction, and contain a neutral term whenever they contain all its one-step reducts. Biorthogonal sets are closed, by their construction, under the tests that define them. The condition used here is closure under steps in both directions. It is stronger than those and simpler to state, and it does their work without being the same as any of them. A reducibility candidate, for instance, contains only terms all of whose runs end. It therefore excludes <code>K a (ω ω)</code> while including <code>a</code>, which is one step away.<label for="sn13" class="sn-num"></label><input type="checkbox" id="sn13" class="sn-toggle"><span class="sidenote">Tait, cited in note 2; J.-Y. Girard, Y. Lafont and P. Taylor, <em>Proofs and Types</em>, Cambridge University Press, 1989, chapters 6 and 14; A. M. Pitts, ‘Parametric polymorphism and operational equivalence’, <em>Mathematical Structures in Computer Science</em> 10(3), 2000, 321–359; J. Vouillon and P.-A. Melliès, ‘Semantic types: a fresh look at the ideal model for types’, <em>POPL</em> 2004, 52–63.</span></p>
+  <figure class="wide">
+    <div class="fig-title">A predicate and its leaks</div>
+    <div class="controls">
+      <label class="check" for="pred">Predicate <select id="pred"></select></label>
+      <button type="button" class="btn" id="closeit" aria-pressed="false">Close it</button>
+    </div>
+    <div class="stage"><svg id="svg-paint" role="img" aria-label="The same fourteen terms, shaded where the chosen predicate holds. A red arrow marks a step with one shaded end and one unshaded end."></svg></div>
+    <p class="verdict" id="verdict"></p>
+    <p class="readout" id="paintread"></p>
+    <figcaption>A shaded box satisfies the predicate. A red arrow is a leak: a step with one end shaded and the other not. The shading takes the colour of what defines the predicate: ochre for the text, green for running, blue for a probe. Boxes can also be shaded by hand, and selecting one begins a predicate of your own.</figcaption>
+  </figure>
+  <p>The control marked ‘Close it’ replaces a leaking predicate by the smallest type that contains it. It extends the shading across every step it meets, in both directions, until nothing more can be added.</p>
+  <p>Two predicates in the list should be compared. ‘Runs to <code>I</code>’ is a type, since it shades exactly one fibre. No probe defines it, however, because it holds of <code>I</code> and not of <code>S K K</code>, and those two give the same readings under every probe. ‘Returns <code>a</code> when applied to <code>a</code>’ is defined by a probe, and its shading is drawn in blue. It is also a type, and it shades the fibres of <code>I</code>, <code>S K K</code> and <code>S K S</code> together, which are the fibres that <span class="probe">sameness under probes</span> merged. Steps settle which predicates are types. Probes are the usual way of defining one, and a type defined by a probe cannot separate terms that probes cannot separate.</p>
+  <p>The fundamental lemma of the first section said that every rule for building a term preserves membership in the semantic type. It can now be followed for a single atom. Let ⟦A⟧ and ⟦B⟧ be any two types in the sense of this section, that is, predicates that do not leak, and let ⟦A → B → A⟧ be the predicate defined by a probe: it holds of a term <code>t</code> if <code>t u v</code> is in ⟦A⟧ whenever <code>u</code> is in ⟦A⟧ and <code>v</code> is in ⟦B⟧. The claim is that <code>K</code> satisfies it. Take such a <code>u</code> and <code>v</code>. The term <code>K u v</code> steps to <code>u</code>, and <code>u</code> is in ⟦A⟧ by assumption. Since ⟦A⟧ does not leak, <code>K u v</code> is in ⟦A⟧ as well, and that is what the probe required.</p>
+  <figure class="wide">
+    <div class="fig-title">The fundamental lemma for K</div>
+    <div class="controls" role="group" aria-label="Stage">
+      <button type="button" class="tab" data-k="0" aria-pressed="true">Given</button>
+      <button type="button" class="tab" data-k="1" aria-pressed="false">Back across the step</button>
+      <button type="button" class="tab" data-k="2" aria-pressed="false">Back across the probe</button>
+      <button type="button" class="btn go" id="lemmaplay">Play the argument</button>
+    </div>
+    <div class="stage narrow"><svg id="svg-lemma" viewBox="0 0 400 132" role="img" aria-label="Three terms in a row: K, then K u v, then u. A dashed arrow labelled as a probe joins the first to the second. A solid arrow labelled as a step joins the second to the third. A dot that marks membership in a type moves from the third term back to the first."></svg></div>
+    <p class="readout" id="lemmaread"></p>
+    <figcaption>The dot marks membership in a type. It passes back across the step because a type does not leak, and back across the probe because that is how ⟦A → B → A⟧ was defined.</figcaption>
+  </figure>
+  <p>The argument uses each notion once. <code>K</code> is an atom, <code>[ ] u v</code> is a probe, and <code>K u v → u</code> is a step. The probe needs a fact about the term under test, <code>K u v</code>. The fact available is about <code>u</code>, and it is the step that carries it from one to the other. This is the sense in which computation lies between atoms and probes.</p>
+</section>
+
+<section>
+  <h2>The definition</h2>
+  <p>The framework’s definition can now be given in familiar words. A <em>presentation</em> has three parts. The first is a collection of descriptions, generated by atoms. The second is a set of steps between them. The third is an observation, which says what probes there are and what kind of answer a probe returns. In this essay the probes have been contexts written in the calculus itself, and the answer has been a reading or none. That is one choice among several, and two later sections change it. The other entries in the table are derived from these three parts.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Framework</th><th>Operational semantics</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="atom">Description</td><td>A term, as text</td></tr>
+        <tr><td class="atom">Atom</td><td>A node of syntax: a constant, a variable, a term former</td></tr>
+        <tr><td class="run">Step</td><td>One use of a rule of the small-step semantics</td></tr>
+        <tr><td class="run">Computation</td><td>A run: a reduction sequence</td></tr>
+        <tr><td class="run">Conversion</td><td>Steps taken forwards or backwards; definitional equality</td></tr>
+        <tr><td>Fibre</td><td>A class of terms under conversion</td></tr>
+        <tr><td class="probe">Observation</td><td>The probes that are available, and the kind of answer they return</td></tr>
+        <tr><td class="probe">Probe</td><td>Here, a context with a hole, used on a term and run</td></tr>
+        <tr><td>Family</td><td>A predicate on terms, or an assignment of evidence to each term</td></tr>
+        <tr><td>Behaviour</td><td>A family in which each step carries evidence across in one way. A type is the case where the evidence is a yes or a no.</td></tr>
+        <tr><td>Reflector</td><td>Closing a predicate, as the control marked ‘Close it’ does in the figure of leaks</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>One statement in the definition is more exact than the table. A family may attach evidence to a term, such as a proof that the term belongs to a type. Suppose there is evidence for <code>t</code>, and suppose <code>t</code> steps to <code>u</code>. In a behaviour the evidence can be carried across the step in exactly one way, and the same holds in the other direction. Subject reduction and subject expansion are the half of this statement that says the evidence can be carried. The other half says that a single step carries it in only one way.<label for="sn14" class="sn-num"></label><input type="checkbox" id="sn14" class="sn-toggle"><span class="sidenote">In the language of category theory: take the category whose objects are descriptions and whose maps are runs. A family is a functor from it to sets. The steps generate an orthogonal factorization system on the category of families, the condition in the text is unique lifting against each step, and a behaviour is a family that sends every step to a bijection. The points of the line, when it is drawn for sameness after running, are the connected components of the category. Putting another category in the place of sets changes the kind of answer a probe returns. See P. Freyd and G. M. Kelly, ‘Categories of continuous functors, I’, <em>Journal of Pure and Applied Algebra</em> 2(3), 1972, 169–191, and C. Cassidy, M. Hébert and G. M. Kelly, ‘Reflective subcategories, localizations and factorization systems’, <em>Journal of the Australian Mathematical Society (Series A)</em> 38(3), 1985, 287–329.</span></p>
+  <p>The statement is about one step at a time. It leaves open whether two different runs between the same two terms carry evidence to the same place. For a predicate the question cannot arise, since a term either satisfies a predicate or does not, and there is nothing further to differ. For evidence with more content it can arise, and the next section shows where.</p>
+</section>
+
+<section>
+  <h2>What a type cannot see</h2>
+  <p>A type was defined as a predicate that no step changes. It shades whole fibres, where a fibre is a set of terms joined by steps, and so it amounts to a set of points on the line. It records which fibre a term is in, and nothing about the inside of the fibre. Three things about the inside matter to a designer: how long the runs are, whether two runs between the same terms are the same run, and whether the order of evaluation decides if a value is reached at all.</p>
+  <p>Length was seen in the figure of fourteen terms, where <code>K a (I b)</code> reached <code>a</code> in one step or in two. The cost of a run is the number of its steps. That this number is a fair measure of cost, within a polynomial factor of time on a machine, is itself a theorem, and it holds for particular orders of evaluation.<label for="sn15" class="sn-num"></label><input type="checkbox" id="sn15" class="sn-toggle"><span class="sidenote">P. van Emde Boas, ‘Machine models and simulations’, in J. van Leeuwen (ed.), <em>Handbook of Theoretical Computer Science</em>, vol. A, Elsevier, 1990, 1–66; B. Accattoli and U. Dal Lago, ‘(Leftmost-outermost) beta reduction is invariant, indeed’, <em>Logical Methods in Computer Science</em> 12(1:4), 2016.</span> The other two are drawn below.</p>
+  <figure class="wide">
+    <div class="fig-title">Two fibres from the inside</div>
+    <div class="multiples">
+      <div>
+        <svg id="svg-pent" viewBox="0 0 330 222" role="img" aria-label="Five bracketings of four letters, joined by five steps into a pentagon. Two markers leave the top term by different routes and arrive at the same bottom term, which stands over one point."></svg>
+        <h3>Two routes</h3>
+        <p>The rule <code>(xy)z → x(yz)</code>, from a calculus of bracketings. Two runs lead from the first term to the last, one of two steps and one of three. <span id="pentread"></span></p>
+        <p><label class="check" for="fill"><input type="checkbox" id="fill"> Count them as one run</label></p>
+      </div>
+      <div>
+        <svg id="svg-exit" viewBox="0 0 330 222" role="img" aria-label="Three terms in a cycle. An arrow leaves each of them for the normal form a, which stands over one point. One marker goes round the cycle and another takes the first exit."></svg>
+        <h3>A loop with exits</h3>
+        <p>The term <code>K a (ω ω)</code>. Its argument runs in a cycle of three terms, and from each of them the K-rule leads out to <code>a</code>. The solid marker runs the argument first and never arrives. The ring uses the K-rule at once.</p>
+      </div>
+    </div>
+    <figcaption>Each panel is one fibre, and each stands over one point. The point shows neither the two routes nor the loop.</figcaption>
+  </figure>
+  <p>In the panel of two routes the question is the one that the definition left open at the end of the last section: whether evidence carried along the two routes arrives in the same state. For a predicate it must. For richer evidence it need not, unless the two runs are counted as one, and Mac Lane’s pentagon axiom is the requirement that they be so counted for associativity.<label for="sn16" class="sn-num"></label><input type="checkbox" id="sn16" class="sn-toggle"><span class="sidenote">S. Mac Lane, ‘Natural associativity and commutativity’, <em>Rice University Studies</em> 49(4), 1963, 28–46. For associativity as a rule that is not an isomorphism see M. L. Laplaza, ‘Coherence for associativity not an isomorphism’, <em>Journal of Pure and Applied Algebra</em> 2(2), 1972, 107–120. The general study of equations between runs begins with C. C. Squier, F. Otto and Y. Kobayashi, ‘A finiteness condition for rewriting systems’, <em>Theoretical Computer Science</em> 131(2), 1994, 271–294.</span></p>
+  <p>In the panel of the loop with exits every term has the value <code>a</code>, but only some orders of evaluation find it. An order that begins with the outermost redex, that is, the outermost part that matches a rule, does. An order that runs arguments first does not. The loop <code>ω ω</code> by itself, where <code>ω</code> is short for <code>S I I</code>, is a third case. It is the cycle of three terms at the edge of the figure of fourteen terms. It has no exit, and no order of evaluation gives it a value.</p>
+</section>
+
+<section>
+  <h2>When probes can read atoms</h2>
+  <p>The probes so far could read only what they supplied: an outcome counted as read only if it was written in the probe’s own variables. Some calculi give a probe more. In tree calculus a program can ask of any normal form whether it is a leaf, a stem or a fork, and take it apart accordingly, so that a probe can read atoms.<label for="sn17" class="sn-num"></label><input type="checkbox" id="sn17" class="sn-toggle"><span class="sidenote">B. Jay, <em>Reflective Programs in Tree Calculus</em>, 2021. The rules in current use are given in the <a href="https://atlas-4vy.pages.dev/specification">specification</a> on the tree calculus website. On what can and cannot be translated between such calculi see B. Jay and J. Vergara, ‘Confusion in the Church–Turing thesis’, arXiv:1410.7103, 2014.</span> The checkbox marked ‘Let probes read code’, under the table of six terms and three probes, had this effect. The figure below shows what it does to <span class="probe">sameness under probes</span>.</p>
+  <figure class="wide">
+    <div class="fig-title">Sameness under probes, with and without reading</div>
+    <div class="controls">
+      <label class="check" for="readcode"><input type="checkbox" id="readcode"> Let probes read code</label>
+    </div>
+    <div class="stage"><svg id="svg-code" role="img" aria-label="The same fourteen terms, with the points placed by sameness under probes. When probes may read code, the single point for I, S K K and S K S separates into three."></svg></div>
+    <p class="readout" id="coderead"></p>
+    <figcaption>The equality shown is ‘same under every probe’ throughout. Only the power of the probes changes.</figcaption>
+  </figure>
+  <p>With the box ticked, a probe distinguishes <code>I</code>, <code>S K K</code> and <code>S K S</code> by their text, and <span class="probe">sameness under probes</span> falls back to <span class="run">sameness after running</span>. It does not fall back to <span class="atom">sameness of text</span>. <code>I a</code> and <code>a</code> still share a point, because a step is invisible to a probe however much the probe can read.</p>
+  <p>In such a calculus programs are data. Two normal forms are equal under probes only when they are the same tree, so there is a single equality for values and it is decided by comparing text. What is given up is abstraction. Any change to the text of a function can be detected by some program, and so no two different normal forms can be exchanged for one another.</p>
+  <p>The lambda calculus is at the opposite setting. There application is the only probe, a function is known only by its use, and <span class="probe">sameness under probes</span> is much coarser than <span class="run">sameness after running</span>. The framework does not choose between the two. The observation is one of its three parts, and the checkbox changes it while the descriptions and the steps stay as they are. Tree calculus reaches the same place by another road, by adding steps that let its own contexts do the reading.</p>
+</section>
+
+<section>
+  <h2>Changing the ingredients</h2>
+  <p>A presentation, which is the framework’s name for a calculus as given by its definition, has three ingredients: the <span class="atom">descriptions</span>, the <span class="run">steps</span> and the <span class="probe">observation</span>. To these must be added one decision, which is how much of the resulting picture to keep. The calculus of this essay made its choices early and then left them alone. Its steps run one way. Its probes supply an argument and read back an answer. And the essay has mostly kept the line, on which each fibre shows as a single point. The definition given above requires none of these choices.</p>
+  <p>Each way of making the choices will be called a notion of computation. (The word computation by itself still means a run.) The usual notion, that of Turing machines and the lambda calculus, is one of them. Its descriptions are finite: for a Turing machine a description is a tape with a head and a state, and a step is one move. Its steps are finitely many rules that run one way, and each rule is local, in that it inspects a bounded part of the description. A probe supplies a number and reads a number, or reads nothing if the run does not end. And only the line is kept, so that a program is identified with the partial function it computes.</p>
+  <p>At this setting something remarkable was found. The calculi proposed independently in the 1930s by Church, Kleene and Turing were proved to put the same points on the line. These points are the partial recursive functions, that is, the functions from numbers to numbers that some Turing machine computes, undefined where the machine does not halt. No calculus with finite descriptions and finitely many local rules has since been found to add a point, and the Church–Turing thesis is the claim that none will. A calculus that reaches all of these points is called universal. This agreement is the reason the usual notion is commonly taken to be what the word computation means.<label for="sn19" class="sn-num"></label><input type="checkbox" id="sn19" class="sn-toggle"><span class="sidenote">A. Church, ‘An unsolvable problem of elementary number theory’, <em>American Journal of Mathematics</em> 58(2), 1936, 345–363; S. C. Kleene, ‘λ-definability and recursiveness’, <em>Duke Mathematical Journal</em> 2, 1936, 340–353; A. M. Turing, ‘On computable numbers, with an application to the Entscheidungsproblem’, <em>Proceedings of the London Mathematical Society</em> s2-42(1), 1937, 230–265, and ‘Computability and λ-definability’, <em>Journal of Symbolic Logic</em> 2(4), 1937, 153–163.</span></p>
+  <p>The agreement holds at one setting, and two things about it should be noticed. First, the calculi that agree on the line differ in their fibres, that is, in what a run costs and in which runs count as the same. Second, the comparison itself needs an observation that belongs to none of the calculi compared. A Turing machine and a term of combinatory logic have no atoms and no steps in common. A number has to be written down in each of them, as marks on a tape or as a term, and to say that the two compute the same function is to probe both from outside, by way of those writings. The observation is therefore an ingredient in its own right, and the thesis is a statement about one choice of it.<label for="sn20" class="sn-num"></label><input type="checkbox" id="sn20" class="sn-toggle"><span class="sidenote">That a comparison of calculi depends on how data are written in each is argued in U. Boker and N. Dershowitz, ‘Comparing computational power’, <em>Logic Journal of the IGPL</em> 14(5), 2006, 633–648, and, for calculi that can read their own programs, in the preprint of Jay and Vergara cited in note 17, whose conclusions are disputed. For comparison by what can be translated, see M. Felleisen, ‘On the expressive power of programming languages’, <em>Science of Computer Programming</em> 17(1–3), 1991, 35–75.</span></p>
+  <figure class="wide">
+    <div class="fig-title">One probe, two calculi</div>
+    <div class="stage narrow"><svg id="svg-outside" viewBox="0 0 420 214" role="img" aria-label="A probe supplies the number three to a Turing machine, where it is written as three marks on a tape, and to a term of combinatory logic, where it is written as a term. Each runs by its own steps. The probe reads the number six back from both."></svg></div>
+    <figcaption>A schematic of doubling. The probe, in blue, belongs to neither calculus. It fixes how a number is written in each and how one is read back, and only then can the two be compared.</figcaption>
+  </figure>
+  <p>The cards below change one choice at a time, starting from the usual notion. Each has a small picture in the colours used throughout. The essay’s own probes are already richer than the first card allows, since they supply terms and not numbers. The cards start from numbers because that is the setting the thesis concerns. No card changes the descriptions, which the framework has not yet tried to vary.<label for="sn21" class="sn-num"></label><input type="checkbox" id="sn21" class="sn-toggle"><span class="sidenote">On cost: van Emde Boas, cited in note 15, where the agreement of the reasonable machine models up to a polynomial is stated as a thesis, following C. Slot and P. van Emde Boas, ‘On tape versus core’, <em>STOC</em> 1984, 391–400. On higher types: J. Longley and D. Normann, <em>Higher-Order Computability</em>, Springer, 2015. On observers of processes: R. De Nicola and M. C. B. Hennessy, ‘Testing equivalences for processes’, <em>Theoretical Computer Science</em> 34(1–2), 1984, 83–133; R. Milner, <em>Communication and Concurrency</em>, Prentice Hall, 1989; R. J. van Glabbeek, ‘The linear time – branching time spectrum I’, in J. A. Bergstra, A. Ponse and S. A. Smolka (eds), <em>Handbook of Process Algebra</em>, Elsevier, 2001, 3–99. Bisimulation is defined by a lifting condition of the kind in note 14 in A. Joyal, M. Nielsen and G. Winskel, ‘Bisimulation from open maps’, <em>Information and Computation</em> 127(2), 1996, 164–185. On proofs of equality: M. Hofmann and T. Streicher, ‘The groupoid interpretation of type theory’, in <em>Twenty-Five Years of Constructive Type Theory</em>, Oxford University Press, 1998, 83–111. On groups: M. R. Bridson, ‘The geometry of the word problem’, in M. R. Bridson and S. M. Salamon (eds), <em>Invitations to Geometry and Topology</em>, Oxford University Press, 2002, 29–91; undecidability is due to P. S. Novikov, 1955, and W. W. Boone, ‘The word problem’, <em>Annals of Mathematics</em> 70(2), 1959, 207–265. On associativity see note 16.</span></p>
+  <div class="legend">
+    <span><svg viewBox="0 0 28 14" aria-hidden="true"><rect x="3" y="2" width="22" height="10" rx="2" class="zdesc"/></svg>a description</span>
+    <span><svg viewBox="0 0 28 14" aria-hidden="true"><line x1="2" y1="7" x2="19" y2="7" class="edge"/><path d="M18 3 L26 7 L18 11 z" class="ah"/></svg>a step</span>
+    <span><svg viewBox="0 0 28 14" aria-hidden="true"><line x1="2" y1="7" x2="19" y2="7" class="edge blue"/><path d="M18 3 L26 7 L18 11 z" class="ah-blue"/></svg>a probe, and what it reads</span>
+    <span><svg viewBox="0 0 28 14" aria-hidden="true"><line x1="1" y1="7" x2="27" y2="7" class="baseline"/><circle cx="14" cy="7" r="3.5" class="basept"/></svg>what is kept</span>
+  </div>
+  <div class="zoo">
+    <div class="card">
+      <svg id="z0" viewBox="0 0 220 118" role="img" aria-label="A probe supplies the number three to a description. Steps lead one way to another description, from which the probe reads six. Below, a line with one point."></svg>
+      <div class="tag">The usual notion</div>
+      <h3>Numbers in, numbers out, and only the line kept</h3>
+      <p class="where">Turing machines, the lambda calculus, combinatory logic</p>
+      <p class="what">Every universal calculus has the same line, the partial recursive functions.</p>
+    </div>
+    <div class="card c-obs">
+      <svg id="z1" viewBox="0 0 220 118" role="img" aria-label="Two runs to the same answer, one of one step and one of two. The probe reads the answer with the number of steps, and the two runs stand over different points."></svg>
+      <div class="tag">Observation</div>
+      <h3>A probe returns a cost as well as an answer</h3>
+      <p class="where">Complexity theory</p>
+      <p class="what">Programs with the same answers come apart. The line now depends on the calculus, though only up to a polynomial among the machine models shown to simulate one another with polynomial overhead.</p>
+    </div>
+    <div class="card c-obs">
+      <svg id="z2" viewBox="0 0 220 118" role="img" aria-label="The probe hands a description to the term in place of a number, and reads a number back. Below, three different lines."></svg>
+      <div class="tag">Observation</div>
+      <h3>A probe supplies a program, which may be called but not read</h3>
+      <p class="where">Computability at higher types</p>
+      <p class="what">Calculi that agree on numbers disagree here. There are several notions of what is computable, and no one of them has displaced the others.</p>
+    </div>
+    <div class="card c-obs">
+      <svg id="z3" viewBox="0 0 220 118" role="img" aria-label="Three normal forms, I, S K K and S K S. A lens over one of them shows the probe reading its text. Each stands over its own point."></svg>
+      <div class="tag">Observation</div>
+      <h3>A probe may read code</h3>
+      <p class="where">The checkbox marked ‘Let probes read code’. Tree calculus gets the same effect by adding steps.</p>
+      <p class="what"><span class="probe">Sameness under probes</span> falls back to <span class="run">sameness after running</span>. Programs become data, and abstraction is lost.</p>
+    </div>
+    <div class="card c-obs">
+      <svg id="z4" viewBox="0 0 220 118" role="img" aria-label="Two small processes with the same traces. The probe is drawn as a ring round the middle states, where the two differ. They stand over different points."></svg>
+      <div class="tag">Observation</div>
+      <h3>A probe may watch a run as it goes</h3>
+      <p class="where">Concurrent processes, in which two runs from one state need not meet again</p>
+      <p class="what">The same steps support a range of equalities, from sameness of traces to bisimulation, one for each kind of observer.</p>
+    </div>
+    <div class="card c-obs">
+      <svg id="z5" viewBox="0 0 220 118" role="img" aria-label="Two terms joined by two proofs of their equality, p and q, with a step from one proof to the other."></svg>
+      <div class="tag">Observation</div>
+      <h3>The answer is a proof, and there may be several</h3>
+      <p class="where">Dependent type theory, where a proof that two terms are equal is itself a term</p>
+      <p class="what">Two proofs of one equality can in turn be equal or not. The proofs have steps and fibres of their own, and the picture is repeated one level up.</p>
+    </div>
+    <div class="card c-step">
+      <svg id="z6" viewBox="0 0 220 118" role="img" aria-label="Three words, aab, aba and baa, joined by steps that go both ways. All three stand over one point."></svg>
+      <div class="tag">Steps</div>
+      <h3>Steps are allowed in both directions</h3>
+      <p class="where">A group given by generators and relations. Descriptions are words, and a step applies a relation.</p>
+      <p class="what">The steps single out no normal form and no order of evaluation. The value of a word is a group element, the cost of a run is an area, and whether two words share a point can be undecidable.</p>
+    </div>
+    <div class="card">
+      <svg id="z7" viewBox="0 0 220 118" role="img" aria-label="A loop of three terms enclosed in a black outline, which marks that the whole fibre is kept. Evidence gains one on the way round. Below, a hollow point."></svg>
+      <div class="tag">What is kept</div>
+      <h3>The fibres are kept as well as the line</h3>
+      <p class="where">Associativity; the loop <code>ω ω</code></p>
+      <p class="what">Loops and holes appear. Evidence carried round a loop can come back changed.</p>
+    </div>
+  </div>
+  <p>The last line of each card reports results that are known, and the note gives sources. What the framework adds is the heading: the claim that every card is the same three ingredients and the same decision, made differently. The framework is unpublished. Its arguments for the cards on code, proofs, groups, cost and associativity have been made by hand, and have been checked neither by machine nor by referees. For higher types and for concurrent processes they have not yet been made.</p>
+  <p>Two of the cards are drawn larger here, because they are the furthest from the calculus of this essay. The first is the card on watching a run. A trace is the sequence of actions that a run shows. Two processes are bisimilar if each can match every move of the other and remain matched afterwards. The two processes in the figure have the same traces, <code>a b</code> and <code>a c</code>. They are not bisimilar, because the first can do <code>a</code> and still offer both <code>b</code> and <code>c</code>, and the second cannot. A probe that sees only finished traces finds them equal. A probe that can stop after <code>a</code> and ask what is on offer tells them apart.</p>
+  <figure class="wide">
+    <div class="fig-title">Two processes with the same traces</div>
+    <div class="stage narrow"><svg id="svg-proc" viewBox="0 0 400 156" role="img" aria-label="Two small trees. In the first, an action a leads to a state from which b and c are both possible. In the second, there are two actions a from the start, one leading to a state that offers only b and the other to a state that offers only c."></svg></div>
+    <figcaption>Each dot is a state and each arrow an action. Both processes can show <code>a</code> then <code>b</code>, or <code>a</code> then <code>c</code>, and nothing else.</figcaption>
+  </figure>
+  <p>The second is the card on groups. Take two generators, <code>a</code> and <code>b</code>, and one relation, which says that <code>ab</code> and <code>ba</code> are the same. A word is then a path on a grid, in which <code>a</code> is a move to the right and <code>b</code> a move up. A step exchanges an adjacent <code>ab</code> for <code>ba</code>, or the reverse, and it moves the path across one square. The value of a word is the place where its path ends, which no step changes. The fibre over that place is the set of all paths to it.</p>
+  <figure class="wide">
+    <div class="fig-title">Words as paths, and steps as squares</div>
+    <div class="bench">
+      <div><svg id="svg-grid" viewBox="0 0 320 290" role="group" aria-label="A three by three grid. A word in a and b is drawn as a path from the bottom left corner to the top right. Each corner of the path can be selected to exchange two letters, which moves the path across one square."></svg></div>
+      <div>
+        <p class="readout" id="gridread" aria-live="polite"></p>
+        <div class="controls"><button type="button" class="btn go" id="gridab">Exchange <code>ab</code> for <code>ba</code></button><button type="button" class="btn go" id="gridba">Exchange <code>ba</code> for <code>ab</code></button><button type="button" class="btn" id="gridreset">Start again</button></div>
+      </div>
+    </div>
+    <figcaption>The ochre line is the word now reached, and the dashed line is the first word. Select a green corner, or press one of the green buttons, to exchange two letters: the corner moves across one square, and the square is shaded or cleared. The shaded squares lie between the two words.</figcaption>
+  </figure>
+  <p>Nothing in this picture resembles a machine. The steps go both ways, so they single out no normal form, and there is no input, no output and no order of evaluation. The three ingredients are present all the same, and so is cost: the least number of steps between two words is the area between their paths. With other relations the same questions become hard. Whether two words name one element is called the word problem of the group, and for some groups no procedure decides it.</p>
+  <p>The last card, on keeping the fibres, needs explaining, because it changes what is kept and not what is given. The picture of running can be kept at three levels. At the first, each fibre is counted as one piece, and the pieces are the points of the line. At the second, the arrowheads are forgotten and a fibre is a graph. A loop in it is a round trip from a term back to itself, and a <em>hole</em> is a loop that no agreed equation between runs fills. (This is not the hole of a context.) At the third, the arrowheads are kept, and a normal form is the term at which the runs of a fibre end. Cost can be added to the graph or to the picture with direction, as the length of a route.<label for="sn22" class="sn-num"></label><input type="checkbox" id="sn22" class="sn-toggle"><span class="sidenote">For length as a structure of the same kind as truth, see F. W. Lawvere, ‘Metric spaces, generalized logic, and closed categories’, <em>Rendiconti del Seminario Matematico e Fisico di Milano</em> 43, 1973, 135–166.</span></p>
+  <figure class="wide">
+    <div class="fig-title">What is kept of a fibre</div>
+    <div class="controls" role="group" aria-label="Level">
+      <button type="button" class="tab" data-f="0" aria-pressed="true">One piece</button>
+      <button type="button" class="tab" data-f="1" aria-pressed="false">A graph</button>
+      <button type="button" class="tab" data-f="2" aria-pressed="false">With direction</button>
+      <button type="button" class="tab" data-f="3" aria-pressed="false">With cost</button>
+      <button type="button" class="btn go" id="fplay">Play all four</button>
+    </div>
+    <div class="multiples">
+      <div>
+        <svg id="fib-a" viewBox="0 0 280 222" role="img" aria-label="The fibre of K a (I b): three terms, with two routes from the first to the normal form a, over a point marked a. The figure shows it as one point, then as a filled triangle in which a round trip shrinks to nothing, then with arrows that end at a, then with the lengths of the two routes."></svg>
+        <h3>A fibre over a value</h3>
+      </div>
+      <div>
+        <svg id="fib-w" viewBox="0 0 280 222" role="img" aria-label="The loop omega omega: three terms in a cycle, over a hollow point marked no value. The figure shows it as one hollow point, then as a triangle with a hole that a round trip cannot shrink past, then with a marker going round for ever, then with a count of steps that keeps rising."></svg>
+        <h3>A fibre with no value</h3>
+      </div>
+    </div>
+    <p class="readout" id="fread" aria-live="polite"></p>
+    <figcaption>On the left, the fibre of <code>K a (I b)</code>, which has two runs to <code>a</code>. On the right, the loop <code>ω ω</code>. Each view keeps more of the two fibres than the one before. The dashed black line in the view called ‘A graph’ is a round trip.</figcaption>
+  </figure>
+  <p>On a fibre without holes, keeping the graph or the direction tells a type nothing that the single point did not. Evidence, it will be recalled, is whatever a family attaches to a term: a yes or a no for a predicate, and a proof or a number for a richer family. On a fibre without holes, evidence carried along any two runs between the same terms arrives in the same state. A behaviour is the framework’s wider notion of type, in which each step carries evidence across in exactly one way. Over such a fibre it amounts to evidence attached to the value, and for a predicate to a yes or a no about the value. In a calculus whose rules do not overlap, such as combinatory logic, the fibre over a value is of this kind, provided that runs differing only in the order of independent steps are counted as one run. That way of counting runs is standard. The claim that it leaves no holes over a value is the framework’s own, and it has been argued by hand.<label for="sn23" class="sn-num"></label><input type="checkbox" id="sn23" class="sn-toggle"><span class="sidenote">The identification is due to Lévy and is treated in Huet and Lévy, cited in note 7, and in Terese, <em>Term Rewriting Systems</em>, Cambridge University Press, 2003, chapter 8. Among the pairs it identifies are a run that discards an argument at once and a run that first takes a step inside that argument. For holes left by overlapping rules, see Squier, Otto and Kobayashi, cited in note 16.</span> This is why types as predicates serve such calculi well, and why keeping only the line has seemed to lose nothing. The calculus of bracketings, with its one rule <code>(xy)z → x(yz)</code>, is not of this kind. The rule overlaps with itself in <code>((xy)z)w</code>, and the pentagon is the hole that the overlap leaves, which is why it needs an equation of its own.</p>
+  <p>Where a hole remains after runs have been counted in this way, the levels come apart, and the loop <code>ω ω</code> is the smallest example. The figure attaches a piece of evidence to a term and carries it along runs. The evidence is either a yes, or a counter that the S-rule, <code>S x y z → x z (y z)</code>, advances by one. On the left is the loop <code>ω ω</code>, in which the S-rule is used once in each lap, so that the counter counts laps. On the right is the fibre of <code>K a (ω ω)</code>, where the same loop sits inside an argument that the K-rule, <code>K x y → x</code>, discards.</p>
+  <figure class="wide">
+    <div class="fig-title">Evidence carried along runs, in two fibres</div>
+    <div class="controls">
+      <label class="check" for="evid">Evidence <select id="evid"><option value="count">a counter</option><option value="yes">a yes</option></select></label>
+      <button type="button" class="btn" id="lapreset">Start again</button>
+    </div>
+    <div class="multiples">
+      <div>
+        <svg id="svg-loop" viewBox="0 0 330 236" role="img" aria-label="The three terms of the loop omega omega, joined in a cycle by three steps, over a hollow point marked no value. A marker travels round the cycle, and the evidence it carries is shown in the middle."></svg>
+        <h3>A loop with no exit</h3>
+        <div class="controls"><button type="button" class="btn go" id="lapfwd">Carry it forward</button><button type="button" class="btn go" id="lapback">Carry it back</button></div>
+        <p id="loopread" class="says" aria-live="polite"></p>
+      </div>
+      <div>
+        <svg id="svg-kloop" viewBox="0 0 330 236" role="img" aria-label="Three terms in a cycle, each with an arrow out to the normal form a, which stands over one point. One marker goes straight to a and another goes once round the cycle first. The evidence each arrives with is shown beside a."></svg>
+        <h3>The same loop, with exits</h3>
+        <div class="controls"><button type="button" class="btn go" id="ksend">Send it by both routes</button></div>
+        <p id="kloopread" class="says" aria-live="polite"></p>
+      </div>
+    </div>
+    <figcaption>The counter is advanced by one at each use of the S-rule and is otherwise left alone. Unmarked arrows in the cycles are uses of the I-rule.</figcaption>
+  </figure>
+  <p>On the three terms of the left-hand panel the counter is a behaviour, though it is not a type in the sense of this essay, since it is not a predicate. There is evidence at each term, an integer, and each step carries it across in exactly one way, forwards or backwards. Yet no rule could assign that evidence from the text of the term, because such a rule would give the same integer at the start of a lap and at the end. What the counter records is the route.</p>
+  <p>On the right the same counter fails. One run uses the K-rule at once. Another goes round the loop and then uses the K-rule. The two differ only by steps inside an argument that is then thrown away, so they count as one run, and evidence must arrive at <code>a</code> in the same state by both. The counter arrives as 0 by one and as 1 by the other. It is therefore not a behaviour on this fibre, and a lap there has to count for nothing. This also shows that the counter is not a measure of cost, which is defined for every run. The loop <code>ω ω</code> can carry a counter because it has no exit. Extending the counter beyond the three terms drawn, to every term that runs into the loop, takes a more careful count, one that ignores steps inside arguments that are later discarded. That extension has been argued by hand and is not attempted here.</p>
+  <p>Readers who know homotopy type theory will recognise the universal cover of the circle: a family whose fibre is the integers, in which going once round the loop is the successor function.<label for="sn24" class="sn-num"></label><input type="checkbox" id="sn24" class="sn-toggle"><span class="sidenote">The Univalent Foundations Program, <em>Homotopy Type Theory: Univalent Foundations of Mathematics</em>, Institute for Advanced Study, 2013, section 8.1.</span></p>
+  <p>The earlier sections showed three loops, and they are three different cases. The pentagon of bracketings, read as a loop by going down one route and back up the other, is filled only if an equation between the two runs is added. A coherence theorem is a proof that enough such equations have been added for the fibres to have no holes. The loop inside <code>K a (ω ω)</code> is filled already, because the K-rule discards it. The loop <code>ω ω</code> is not filled and has no exit, and it carries information that no value holds.</p>
+  <p>Where evidence depends on the route, a result is no longer a property of a value, or of any one description. It is a property of the way in which one description was reached from another.</p>
+  <p>The usual notion of computation is thus one place among several, and a distinguished one, since it is where one line serves every universal calculus. It owes its position to three choices: rules that are finite and local, probes that deal in numbers, and the decision to keep only the line. It ceases to be the only notion when any of the three is changed. The framework is an attempt to name the ingredients, so that the other notions can be described in the same terms as this one.</p>
+</section>
+
+<section>
+  <h2>Summary</h2>
+  <p>Atoms are the parts from which a term is written. Probes are experiments on a term, and in this essay they read only what they supplied. Running lies between the two, and its steps join descriptions into fibres. Equality of terms can be taken as sameness of text, as membership of one fibre, or as agreement under every probe, and each of these is coarser than the one before.</p>
+  <p>A type is a predicate that no step changes. The useful ones are defined by probes, and the fundamental lemma for <code>K</code> shows a step carrying a fact from the term under test back to an atom. A type records which fibre a term is in. It does not record the length of a run, the difference between two runs, or a loop, whether or not some order of evaluation escapes it.</p>
+  <p>A presentation has three ingredients: the descriptions, the steps and the observation. The usual notion of computation is one way of choosing them, with finite and local rules that run one way, probes that deal in numbers, and only the line kept. At that setting every universal calculus, meaning one that computes all that a Turing machine can, has the same line, which is why it has been taken for the whole subject. Change what a probe returns or may do, let the steps run both ways, or keep the fibres, and other notions appear. Some of them have results that depend on the route taken, and those results are recorded by no value.<label for="sn18" class="sn-num"></label><input type="checkbox" id="sn18" class="sn-toggle"><span class="sidenote">Three works stand close to this one. B. P. Hilken, ‘Towards a proof theory of rewriting: the simply typed 2λ-calculus’, <em>Theoretical Computer Science</em> 170(1–2), 1996, 407–444, studies the equations that hold between runs of λ-terms. M. Fiore and P. Saville, ‘Coherence and normalisation-by-evaluation for bicategorical cartesian closed structure’, <em>LICS</em> 2020, 425–439, proves a coherence theorem for such runs when they are invertible. J. C. Baez and C. Williams, ‘Enriched Lawvere theories for operational semantics’, <em>EPTCS</em> 323, 2020, 106–135, obtains denotational semantics from operational semantics by a change of enriching category.</span></p>
+</section>
+
+<footer>
+  <p>The framework came out of a design conversation and was argued by hand. A Lean formalization is planned, and nothing here has been checked by machine. Every arrow in the large figures and every entry in the table of probes is computed in the browser by a small reducer. The choice of terms, their layout, and their grouping into fibres were made by hand.</p>
+</footer>
+
+</article>
+
+<script>
+(function () {
+  'use strict';
+  var RM = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var NARROW = window.matchMedia ? window.matchMedia('(max-width: 640px)') : { matches: false };
+  var NS = 'http://www.w3.org/2000/svg';
+  function S(tag, attrs, parent) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function $(id) { return document.getElementById(id); }
+  function each(sel, f) { Array.prototype.forEach.call(document.querySelectorAll(sel), f); }
+  function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+  function op(el, o) { el.style.opacity = o; }
+  function ease(u) { return u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; }
+  var WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen'];
+  function word(n) { return WORDS[n] || String(n); }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function steps(n) { return word(n) + (n === 1 ? ' step' : ' steps'); }
+  // restart a one-shot CSS cue on an element
+  function kick(el, cls) { el.classList.remove(cls); el.getBoundingClientRect(); el.classList.add(cls); }
+  // run frame(u) for u from 0 to 1: smoothly, or in a few plain jumps when the reader has asked for reduced motion
+  function animate(ms, frame, done, jumps) {
+    var h = { live: true, stop: function () { h.live = false; } };
+    if (RM) {
+      var n = jumps || 5, k = 0;
+      // the first jump waits a moment, so that the caller holds the handle before anything can finish
+      setTimeout(function hop() {
+        if (!h.live) return;
+        k++; frame(k / n);
+        if (k < n) setTimeout(hop, Math.max(420, ms / n)); else { h.live = false; if (done) done(); }
+      }, 0);
+    } else {
+      var t0 = null;
+      requestAnimationFrame(function tick(ts) {
+        if (!h.live) return;
+        if (t0 === null) t0 = ts;
+        var u = Math.min(1, (ts - t0) / ms);
+        frame(u);
+        if (u < 1) requestAnimationFrame(tick); else { h.live = false; if (done) done(); }
+      });
+    }
+    return h;
+  }
+  // call fn the first time el is half on screen
+  function onFirstView(el, fn) {
+    if (!('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); fn(); } }, { threshold: 0.5 });
+    io.observe(el);
+  }
+
+  /* ---------- reducer ---------- */
+  var A = function (n) { return { k: 'a', n: n }; };
+  var App = function (f, x) { return { k: 'p', f: f, x: x }; };
+  function parse(s) {
+    var toks = s.match(/[()]|[^\s()]+/g) || [], i = 0;
+    function seq() {
+      var cur = null, t;
+      while (i < toks.length && toks[i] !== ')') {
+        if (toks[i] === '(') { i++; t = seq(); i++; } else { t = A(toks[i]); i++; }
+        cur = cur ? App(cur, t) : t;
+      }
+      return cur;
+    }
+    return seq();
+  }
+  function plain(t) {
+    if (t.k === 'a') return t.n;
+    return plain(t.f) + ' ' + (t.x.k === 'p' ? '(' + plain(t.x) + ')' : plain(t.x));
+  }
+  function isOmegaHalf(t) { return t.k === 'p' && plain(t) === 'S I I'; }
+  // printed form with ω for S I I; marks the redex node r when given
+  function pretty(t, r, html) {
+    function go(u) {
+      var s;
+      if (isOmegaHalf(u)) s = 'ω';
+      else if (u.k === 'a') s = u.n;
+      else {
+        var xs = go(u.x);
+        s = go(u.f) + ' ' + ((u.x.k === 'p' && !isOmegaHalf(u.x)) ? '(' + xs + ')' : xs);
+      }
+      return (html && u === r) ? '<mark>' + s + '</mark>' : s;
+    }
+    return go(t);
+  }
+  function spine(t) {
+    var args = [], apps = [];
+    while (t.k === 'p') { args.unshift(t.x); apps.unshift(t); t = t.f; }
+    return { head: t, args: args, apps: apps };
+  }
+  function need(h) { return h.n === 'I' ? 1 : h.n === 'K' ? 2 : h.n === 'S' ? 3 : 0; }
+  // every redex of t, the head redex first and then those inside the arguments, left to right
+  function redexes(t) {
+    var out = [];
+    (function go(u) {
+      if (u.k === 'a') return;
+      var sp = spine(u), n = need(sp.head);
+      if (n && sp.args.length >= n) out.push(sp.apps[n - 1]);
+      sp.args.forEach(go);
+    })(t);
+    return out;
+  }
+  function redexOuter(t) { return redexes(t)[0] || null; }
+  function redexInner(t) {
+    if (t.k === 'a') return null;
+    var sp = spine(t), n = need(sp.head);
+    for (var i = 0; i < sp.args.length; i++) { var r = redexInner(sp.args[i]); if (r) return r; }
+    if (n && sp.args.length >= n) return sp.apps[n - 1];
+    return null;
+  }
+  function contractAt(t, r) {
+    if (t === r) {
+      var sp = spine(t), a = sp.args;
+      if (sp.head.n === 'S') return App(App(a[0], a[2]), App(a[1], a[2]));
+      return a[0];
+    }
+    if (t.k === 'a') return t;
+    var f = contractAt(t.f, r), x = contractAt(t.x, r);
+    return (f === t.f && x === t.x) ? t : App(f, x);
+  }
+  function ruleOf(r) { return 'the ' + spine(r).head.n + '-rule'; }
+  function runOuter(t) {
+    var seq = [t];
+    for (var i = 0; i < 40; i++) { var r = redexOuter(t); if (!r) break; t = contractAt(t, r); seq.push(t); }
+    return seq;
+  }
+  function nfOuter(t) { var seq = runOuter(t), last = seq[seq.length - 1]; return redexOuter(last) ? null : plain(last); }
+
+  /* ---------- the bundle: positions are laid out by hand, arrows are computed ---------- */
+  var NODES = [
+    { s: 'S K K a', f: 'a' },
+    { s: 'K a (I b)', f: 'a' },
+    { s: 'K a (K a)', f: 'a' },
+    { s: 'I a', f: 'a' },
+    { s: 'K a b', f: 'a' },
+    { s: 'a', f: 'a', nf: true },
+    { s: 'I I', f: 'I' },
+    { s: 'K I a', f: 'I' },
+    { s: 'I', f: 'I', nf: true },
+    { s: 'S K K', f: 'SKK', nf: true },
+    { s: 'S K S', f: 'SKS', nf: true },
+    { s: 'S I I (S I I)', f: 'loop', inner: true },
+    { s: 'I (S I I) (I (S I I))', f: 'loop', inner: true },
+    { s: 'I (S I I) (S I I)', f: 'loop', inner: true }
+  ];
+  var FIBS = { a: 'a', I: 'I', SKK: 'S K K', SKS: 'S K S', loop: 'no value' };
+  // two hand layouts: the line along the bottom on a wide screen, down the right side on a narrow one
+  var LAY = {
+    wide: {
+      vb: '0 20 720 264', line: [20, 250, 700, 250],
+      pos: [[52, 50], [176, 50], [52, 120], [116, 120], [206, 120], [128, 190], [268, 120], [332, 120], [298, 190], [416, 190], [496, 190], [612, 56], [664, 150], [566, 150]],
+      pj: [0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1],
+      fib: { a: [128, 250], I: [298, 250], SKK: [416, 250], SKS: [496, 250], loop: [612, 250] },
+      merged: [404, 250],
+      syn: function (r, n) { return [40 + r * 640 / (n - 1), 250]; },
+      synlab: [360, 272, 0],
+      lab: function (p) { return { x: p[0], y: p[1] + 22, anchor: 'middle' }; },
+      from: function (n) { return [n.x, n.y + 11]; },
+      rank: function (p, q) { return p.x - q.x || p.y - q.y; },
+      arcs: ['M 387 190 L 313 190', 'M 486 177 Q 392 126 305 177']
+    },
+    tall: {
+      vb: '0 0 380 424', line: [300, 16, 300, 412],
+      pos: [[38, 34], [47, 84], [136, 34], [196, 128], [120, 128], [240, 76], [60, 178], [60, 214], [240, 196], [240, 252], [240, 292], [50, 336], [150, 366], [50, 396]],
+      pj: [0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0],
+      fib: { a: [300, 76], I: [300, 196], SKK: [300, 252], SKS: [300, 292], loop: [300, 366] },
+      merged: [300, 252],
+      syn: function (r, n) { return [300, 28 + r * 372 / (n - 1)]; },
+      synlab: [326, 214, 90],
+      lab: function (p) { return { x: p[0] + 10, y: p[1] + 4, anchor: 'start' }; },
+      from: function (n) { return [n.x + n.w / 2, n.y]; },
+      rank: function (p, q) { return p.y - q.y || p.x - q.x; },
+      arcs: ['M 240 238 L 240 211', 'M 212 292 Q 172 244 226 205']
+    }
+  };
+  var L = null, SYN = [];
+  var index = {};
+  NODES.forEach(function (n, i) {
+    n.t = parse(n.s); n.key = plain(n.t); n.label = pretty(n.t); n.w = n.label.length * 7.6 + 14; index[n.key] = i;
+  });
+  // every step from one of the fourteen terms to another
+  var EDGES = [], EIDX = {};
+  NODES.forEach(function (n, i) {
+    redexes(n.t).forEach(function (r) {
+      var j = index[plain(contractAt(n.t, r))];
+      if (j === undefined || EIDX[i + '>' + j] !== undefined) return;
+      EIDX[i + '>' + j] = EDGES.length; EDGES.push([i, j]);
+    });
+  });
+  function redexFor(i, order) {
+    var n = NODES[i];
+    return (n.inner || order === 'inner') ? redexInner(n.t) : redexOuter(n.t);
+  }
+  function nextOf(i, order) {
+    var r = redexFor(i, order);
+    if (!r) return -1;
+    var j = index[plain(contractAt(NODES[i].t, r))];
+    return j === undefined ? -1 : j;
+  }
+  function pathOf(start, order) {
+    var path = [], i = start, seen = {};
+    while (i !== -1 && !seen[i]) { seen[i] = true; path.push(i); i = nextOf(i, order); }
+    return { path: path, cyc: i !== -1 };
+  }
+  function applyLayout() {
+    L = LAY[NARROW.matches ? 'tall' : 'wide'];
+    NODES.forEach(function (n, i) { n.x = L.pos[i][0]; n.y = L.pos[i][1]; n.pj = !!L.pj[i]; });
+    var order = NODES.map(function (n, i) { return i; }).sort(function (p, q) { return L.rank(NODES[p], NODES[q]); });
+    order.forEach(function (i, rank) { SYN[i] = L.syn(rank, NODES.length); });
+  }
+  applyLayout();
+  var BUILD = [];
+
+  function clip(a, b) {
+    var dx = b.x - a.x, dy = b.y - a.y;
+    var sx = dx === 0 ? Infinity : (a.w / 2 + 3) / Math.abs(dx);
+    var sy = dy === 0 ? Infinity : 14 / Math.abs(dy);
+    var s = Math.min(sx, sy);
+    return [a.x + dx * s, a.y + dy * s];
+  }
+  function marker(defs, id, cls, size) {
+    var m = S('marker', { id: id, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: size, markerHeight: size, orient: 'auto' }, defs);
+    S('path', { d: 'M0 0 L10 5 L0 10 z', 'class': cls }, m);
+  }
+  function drawBundle(svg, pid) {
+    clear(svg);
+    svg.setAttribute('viewBox', L.vb);
+    svg.setAttribute('data-lay', L === LAY.tall ? 'tall' : 'wide');
+    var defs = S('defs', {}, svg);
+    marker(defs, pid + 'ah', 'ah', 7);
+    marker(defs, pid + 'ahr', 'ah-alarm', 5);
+    marker(defs, pid + 'ahg', 'ah-run', 5);
+    var gProj = S('g', {}, svg), gEdge = S('g', {}, svg), gNode = S('g', {}, svg), gBase = S('g', {}, svg), gTop = S('g', {}, svg);
+    S('line', { x1: L.line[0], y1: L.line[1], x2: L.line[2], y2: L.line[3], 'class': 'baseline' }, gBase);
+    var v = { svg: svg, pid: pid, nodes: [], edges: [], proj: [], pts: [], top: gTop, base: gBase, edgeLayer: gEdge };
+    NODES.forEach(function (n) {
+      var g = S('g', { 'class': 'fade' }, gNode);
+      S('rect', { x: n.x - n.w / 2 - 6, y: n.y - 18, width: n.w + 12, height: 36, 'class': 'hit' }, g);     // a larger target for a finger
+      var r = S('rect', { x: n.x - n.w / 2, y: n.y - 11, width: n.w, height: 22, rx: 3, 'class': 'n-rect' + (n.nf ? ' nf' : '') }, g);
+      S('text', { x: n.x, y: n.y + 4.5, 'text-anchor': 'middle', 'class': 't-atom' }, g).textContent = n.label;
+      v.nodes.push({ g: g, r: r });
+      var b = L.fib[n.f], p = L.from(n);
+      var pr = S('line', { x1: p[0], y1: p[1], x2: b[0], y2: b[1], 'class': 'proj fade' }, gProj);
+      if (!n.pj) op(pr, 0);
+      v.proj.push(pr);
+      v.pts.push(S('circle', { cx: b[0], cy: b[1], r: 4.5, 'class': 'basept fade' + (n.f === 'loop' ? ' hollow' : '') }, gBase));
+    });
+    EDGES.forEach(function (e) {
+      var p = clip(NODES[e[0]], NODES[e[1]]), q = clip(NODES[e[1]], NODES[e[0]]);
+      v.edges.push(S('line', { x1: p[0], y1: p[1], x2: q[0], y2: q[1], 'class': 'edge fade', 'marker-end': 'url(#' + pid + 'ah)' }, gEdge));
+    });
+    return v;
+  }
+  function baseLabel(parent, pos, text, cls) {
+    var a = L.lab(pos);
+    var t = S('text', { x: a.x, y: a.y, 'text-anchor': a.anchor, 'class': 'fade ' + (cls || '') }, parent);
+    t.textContent = text;
+    return t;
+  }
+  function fibreLabels(v) {
+    var out = {};
+    Object.keys(FIBS).forEach(function (k) { out[k] = baseLabel(v.base, L.fib[k], FIBS[k], k === 'loop' ? 'lab' : ''); });
+    return out;
+  }
+
+  /* ---------- atoms and probes: the bench ---------- */
+  (function () {
+    var TERMS = ['I', 'S K K', 'S K S', 'K I', 'K (S K K)', 'K'];
+    var PROBES = [[], ['x'], ['x', 'y']];
+    var svg = $('svg-tree'), grid = $('grid'), code = $('benchcode');
+    var sel = { r: 1, c: 1 }, reading = 'probe';
+    function ctx(c) { return '[ ]' + PROBES[c].map(function (a) { return ' ' + a; }).join(''); }
+    function experiment(r, c) {
+      var tt = parse(TERMS[r]), e = tt;
+      PROBES[c].forEach(function (a) { e = App(e, A(a)); });
+      var seq = runOuter(e), last = seq[seq.length - 1];
+      return { term: tt, expr: e, seq: seq, out: pretty(last), own: !/[SKI]/.test(plain(last)) };
+    }
+    var h = '<thead><tr><th scope="col">Term</th>';
+    PROBES.forEach(function (p, c) { h += '<th scope="col" class="h-probe"><code>' + ctx(c) + '</code></th>'; });
+    h += '<th scope="col">Point</th></tr></thead><tbody>';
+    TERMS.forEach(function (t, r) {
+      h += '<tr id="row' + r + '"><th scope="row"><code>' + t + '</code></th>';
+      PROBES.forEach(function (p, c) { h += '<td><button type="button" class="cell" data-r="' + r + '" data-c="' + c + '"></button></td>'; });
+      h += '<td class="pt" id="pt' + r + '"></td></tr>';
+    });
+    grid.innerHTML = h + '</tbody>';
+
+    function drawTree(ex) {
+      clear(svg);
+      var leaves = [], apps = 0, W = 340, H = 176, gap = 40, drop = 25;
+      var root = (function walk(u, inT) {
+        inT = inT || u === ex.term;
+        var n = { inT: inT };
+        if (u.k === 'a') { n.s = u.n; n.i = leaves.length; leaves.push(n); }
+        else { apps++; n.l = walk(u.f, inT); n.r = walk(u.x, inT); }
+        return n;
+      })(ex.expr, false);
+      var x0 = (W - (leaves.length - 1) * gap) / 2, box = null;
+      (function place(n) {
+        if (n.l) { place(n.l); place(n.r); n.x = (n.l.x + n.r.x) / 2; n.y = Math.min(n.l.y, n.r.y) - drop; }
+        else { n.x = x0 + n.i * gap; n.y = H - 24; }
+        if (n.inT) box = box ? [Math.min(box[0], n.x), Math.min(box[1], n.y), Math.max(box[2], n.x)] : [n.x, n.y, n.x];
+      })(root);
+      var asText = reading === 'text';
+      if (!asText && box) S('rect', { x: box[0] - 17, y: box[1] - 15, width: box[2] - box[0] + 34, height: H - 24 - box[1] + 30, rx: 5, 'class': 'holebox' }, svg);
+      var gl = S('g', {}, svg), gn = S('g', {}, svg);
+      (function draw(n) {
+        var c = (asText || n.inT) ? 'a' : 'p';
+        if (n.l) {
+          [n.l, n.r].forEach(function (k) {
+            var kc = (asText || k.inT) ? 'a' : 'p';
+            S('line', { x1: n.x, y1: n.y, x2: k.x, y2: k.l ? k.y : k.y - 13, 'class': 'tl ' + (c === 'a' ? kc : 'p') }, gl);
+            draw(k);
+          });
+          S('circle', { cx: n.x, cy: n.y, r: 3.4, 'class': 'tn ' + c }, gn);
+        } else {
+          S('text', { x: n.x, y: n.y + 4.5, 'text-anchor': 'middle', 'class': c === 'a' ? 't-atom' : 't-probe' }, gn).textContent = n.s;
+        }
+      })(root);
+      return { leaves: leaves.length, apps: apps };
+    }
+    var timers = [], touched = false, prev = {};
+    function cellAt(r, c) { return grid.querySelector('[data-r="' + r + '"][data-c="' + c + '"]'); }
+    // the run as far as term number upto; the redex of the last term shown is marked while the run is still going
+    function runHtml(ex, upto) {
+      return ex.seq.slice(0, upto + 1).map(function (u, k) {
+        return pretty(u, (k === upto && upto < ex.seq.length - 1) ? redexOuter(u) : null, true);
+      }).join('<span class="run"> → </span>') + (ex.seq.length === 1 ? ' (no rule applies)' : '');
+    }
+    function render(play, flashChanged) {
+      timers.forEach(clearTimeout); timers = [];
+      var allow = code.checked, keys = [], changed = [];
+      TERMS.forEach(function (t, r) {
+        var key = [];
+        PROBES.forEach(function (p, c) {
+          var ex = experiment(r, c), b = cellAt(r, c);
+          var read = ex.own || allow, on = sel.r === r && sel.c === c, txt = read ? ex.out : 'not read';
+          if (prev[r + ',' + c] !== undefined && prev[r + ',' + c] !== txt) changed.push(b);
+          prev[r + ',' + c] = txt;
+          b.textContent = txt;
+          b.className = 'cell ' + (ex.own ? 'own' : read ? 'text' : 'sealed');
+          b.setAttribute('aria-pressed', String(on));
+          b.setAttribute('aria-label', 'The probe ' + ctx(c) + ' on ' + t + ': ' + (read ? 'reads ' + ex.out : 'not read'));
+          key.push(read ? ex.out : '');
+        });
+        keys.push(key.join('|'));
+      });
+      var seen = {}, count = 0, last = null;
+      keys.forEach(function (k, r) {
+        if (!seen[k]) seen[k] = ++count;
+        $('pt' + r).textContent = seen[k];
+        $('row' + r).className = (last !== null && last !== seen[k]) ? 'gstart' : '';
+        last = seen[k];
+      });
+      var ex = experiment(sel.r, sel.c), size = drawTree(ex), t = TERMS[sel.r], full = plain(ex.expr);
+      $('benchsay').innerHTML = reading === 'text'
+        ? (size.apps === 0
+            ? 'Read as text, <code class="atom">' + full + '</code> is a single atom.'
+            : 'Read as text, <code class="atom">' + full + '</code> is a tree of ' + word(size.leaves + size.apps) + ' atoms: ' + word(size.leaves) + ' symbols and ' + word(size.apps) + (size.apps === 1 ? ' application' : ' applications') + '. Nothing in the tree marks one part as the thing under test.')
+        : (PROBES[sel.c].length
+            ? 'Read as an experiment, the expression is the term <code class="atom">' + t + '</code> placed in the hole of the probe <code class="probe">' + ctx(sel.c) + '</code>.'
+            : 'The probe <code class="probe">[ ]</code> supplies nothing. It asks only to see the term <code class="atom">' + t + '</code> once it has run.');
+      var cellBtn = cellAt(sel.r, sel.c), n = ex.seq.length - 1;
+      function verdict() {
+        $('benchverdict').innerHTML = ex.own
+          ? 'Read: <code class="probe">' + ex.out + '</code>. The outcome is written in the probe’s own variables.'
+          : allow
+            ? 'Read as text: <code class="atom">' + ex.out + '</code>. The probe has looked at the atoms of the term.'
+            : 'Not read. The outcome still contains symbols of the term, and the probe may not look at them.';
+      }
+      if (play) {
+        // play the run a step at a time; the reading lands in the cell when the run ends
+        var final = cellBtn.textContent;
+        cellBtn.textContent = '…';
+        $('benchrun').innerHTML = runHtml(ex, 0);
+        $('benchverdict').innerHTML = '<span class="run">Running' + (n > 0 ? ', ' + steps(n) : '') + '.</span>';
+        for (var k = 1; k <= n; k++) (function (k) { timers.push(setTimeout(function () { $('benchrun').innerHTML = runHtml(ex, k); }, 750 * k)); })(k);
+        timers.push(setTimeout(function () { cellBtn.textContent = final; verdict(); kick(cellBtn, 'land'); }, 750 * n + 450));
+      } else {
+        $('benchrun').innerHTML = runHtml(ex, n);
+        verdict();
+      }
+      if (flashChanged) changed.forEach(function (b) { kick(b, 'land'); });
+      $('benchread').textContent = cap(word(TERMS.length)) + ' terms, ' + word(count) + ' points. ' + (allow
+        ? 'The probe [ ] now reads each term as text, and no two rows agree.'
+        : 'Rows with the same readings in every column cannot be told apart by these probes, nor by any other probe that reads only what it supplied.');
+      each('[data-r]', function (b) { if (b.classList.contains('tab')) b.setAttribute('aria-pressed', String(b.getAttribute('data-r') === reading)); });
+    }
+    grid.addEventListener('click', function (ev) {
+      var b = ev.target.closest ? ev.target.closest('.cell') : null;
+      if (!b) return;
+      touched = true;
+      sel = { r: Number(b.getAttribute('data-r')), c: Number(b.getAttribute('data-c')) };
+      render(true);
+    });
+    each('.tab[data-r]', function (b) { b.addEventListener('click', function () { touched = true; reading = b.getAttribute('data-r'); render(false); }); });
+    code.addEventListener('change', function () { touched = true; render(false, true); });
+    render(false);
+    onFirstView(grid, function () { if (!touched) render(true); });
+  })();
+
+  /* ---------- running: four views ---------- */
+  (function () {
+    var svg = $('svg-hero'), v, labs, token;
+    var level = 3, start = 0, order = 'outer', path = [], cyc = false, t = 0, playing = null, timer = null, shown = null, touched = false;
+    var time = $('time'), playBtn = $('play'), focus = $('focus'), ord = $('order');
+    NODES.forEach(function (n, i) { var o = document.createElement('option'); o.value = i; o.textContent = n.label; focus.appendChild(o); });
+
+    function buildPath() {
+      var p = pathOf(start, order);
+      path = p.path; cyc = p.cyc;
+      time.max = cyc ? path.length * 2 : Math.max(path.length - 1, 0);
+    }
+    function at(k) { return path[cyc ? k % path.length : Math.min(k, path.length - 1)]; }
+    function render() {
+      var k = Math.floor(t + 1e-6), u = t - k, i = at(k), j = at(k + 1);
+      var a = NODES[i], b = NODES[j], here = u < 0.5 ? i : j;
+      token.setAttribute('cx', a.x + (b.x - a.x) * u);
+      token.setAttribute('cy', a.y - 17 + (b.y - a.y) * u);
+      var inPath = {}, inEdge = {}, nxt = nextOf(i, order), nowEdge = EIDX[i + '>' + nxt];
+      path.forEach(function (p) {
+        inPath[p] = true;
+        var e = EIDX[p + '>' + nextOf(p, order)];
+        if (e !== undefined) inEdge[e] = true;
+      });
+      var fib = NODES[start].f;
+      v.nodes.forEach(function (n, ni) {
+        op(n.g, level === 1 ? (ni === i ? 1 : ni === nxt ? 0.5 : 0) : level === 2 ? (inPath[ni] ? 1 : 0) : level === 3 ? 1 : 0.1);
+        n.r.setAttribute('class', 'n-rect' + (NODES[ni].nf ? ' nf' : '') + (level !== 4 && ni === here ? ' cur' : ''));
+      });
+      v.edges.forEach(function (e, ei) {
+        var hot = level === 1 ? ei === nowEdge : (level === 2 || level === 3) && inEdge[ei];
+        op(e, level === 1 ? (ei === nowEdge ? 1 : 0) : level === 2 ? (inEdge[ei] ? 1 : 0) : level === 3 ? (inEdge[ei] ? 1 : 0.5) : 0.1);
+        e.setAttribute('class', 'edge fade' + (hot ? ' focus' : ''));
+        e.setAttribute('marker-end', 'url(#h' + (hot ? 'ahg' : 'ah') + ')');
+      });
+      NODES.forEach(function (n, ni) {
+        var mine = n.f === fib;
+        op(v.proj[ni], !n.pj ? 0 : level === 1 ? 0 : level === 2 ? (mine ? 1 : 0) : 1);
+        op(v.pts[ni], level === 1 ? 0 : level === 2 ? (mine ? 1 : 0) : 1);
+        v.pts[ni].setAttribute('class', 'basept fade' + (n.f === 'loop' ? ' hollow' : mine && level !== 4 ? ' k-run' : ''));
+      });
+      Object.keys(labs).forEach(function (f) { op(labs[f], level === 1 ? 0 : level === 2 ? (f === fib ? 1 : 0) : 1); });
+      op(token, level === 4 ? 0 : 1);
+      var cur = NODES[i], rx = redexFor(i, order), n = path.length - 1;
+      var nowHtml = pretty(cur.t, rx, true);
+      if (nowHtml !== shown) { $('now').innerHTML = nowHtml; shown = nowHtml; }
+      $('stepinfo').textContent = level === 4 ? ''
+        : cyc ? 'Step ' + (k + 1) + ', by ' + ruleOf(rx) + '. This run does not end.'
+        : n < 1 ? 'Already a normal form.'
+        : !rx ? 'Finished in ' + steps(n) + '.'
+        : 'Step ' + (k + 1) + ' of ' + n + ', by ' + ruleOf(rx) + '.';
+      var other = '';
+      if (!cyc && !NODES[start].inner) {
+        var alt = pathOf(start, order === 'outer' ? 'inner' : 'outer').path.length - 1;
+        if (alt !== n) other = ' Under the other order the same term takes ' + steps(alt) + '.';
+      }
+      $('heroread').textContent =
+        level === 1 ? (rx
+            ? 'One step. The marked part of the term is a redex of ' + ruleOf(rx) + ', and the arrow points to the term that results.' + (/ω/.test(cur.label) ? ' Written out, ω is S I I.' : '')
+            : 'This term is a normal form. It has no redex.')
+        : level === 2 ? (cyc
+            ? 'The whole run. It returns to the term it started from, so it never ends and the term has no value. The hollow point marks this.'
+            : n > 0
+              ? 'The whole run, of ' + steps(n) + '. Its value is marked on the line.' + other
+              : 'A run of no steps. The term is a normal form and is its own value.')
+        : level === 3 ? 'Fourteen terms and every step between them. Terms joined by steps share a point on the line. The green arrows are the run of the chosen term.' + other
+        : 'Only the values are left. The picture is now a partial function from terms to values, and the hollow point stands for the terms that have none.';
+      var idle = path.length < 2 || level === 4;
+      time.disabled = idle; playBtn.disabled = idle;
+      each('[data-l]', function (b) { b.setAttribute('aria-pressed', String(Number(b.getAttribute('data-l')) === level)); });
+    }
+    function stop() {
+      if (playing !== null) { cancelAnimationFrame(playing); playing = null; }
+      if (timer !== null) { clearTimeout(timer); timer = null; }
+      playBtn.textContent = 'Play';
+    }
+    function finish() {
+      stop();
+      if (!cyc && path.length > 1 && level !== 4) kick(v.pts[at(path.length - 1)], 'arrive');   // the value is reached
+      playBtn.textContent = 'Play again';
+    }
+    function play() {
+      var max = Number(time.max);
+      if (max <= 0 || level === 4) return;
+      if (t >= max - 1e-6) t = 0;
+      playBtn.textContent = 'Pause';
+      time.value = t; render();
+      if (RM) {
+        // reduced motion: one whole step at a time, with no sliding
+        (function wait() {
+          timer = setTimeout(function () {
+            timer = null;
+            t = Math.min(max, Math.floor(t + 1e-6) + 1); time.value = t; render();
+            if (t < max) wait(); else finish();
+          }, 800);
+        })();
+        return;
+      }
+      var last = null;
+      function tick(ts) {
+        if (last === null) last = ts;
+        t = Math.min(max, t + (ts - last) / 950); last = ts;
+        time.value = t; render();
+        if (t < max) playing = requestAnimationFrame(tick); else finish();
+      }
+      playing = requestAnimationFrame(tick);
+    }
+    function reset() { stop(); t = 0; buildPath(); time.value = 0; render(); }
+    function choose(i) { touched = true; start = i; focus.value = i; if (level === 4) level = 3; reset(); play(); }
+    playBtn.addEventListener('click', function () { touched = true; if (playing !== null || timer !== null) stop(); else play(); });
+    time.addEventListener('input', function () { touched = true; stop(); t = Number(time.value); render(); });
+    focus.addEventListener('change', function () { choose(Number(focus.value)); });
+    ord.addEventListener('change', function () { touched = true; order = ord.value; reset(); play(); });
+    each('[data-l]', function (b) {
+      b.addEventListener('click', function () { touched = true; level = Number(b.getAttribute('data-l')); if (level === 4) stop(); render(); });
+    });
+    function build() {
+      v = drawBundle(svg, 'h'); labs = fibreLabels(v);
+      token = S('circle', { r: 7, 'class': 'token fade' }, v.top);
+      v.nodes.forEach(function (n, i) {
+        n.g.setAttribute('class', 'fade pick'); n.g.setAttribute('role', 'button'); n.g.setAttribute('tabindex', '0');
+        n.g.setAttribute('aria-label', 'Run ' + NODES[i].label);
+        n.g.addEventListener('click', function () { choose(i); });
+        n.g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); choose(i); } });
+      });
+      shown = null; render();
+    }
+    BUILD.push(build);
+    buildPath(); build();
+    onFirstView(svg, function () { if (!touched) play(); });
+  })();
+
+  /* ---------- equalities: one figure for the three, one for the effect of reading code ---------- */
+  function eqFigure(svgId, pid, st, describe) {
+    var svg = $(svgId), v, cur, anim = null, labs, arcs, hadRule = false;
+    function eff() { return (st.mode === 'test' && st.code) ? 'run' : st.mode; }
+    function merges(n) { return n.f === 'I' || n.f === 'SKK' || n.f === 'SKS'; }
+    function target(m) {
+      return NODES.map(function (n, i) {
+        if (m === 'syntax') return SYN[i];
+        if (m === 'test' && merges(n)) return L.merged;
+        if (m === 'run' && st.rule && merges(n)) return L.fib.I;
+        return L.fib[n.f];
+      });
+    }
+    function place(ps) {
+      ps.forEach(function (p, i) {
+        v.proj[i].setAttribute('x2', p[0]); v.proj[i].setAttribute('y2', p[1]);
+        v.pts[i].setAttribute('cx', p[0]); v.pts[i].setAttribute('cy', p[1]);
+      });
+      cur = ps;
+    }
+    function render(animate) {
+      var m = eff(), to = target(m), from = cur || to;
+      var show = m === 'run' && st.rule ? 'rule' : m;
+      Object.keys(labs).forEach(function (k) { op(labs[k], k === show ? 1 : 0); });
+      arcs.forEach(function (a) {
+        op(a, st.rule ? 1 : 0);
+        if (st.rule && !hadRule && animate && !RM) {       // the new steps are drawn in
+          var len = a.getTotalLength();
+          a.style.transition = 'none'; a.style.strokeDasharray = len; a.style.strokeDashoffset = len;
+          a.getBoundingClientRect();
+          a.style.transition = 'stroke-dashoffset 0.8s ease'; a.style.strokeDashoffset = 0;
+        }
+      });
+      hadRule = st.rule;
+      // the points take the colour of what decides the equality
+      var kc = st.mode === 'syntax' ? ' k-atom' : st.mode === 'test' ? ' k-probe' : ' k-run';
+      NODES.forEach(function (n, i) { v.pts[i].setAttribute('class', 'basept fade' + ((m !== 'syntax' && n.f === 'loop') ? ' hollow' : kc)); });
+      var joined = (m === 'test' || (m === 'run' && st.rule)) && animate;
+      if (anim) cancelAnimationFrame(anim);
+      if (!animate || RM) { place(to); if (joined) kick(v.pts[10], 'arrive'); }
+      else {
+        var t0 = null;
+        var tick = function (ts) {
+          if (t0 === null) t0 = ts;
+          var u = Math.min(1, (ts - t0) / 750), e = ease(u);
+          place(from.map(function (p, i) { return [p[0] + (to[i][0] - p[0]) * e, p[1] + (to[i][1] - p[1]) * e]; }));
+          if (u < 1) anim = requestAnimationFrame(tick);
+          else if (joined) kick(v.pts[10], 'arrive');      // the points that have come together
+        };
+        anim = requestAnimationFrame(tick);
+      }
+      var count = {};
+      to.forEach(function (p) { count[Math.round(p[0]) + ',' + Math.round(p[1])] = true; });
+      describe(m, Object.keys(count).length, NODES.length);
+    }
+    function build() {
+      v = drawBundle(svg, pid); cur = null;
+      v.proj.forEach(function (p) { op(p, 0.6); });
+      var g = {};
+      ['syntax', 'run', 'rule', 'test'].forEach(function (k) { g[k] = S('g', { 'class': 'fade' }, v.base); });
+      var sl = S('text', { x: L.synlab[0], y: L.synlab[1], 'text-anchor': 'middle', 'class': 'lab' }, g.syntax);
+      if (L.synlab[2]) sl.setAttribute('transform', 'rotate(' + L.synlab[2] + ' ' + L.synlab[0] + ' ' + L.synlab[1] + ')');
+      sl.textContent = 'one point for each description';
+      Object.keys(FIBS).forEach(function (k) {
+        baseLabel(g.run, L.fib[k], FIBS[k], k === 'loop' ? 'lab' : '');
+        if (k !== 'SKK' && k !== 'SKS') baseLabel(g.rule, L.fib[k], FIBS[k], k === 'loop' ? 'lab' : '');
+      });
+      [[L.fib.a, 'a', ''], [L.merged, 'the identity', 'lab'], [L.fib.loop, 'no value', 'lab']].forEach(function (p) { baseLabel(g.test, p[0], p[1], p[2]); });
+      labs = g;
+      arcs = L.arcs.map(function (d) { return S('path', { d: d, 'class': 'edge run fade', 'marker-end': 'url(#' + pid + 'ahg)' }, v.edgeLayer); });
+      hadRule = st.rule;
+      render(false);
+    }
+    BUILD.push(build);
+    build();
+    return render;
+  }
+  (function () {
+    var st = { mode: 'run', rule: false, code: false };
+    var render = eqFigure('svg-base', 'b', st, function (m, n, N) {
+      var head = cap(word(N)) + ' descriptions, ' + word(n) + ' points. ';
+      $('baseread').textContent = head + (
+        m === 'syntax' ? 'Two descriptions are equal only if they are the same tree.'
+        : m === 'run' && st.rule ? 'With the rule S K y → I, the terms S K K and S K S step to I, and three fibres have become one.'
+        : m === 'run' ? 'Descriptions in one fibre share a point. I, S K K and S K S are normal forms, so no step joins them.'
+        : 'In the table of six terms and three probes, I, S K K and S K S had the same readings in every column, so they share a point.');
+      each('[data-m]', function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-m') === st.mode)); });
+    });
+    each('[data-m]', function (b) { b.addEventListener('click', function () { st.mode = b.getAttribute('data-m'); render(true); }); });
+    $('addrule').addEventListener('change', function () { st.rule = this.checked; render(true); });
+  })();
+  (function () {
+    var st = { mode: 'test', rule: false, code: false };
+    var render = eqFigure('svg-code', 'c', st, function (m, n, N) {
+      $('coderead').textContent = cap(word(N)) + ' descriptions, ' + word(n) + ' points. ' + (st.code
+        ? 'A probe that can read a normal form separates I, S K K and S K S. Sameness under probes now agrees with sameness after running.'
+        : 'A probe reads only what it supplied, and cannot separate I, S K K and S K S.');
+    });
+    $('readcode').addEventListener('change', function () { st.code = this.checked; render(true); });
+  })();
+
+  /* ---------- types: a predicate and its leaks ---------- */
+  (function () {
+    var svg = $('svg-paint'), v;
+    function symbols(s) { return (s.match(/[^\s()]+/g) || []).length; }
+    var custom = NODES.map(function () { return false; });
+    var PREDS = [
+      { id: 'hasK', label: 'mentions K', by: 'a', f: function (n) { return /K/.test(n.key); } },
+      { id: 'hasA', label: 'mentions a', by: 'a', f: function (n) { return /(^|[\s(])a($|[\s)])/.test(n.key); } },
+      { id: 'small', label: 'has at most three symbols', by: 'a', f: function (n) { return symbols(n.key) <= 3; } },
+      { id: 'normal', label: 'is already a normal form', by: 'a', f: function (n) { return !!n.nf; } },
+      { id: 'evalA', label: 'runs to a', by: 'r', f: function (n) { return n.f === 'a'; } },
+      { id: 'evalI', label: 'runs to I', by: 'r', f: function (n) { return n.f === 'I'; },
+        note: 'This predicate shades one whole fibre. No probe defines it, because it holds of I and not of S K K, and those two give the same readings under every probe.' },
+      { id: 'halts', label: 'has a normal form', by: 'r', f: function (n) { return n.f !== 'loop'; } },
+      { id: 'probeA', label: 'returns a when applied to a', by: 'b', f: function (n) { return nfOuter(App(n.t, A('a'))) === 'a'; },
+        note: 'This predicate is defined by a probe. It shades I, S K K and S K S, and every term that runs to I. These are the fibres that sameness under probes merged.' },
+      { id: 'custom', label: 'your own (select the boxes)', f: function (n, i) { return custom[i]; } }
+    ];
+    var sel = $('pred'), btn = $('closeit'), closed = false, timers = [];
+    PREDS.forEach(function (p) { var o = document.createElement('option'); o.value = p.id; o.textContent = p.label; sel.appendChild(o); });
+    function current() { return PREDS.filter(function (q) { return q.id === sel.value; })[0]; }
+    function render() {
+      timers.forEach(clearTimeout); timers = [];
+      var p = current(), pb = p.by ? ' p' + p.by : '';
+      var on = NODES.map(p.f), leaks = [], any = on.some(Boolean);
+      EDGES.forEach(function (e, ei) { if (on[e[0]] !== on[e[1]]) leaks.push(ei); });
+      // closure: a fibre is connected by steps, so one shaded description shades the whole fibre
+      var hit = {};
+      NODES.forEach(function (n, i) { if (on[i]) hit[n.f] = true; });
+      var spread = NODES.map(function (n, i) { return !on[i] && hit[n.f]; });
+      v.nodes.forEach(function (n, i) {
+        n.r.setAttribute('class', 'n-rect' + (NODES[i].nf ? ' nf' : '') + (on[i] ? ' paint' + pb : ''));
+        n.g.setAttribute('aria-pressed', String(on[i]));
+      });
+      v.edges.forEach(function (e, ei) {
+        var leak = !closed && leaks.indexOf(ei) >= 0;
+        e.setAttribute('class', 'edge fade' + (leak ? ' leak' : ''));
+        e.setAttribute('marker-end', 'url(#p' + (leak ? 'ahr' : 'ah') + ')');
+      });
+      if (closed) {
+        var k = 0;
+        NODES.forEach(function (n, i) {
+          if (!spread[i]) return;
+          var paint = function () { v.nodes[i].r.setAttribute('class', 'n-rect' + (n.nf ? ' nf' : '') + ' spread' + pb); };
+          if (RM) paint(); else timers.push(setTimeout(paint, 160 * (++k)));
+        });
+      }
+      btn.setAttribute('aria-pressed', String(closed));
+      btn.textContent = closed ? 'Undo closing' : 'Close it';
+      btn.disabled = leaks.length === 0;
+      var vd = $('verdict'), rd = $('paintread');
+      if (leaks.length === 0) {
+        vd.className = 'verdict'; vd.textContent = 'No leaks. The predicate is a type.';
+        rd.textContent = p.note || (any
+          ? 'Each fibre is shaded entirely or not at all, so the predicate can be stated by naming points on the line.'
+          : 'Nothing is shaded. The empty predicate is a type, though not a useful one. Select a box to shade it.');
+      } else if (!closed) {
+        var e = EDGES[leaks[0]], x = NODES[e[0]], y = NODES[e[1]];
+        vd.className = 'verdict bad'; vd.textContent = cap(word(leaks.length)) + (leaks.length === 1 ? ' leak.' : ' leaks.') + ' The predicate is not a type.';
+        rd.textContent = x.label + ' steps to ' + y.label + ', and only one of the two satisfies the predicate. Running a term can therefore change whether it belongs.';
+      } else {
+        var fibs = Object.keys(hit).length;
+        vd.className = 'verdict'; vd.textContent = 'Closed. The shading is the smallest type that contains the predicate.';
+        rd.textContent = 'The shading has been extended to every term joined to a shaded one by steps in either direction. It covers ' + word(fibs) + (fibs === 1 ? ' whole fibre' : ' whole fibres') + ', and the dashed boxes are the terms that were added.';
+      }
+    }
+    function toggle(i) {
+      if (sel.value !== 'custom') { custom = NODES.map(current().f); sel.value = 'custom'; }
+      custom[i] = !custom[i]; closed = false; render();
+    }
+    sel.addEventListener('change', function () { closed = false; render(); });
+    btn.addEventListener('click', function () { closed = !closed; render(); });
+    function build() {
+      v = drawBundle(svg, 'p'); fibreLabels(v);
+      v.nodes.forEach(function (n, i) {
+        n.g.setAttribute('class', 'fade pick'); n.g.setAttribute('role', 'button'); n.g.setAttribute('tabindex', '0');
+        n.g.setAttribute('aria-label', 'Shade ' + NODES[i].label);
+        n.g.addEventListener('click', function () { toggle(i); });
+        n.g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); toggle(i); } });
+      });
+      render();
+    }
+    BUILD.push(build);
+    build();
+  })();
+
+  /* ---------- types: the fundamental lemma for K ---------- */
+  (function () {
+    var svg = $('svg-lemma'), defs = S('defs', {}, svg);
+    marker(defs, 'lah', 'ah', 7); marker(defs, 'lahb', 'ah-blue', 7); marker(defs, 'lahg', 'ah-run', 5);
+    var Y = 98, B = [{ x: 50, s: 'K', w: 30, atom: true }, { x: 200, s: 'K u v', w: 60 }, { x: 350, s: 'u', w: 28, nf: true }];
+    S('line', { x1: 70, y1: Y, x2: 165, y2: Y, 'class': 'edge blue', 'marker-end': 'url(#lahb)' }, svg);
+    S('text', { x: 118, y: Y - 9, 'text-anchor': 'middle', 'class': 'lab blue' }, svg).textContent = 'the probe [ ] u v';
+    S('line', { x1: 235, y1: Y, x2: 331, y2: Y, 'class': 'edge run', 'marker-end': 'url(#lahg)' }, svg);
+    S('text', { x: 283, y: Y - 9, 'text-anchor': 'middle', 'class': 'lab green' }, svg).textContent = 'one step';
+    B.forEach(function (b) {
+      S('rect', { x: b.x - b.w / 2, y: Y - 11, width: b.w, height: 22, rx: 3, 'class': 'n-rect' + (b.nf ? ' nf' : '') }, svg);
+      S('text', { x: b.x, y: Y + 4.5, 'text-anchor': 'middle', 'class': 't-atom' }, svg).textContent = b.s;
+    });
+    var stem = S('line', { y1: 54, y2: Y - 13, 'class': 'proj' }, svg);
+    var mark = S('circle', { cy: 46, r: 7, 'class': 'evid' }, svg);
+    var capt = S('text', { y: 26, 'text-anchor': 'middle', 'class': 't-probe' }, svg);
+    var STAGES = [
+      { x: 350, cap: 'u ∈ ⟦A⟧', say: 'Given: u is in ⟦A⟧ and v is in ⟦B⟧.' },
+      { x: 200, cap: 'K u v ∈ ⟦A⟧', say: 'K u v steps to u. ⟦A⟧ is a type, so membership passes back across the step, and K u v is in ⟦A⟧.' },
+      { x: 50, cap: 'K ∈ ⟦A → B → A⟧', say: 'This holds for every u in ⟦A⟧ and every v in ⟦B⟧, which is what the probe [ ] u v requires of K.' }
+    ];
+    var k = 0, x = STAGES[0].x, anim = null;
+    function put(px) { x = px; mark.setAttribute('cx', px); stem.setAttribute('x1', px); stem.setAttribute('x2', px); capt.setAttribute('x', Math.min(350, Math.max(66, px))); }
+    function render(animate) {
+      var st = STAGES[k], from = x;
+      capt.textContent = st.cap; $('lemmaread').textContent = st.say;
+      each('[data-k]', function (b) { b.setAttribute('aria-pressed', String(Number(b.getAttribute('data-k')) === k)); });
+      if (anim) cancelAnimationFrame(anim);
+      if (!animate || RM) { put(st.x); if (animate) kick(mark, 'arrive'); return; }
+      var t0 = null;
+      var tick = function (ts) {
+        if (t0 === null) t0 = ts;
+        var u = Math.min(1, (ts - t0) / 700);
+        put(from + (st.x - from) * ease(u));
+        if (u < 1) anim = requestAnimationFrame(tick); else kick(mark, 'arrive');
+      };
+      anim = requestAnimationFrame(tick);
+    }
+    var seq = [];
+    function halt() { seq.forEach(clearTimeout); seq = []; }
+    each('[data-k]', function (b) { b.addEventListener('click', function () { halt(); k = Number(b.getAttribute('data-k')); render(true); }); });
+    $('lemmaplay').addEventListener('click', function () {      // the three stages in turn
+      halt(); k = 0; render(false);
+      seq.push(setTimeout(function () { k = 1; render(true); }, 1100));
+      seq.push(setTimeout(function () { k = 2; render(true); }, 3000));
+    });
+    render(false);
+  })();
+
+  /* ---------- what a type cannot see: two fibres from the inside ---------- */
+  (function () {
+    function node(s, x, y, nf) { return { s: s, x: x, y: y, w: s.length * 7.6 + 14, nf: nf }; }
+    function box(svg, n) {
+      S('rect', { x: n.x - n.w / 2, y: n.y - 11, width: n.w, height: 22, rx: 3, 'class': 'n-rect' + (n.nf ? ' nf' : '') }, svg);
+      S('text', { x: n.x, y: n.y + 4.5, 'text-anchor': 'middle', 'class': 't-atom' }, svg).textContent = n.s;
+    }
+    function seg(a, b) { return [clip(a, b), clip(b, a)]; }
+    function arrow(svg, id, a, b, cls) {
+      var s = seg(a, b);
+      S('line', { x1: s[0][0], y1: s[0][1], x2: s[1][0], y2: s[1][1], 'class': 'edge' + (cls ? ' ' + cls : ''), 'marker-end': 'url(#' + id + ')' }, svg);
+      return s;
+    }
+    function base(svg, n, x1, x2) {
+      S('line', { x1: n.x, y1: n.y + 11, x2: n.x, y2: 198, 'class': 'proj' }, svg);
+      S('line', { x1: x1, y1: 198, x2: x2, y2: 198, 'class': 'baseline' }, svg);
+      S('circle', { cx: n.x, cy: 198, r: 4.5, 'class': 'basept' }, svg);
+      S('text', { x: n.x, y: 216, 'text-anchor': 'middle', 'class': 'lab' }, svg).textContent = 'one point';
+    }
+    // position at fraction u of a polyline, by length
+    function along(pts, u) {
+      var len = [0], i;
+      for (i = 1; i < pts.length; i++) len[i] = len[i - 1] + Math.sqrt(Math.pow(pts[i][0] - pts[i - 1][0], 2) + Math.pow(pts[i][1] - pts[i - 1][1], 2));
+      var d = Math.min(1, Math.max(0, u)) * len[len.length - 1];
+      for (i = 1; i < pts.length; i++) if (d <= len[i] || i === pts.length - 1) {
+        var f = len[i] === len[i - 1] ? 0 : (d - len[i - 1]) / (len[i] - len[i - 1]);
+        return [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * f, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * f];
+      }
+      return pts[0];
+    }
+    function put(c, p) { c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); }
+    // a route that stops d short of its end, so a marker at rest stays clear of the box
+    function shortBy(pts, d) {
+      var out = pts.slice(), a = out[out.length - 2], b = out[out.length - 1];
+      var len = Math.sqrt(Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2));
+      out[out.length - 1] = [b[0] - (b[0] - a[0]) * d / len, b[1] - (b[1] - a[1]) * d / len];
+      return out;
+    }
+
+    // the associativity pentagon
+    var pent = $('svg-pent'); marker(S('defs', {}, pent), 'm1', 'ah', 7);
+    var Pa = node('((xy)z)w', 165, 26), Pb = node('(xy)(zw)', 262, 92), Pc = node('x(y(zw))', 165, 158, true),
+        Pd = node('(x(yz))w', 68, 70), Pe = node('x((yz)w)', 68, 120);
+    var hole = S('polygon', { points: [Pa, Pb, Pc, Pe, Pd].map(function (p) { return p.x + ',' + p.y; }).join(' '), 'class': 'hole' }, pent);
+    var r1 = [].concat(arrow(pent, 'm1', Pa, Pb), arrow(pent, 'm1', Pb, Pc));
+    var r2 = [].concat(arrow(pent, 'm1', Pa, Pd), arrow(pent, 'm1', Pd, Pe), arrow(pent, 'm1', Pe, Pc));
+    r1 = shortBy(r1, 7); r2 = shortBy(r2, 7);
+    // markers are drawn under the boxes, so they pass behind a term and not across its text
+    var tk1 = S('circle', { r: 6, 'class': 'token' }, pent), tk2 = S('circle', { r: 5.5, 'class': 'ring' }, pent);
+    [Pa, Pb, Pc, Pd, Pe].forEach(function (n) { box(pent, n); });
+    base(pent, Pc, 100, 230);
+    var holeLab = S('text', { x: 165, y: 96, 'text-anchor': 'middle', 'class': 'lab' }, pent);
+    function pentSay() {
+      var on = $('fill').checked;
+      hole.setAttribute('class', 'hole' + (on ? ' on' : ''));
+      holeLab.textContent = on ? 'one run' : '';
+      $('pentread').textContent = on
+        ? 'They are now counted as one run, and evidence carried along either arrives in the same state.'
+        : 'Nothing in the rule says whether they are the same run.';
+    }
+    $('fill').addEventListener('change', pentSay);
+    pentSay();
+
+    // K a (ω ω): a cycle of three terms, each with an exit
+    var ex = $('svg-exit'); marker(S('defs', {}, ex), 'm2', 'ah', 7);
+    var T0 = parse('K a (S I I (S I I))'), T1 = contractAt(T0, redexInner(T0)), T2 = contractAt(T1, redexInner(T1));
+    var C = [node(pretty(T0), 100, 28), node(pretty(T1), 100, 82), node(pretty(T2), 100, 136)];
+    var X = node('a', 288, 82, true);
+    var c1 = arrow(ex, 'm2', C[0], C[1]), c2 = arrow(ex, 'm2', C[1], C[2]);
+    var q0 = [C[2].x - C[2].w / 2 - 3, C[2].y - 2], q1 = [-8, 82], q2 = [C[0].x - C[0].w / 2 - 3, C[0].y + 3];
+    S('path', { d: 'M ' + q0.join(' ') + ' Q ' + q1.join(' ') + ' ' + q2.join(' '), 'class': 'edge', 'marker-end': 'url(#m2)' }, ex);
+    var back = [];
+    for (var i = 0; i <= 14; i++) {
+      var u = i / 14, w0 = (1 - u) * (1 - u), w1 = 2 * u * (1 - u), w2 = u * u;
+      back.push([w0 * q0[0] + w1 * q1[0] + w2 * q2[0], w0 * q0[1] + w1 * q1[1] + w2 * q2[1]]);
+    }
+    var exits = C.map(function (n) { return arrow(ex, 'm2', n, X, 'thin'); });
+    var lap = [].concat(c1, c2, back, [c1[0]]);
+    var out = exits[0].concat([[X.x, X.y - 20]]);
+    var tk3 = S('circle', { r: 6, 'class': 'token' }, ex), tk3b = S('circle', { r: 5.5, 'class': 'ring' }, ex);
+    C.forEach(function (n) { box(ex, n); }); box(ex, X);
+    S('text', { x: 222, y: 48, 'text-anchor': 'middle', 'class': 'lab green' }, ex).textContent = 'K-rule';
+    base(ex, X, 226, 322);
+
+    // under reduced motion the markers move in a few plain jumps, not a glide
+    function q(x, n) { return RM ? Math.round(x * n) / n : x; }
+    function frame(ms) {
+      var v = Math.min(1, ((ms % 4200) / 4200) / 0.7);            // travel, then rest at the end
+      put(tk1, along(r1, q(v, 4))); put(tk2, along(r2, q(v, 6)));
+      put(tk3, along(lap, q((ms % 3000) / 3000, 6)));
+      put(tk3b, along(out, q(Math.min(1, ((ms % 4200) / 4200) / 0.3), 2)));
+    }
+    var visible = true, raf = null, clock = 0;
+    function loop(ts) { frame(ts); raf = visible ? requestAnimationFrame(loop) : null; }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) {
+        visible = es[0].isIntersecting;
+        if (!RM && visible && raf === null) raf = requestAnimationFrame(loop);
+      }).observe(pent.closest('figure'));
+    }
+    frame(0);
+    if (RM) setInterval(function () { if (visible) { clock += 600; frame(clock); } }, 600);
+    else raf = requestAnimationFrame(loop);
+  })();
+
+  /* ---------- changing the ingredients ---------- */
+  (function () {
+    function node(t, x, y, nf) { var s = pretty(t); return { t: t, s: s, x: x, y: y, w: s.length * 7.6 + 14, nf: !!nf }; }
+    function box(parent, n) {
+      S('rect', { x: n.x - n.w / 2, y: n.y - 11, width: n.w, height: 22, rx: 3, 'class': 'n-rect' + (n.nf ? ' nf' : '') }, parent);
+      S('text', { x: n.x, y: n.y + 4.5, 'text-anchor': 'middle', 'class': 't-atom' }, parent).textContent = n.s;
+    }
+    function seg(a, b) { return [clip(a, b), clip(b, a)]; }
+    function line(parent, sg, id, cls) {
+      var at = { x1: sg[0][0], y1: sg[0][1], x2: sg[1][0], y2: sg[1][1], 'class': 'edge' + (cls ? ' ' + cls : '') };
+      if (id) at['marker-end'] = 'url(#' + id + ')';
+      return S('line', at, parent);
+    }
+    function text(parent, x, y, str, cls, anchor) {
+      var e = S('text', { x: x, y: y, 'text-anchor': anchor || 'middle', 'class': cls || '' }, parent);
+      e.textContent = str; return e;
+    }
+    // a polyline measured by length
+    function route(pts) {
+      var len = [0];
+      for (var i = 1; i < pts.length; i++) len[i] = len[i - 1] + Math.sqrt(Math.pow(pts[i][0] - pts[i - 1][0], 2) + Math.pow(pts[i][1] - pts[i - 1][1], 2));
+      return {
+        L: len[len.length - 1], len: len,
+        at: function (d) {
+          d = Math.min(this.L, Math.max(0, d));
+          for (var k = 1; k < pts.length; k++) if (d <= len[k] || k === pts.length - 1) {
+            var f = len[k] === len[k - 1] ? 0 : (d - len[k - 1]) / (len[k] - len[k - 1]);
+            return [pts[k - 1][0] + (pts[k][0] - pts[k - 1][0]) * f, pts[k - 1][1] + (pts[k][1] - pts[k - 1][1]) * f];
+          }
+          return pts[0];
+        }
+      };
+    }
+    function put(c, p) { c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); }
+    function ruleName(r) { return spine(r).head.n; }
+
+    /* the zoo: one small picture for each way of making the choices.
+       Ochre boxes are descriptions, green arrows steps, blue marks the probe and what it reads, black is what is kept. */
+    (function () {
+      function start(id) {
+        var svg = $(id), d = S('defs', {}, svg);
+        marker(d, id + 'g', 'ah', 6); marker(d, id + 'b', 'ah-blue', 6);
+        var m = S('marker', { id: id + 'r', viewBox: '0 0 10 10', refX: 1, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto' }, d);
+        S('path', { d: 'M10 0 L0 5 L10 10 z', 'class': 'ah' }, m);       // the head at the near end of a two-way step
+        return svg;
+      }
+      function desc(svg, x, y, label) {
+        var w = label ? label.length * 6.6 + 12 : 26;
+        S('rect', { x: x - w / 2, y: y - 9, width: w, height: 18, rx: 3, 'class': 'zdesc' }, svg);
+        if (label) text(svg, x, y + 4, label, 't-atom zt');
+        return { x: x, y: y, w: w };
+      }
+      function edge(a, b) {
+        var dx = b.x - a.x, dy = b.y - a.y;
+        var sx = dx === 0 ? Infinity : (a.w / 2 + 3) / Math.abs(dx), sy = dy === 0 ? Infinity : 12 / Math.abs(dy), s = Math.min(sx, sy);
+        return [a.x + dx * s, a.y + dy * s];
+      }
+      function step(svg, id, a, b, both) {
+        var p = edge(a, b), q = edge(b, a), at = { x1: p[0], y1: p[1], x2: q[0], y2: q[1], 'class': 'edge', 'marker-end': 'url(#' + id + 'g)' };
+        if (both) at['marker-start'] = 'url(#' + id + 'r)';
+        S('line', at, svg);
+      }
+      function probe(svg, id, x1, y1, x2, y2) { S('line', { x1: x1, y1: y1, x2: x2, y2: y2, 'class': 'edge blue', 'marker-end': 'url(#' + id + 'b)' }, svg); }
+      function over(svg, x1, y1, x2, y2) { S('line', { x1: x1, y1: y1, x2: x2, y2: y2, 'class': 'proj' }, svg); }
+      function kept(svg, x1, x2, y, pts, hollow) {
+        S('line', { x1: x1, y1: y, x2: x2, y2: y, 'class': 'baseline' }, svg);
+        pts.forEach(function (x) { S('circle', { cx: x, cy: y, r: 4, 'class': 'basept' + (hollow ? ' hollow' : '') }, svg); });
+      }
+      var s, a, b, c, d, e;
+
+      // the usual notion: a number in, steps one way, a number out, and only the line kept
+      s = start('z0');
+      text(s, 12, 38, '3', 't-probe'); probe(s, 'z0', 20, 34, 44, 34);
+      a = desc(s, 62, 34); b = desc(s, 110, 34); c = desc(s, 158, 34); step(s, 'z0', a, b); step(s, 'z0', b, c);
+      probe(s, 'z0', 176, 34, 198, 34); text(s, 208, 38, '6', 't-probe');
+      over(s, 110, 45, 110, 92); kept(s, 40, 180, 92, [110]);
+
+      // cost: the same answer by a short run and a long one, read back with its length
+      s = start('z1');
+      a = desc(s, 28, 30); b = desc(s, 72, 30); step(s, 'z1', a, b); text(s, 50, 58, 'a, 1 step', 'lab blue');
+      c = desc(s, 116, 30); d = desc(s, 160, 30); e = desc(s, 204, 30); step(s, 'z1', c, d); step(s, 'z1', d, e); text(s, 160, 58, 'a, 2 steps', 'lab blue');
+      over(s, 50, 64, 50, 96); over(s, 160, 64, 160, 96); kept(s, 20, 200, 96, [50, 160]);
+
+      // higher types: the probe hands over a program, and there is more than one line
+      s = start('z2');
+      S('rect', { x: 8, y: 20, width: 36, height: 28, rx: 4, 'class': 'zprobe' }, s); desc(s, 26, 34, 'g');
+      probe(s, 'z2', 46, 34, 68, 34);
+      a = desc(s, 86, 34); b = desc(s, 134, 34); step(s, 'z2', a, b);
+      probe(s, 'z2', 152, 34, 176, 34); text(s, 188, 38, '6', 't-probe');
+      kept(s, 40, 180, 72, [70, 110, 150]); kept(s, 40, 180, 90, [70, 150]); kept(s, 40, 180, 108, [90, 130]);
+
+      // reading code: the probe looks inside the box, and one point becomes three
+      s = start('z3');
+      a = desc(s, 34, 34, 'I'); b = desc(s, 100, 34, 'S K K'); c = desc(s, 176, 34, 'S K S');
+      S('circle', { cx: 100, cy: 34, r: 16, 'class': 'zlens' }, s); S('line', { x1: 112, y1: 46, x2: 124, y2: 58, 'class': 'zlens' }, s);
+      over(s, 34, 45, 34, 96); over(s, 100, 52, 100, 96); over(s, 176, 45, 176, 96); kept(s, 16, 204, 96, [34, 100, 176]);
+
+      // watching a run: two processes with the same traces, and a probe that stops in the middle
+      s = start('z4');
+      (function () {
+        function arr(p, q) {
+          var dx = q[0] - p[0], dy = q[1] - p[1], len = Math.sqrt(dx * dx + dy * dy), ux = dx / len, uy = dy / len;
+          S('line', { x1: p[0] + ux * 6, y1: p[1] + uy * 6, x2: q[0] - ux * 7, y2: q[1] - uy * 7, 'class': 'edge', 'marker-end': 'url(#z4g)' }, s);
+        }
+        var r = [56, 12], m = [56, 40], l = [38, 68], q = [74, 68], r2 = [160, 12], m1 = [142, 40], m2 = [178, 40], e1 = [142, 68], e2 = [178, 68];
+        arr(r, m); arr(m, l); arr(m, q); arr(r2, m1); arr(r2, m2); arr(m1, e1); arr(m2, e2);
+        [r, m, l, q, r2, m1, m2, e1, e2].forEach(function (p) { S('circle', { cx: p[0], cy: p[1], r: 3.5, 'class': 'state' }, s); });
+        [m, m1, m2].forEach(function (p) { S('circle', { cx: p[0], cy: p[1], r: 9, 'class': 'zlens' }, s); });
+        over(s, 56, 76, 56, 100); over(s, 160, 76, 160, 100); kept(s, 30, 190, 100, [56, 160]);
+      })();
+
+      // proofs as answers: two proofs of one equality, and a step between them
+      s = start('z5');
+      a = desc(s, 54, 48, 't'); b = desc(s, 166, 48, 'u');
+      S('path', { d: 'M 66 42 Q 110 4 154 42', 'class': 'zproof' }, s); S('path', { d: 'M 66 54 Q 110 92 154 54', 'class': 'zproof' }, s);
+      text(s, 110, 16, 'p', 't-probe'); text(s, 110, 88, 'q', 't-probe');
+      S('line', { x1: 110, y1: 30, x2: 110, y2: 65, 'class': 'edge', 'marker-end': 'url(#z5g)' }, s);
+      kept(s, 40, 180, 108, [110]);
+
+      // steps both ways: words joined by a relation, with no normal form among them
+      s = start('z6');
+      a = desc(s, 44, 38, 'aab'); b = desc(s, 110, 38, 'aba'); c = desc(s, 176, 38, 'baa'); step(s, 'z6', a, b, true); step(s, 'z6', b, c, true);
+      over(s, 44, 49, 110, 94); over(s, 110, 49, 110, 94); over(s, 176, 49, 110, 94); kept(s, 40, 180, 94, [110]);
+
+      // keeping the fibre: the loop itself is kept, and evidence changes round it
+      s = start('z7');
+      S('rect', { x: 36, y: 4, width: 148, height: 84, rx: 14, 'class': 'zkept' }, s);
+      a = desc(s, 110, 20, 'ω ω'); b = desc(s, 152, 66); c = desc(s, 68, 66); step(s, 'z7', a, b); step(s, 'z7', b, c); step(s, 'z7', c, a);
+      text(s, 150, 40, '+1', 't-probe', 'start');
+      over(s, 110, 88, 110, 106); kept(s, 40, 180, 106, [110], true);
+    })();
+
+    /* one probe, two calculi: a schematic */
+    (function () {
+      var svg = $('svg-outside'), d = S('defs', {}, svg);
+      marker(d, 'oa', 'ah-run', 5); marker(d, 'ob', 'ah-blue', 7);
+      function tape(cx, y, cells, marks) {
+        var w = 18, x = cx - cells * w / 2;
+        for (var i = 0; i < cells; i++) {
+          S('rect', { x: x + i * w, y: y - 10, width: w, height: 20, 'class': 'n-rect nf' }, svg);
+          if (i < marks) text(svg, x + i * w + w / 2, y + 4.5, '1', 't-atom');
+        }
+      }
+      function term(cx, y, str) {
+        S('rect', { x: cx - 30, y: y - 11, width: 60, height: 22, rx: 3, 'class': 'n-rect nf' }, svg);
+        text(svg, cx, y + 4.5, str, 't-atom');
+      }
+      function probe(x1, y1, x2, y2) { S('line', { x1: x1, y1: y1, x2: x2, y2: y2, 'class': 'edge blue', 'marker-end': 'url(#ob)' }, svg); }
+      text(svg, 210, 18, 'supply the number 3', 'lab blue');
+      probe(168, 26, 128, 44); probe(252, 26, 292, 44);
+      text(svg, 110, 62, 'a Turing machine', 'lab'); text(svg, 310, 62, 'a term of combinatory logic', 'lab');
+      tape(110, 86, 5, 3); term(310, 86, 't n₃');
+      S('line', { x1: 110, y1: 102, x2: 110, y2: 126, 'class': 'edge run', 'marker-end': 'url(#oa)' }, svg); text(svg, 120, 118, 'moves', 'lab green', 'start');
+      S('line', { x1: 310, y1: 102, x2: 310, y2: 126, 'class': 'edge run', 'marker-end': 'url(#oa)' }, svg); text(svg, 320, 118, 'steps', 'lab green', 'start');
+      tape(110, 142, 8, 6); term(310, 142, 'n₆');
+      probe(128, 160, 168, 184); probe(292, 160, 252, 184);
+      text(svg, 210, 202, 'read the number 6', 'lab blue');
+    })();
+
+    /* two processes with the same traces */
+    (function () {
+      var svg = $('svg-proc'); marker(S('defs', {}, svg), 'pa', 'ah', 6);
+      function arr(a, b, l) {
+        var dx = b[0] - a[0], dy = b[1] - a[1], len = Math.sqrt(dx * dx + dy * dy), ux = dx / len, uy = dy / len;
+        S('line', { x1: a[0] + ux * 7, y1: a[1] + uy * 7, x2: b[0] - ux * 8, y2: b[1] - uy * 8, 'class': 'edge', 'marker-end': 'url(#pa)' }, svg);
+        text(svg, (a[0] + b[0]) / 2 + (dx < 0 ? -11 : 11), (a[1] + b[1]) / 2 + 4, l);
+      }
+      var r = [100, 16], m = [100, 64], l = [70, 112], q = [130, 112];
+      arr(r, m, 'a'); arr(m, l, 'b'); arr(m, q, 'c');
+      var r2 = [300, 16], m1 = [270, 64], m2 = [330, 64], e1 = [270, 112], e2 = [330, 112];
+      arr(r2, m1, 'a'); arr(r2, m2, 'a'); arr(m1, e1, 'b'); arr(m2, e2, 'c');
+      [r, m, l, q, r2, m1, m2, e1, e2].forEach(function (p) { S('circle', { cx: p[0], cy: p[1], r: 4, 'class': 'state' }, svg); });
+      text(svg, 100, 144, 'after a, both b and c are on offer', 'lab');
+      text(svg, 300, 144, 'after a, only one of them is', 'lab');
+    })();
+
+    /* words as paths: two commuting generators */
+    (function () {
+      var svg = $('svg-grid'), n = 3, c = 62, x0 = 58, y0 = 238, START = 'aaabbb', w, taken, busy = null, refocus = null;
+      var gs = S('g', {}, svg), gq = S('g', {}, svg), gd = S('g', {}, svg);
+      for (var i = 0; i <= n; i++) {
+        S('line', { x1: x0 + i * c, y1: y0, x2: x0 + i * c, y2: y0 - n * c, 'class': 'gridline' }, gs);
+        S('line', { x1: x0, y1: y0 - i * c, x2: x0 + n * c, y2: y0 - i * c, 'class': 'gridline' }, gs);
+      }
+      function P(p) { return [x0 + p[0] * c, y0 - p[1] * c]; }
+      function pathOfWord(word) {
+        var x = 0, y = 0, out = [[0, 0]];
+        word.split('').forEach(function (ch) { if (ch === 'a') x++; else y++; out.push([x, y]); });
+        return out;
+      }
+      // the squares between a word and the first word, as "column,row"
+      function squares(word) {
+        var out = {}, y = 0, col = 0;
+        word.split('').forEach(function (ch) {
+          if (ch === 'b') { y++; return; }
+          for (var j = 0; j < y; j++) out[col + ',' + j] = true;
+          col++;
+        });
+        return out;
+      }
+      function square(key) {
+        var q = key.split(',');
+        return S('rect', { x: x0 + Number(q[0]) * c, y: y0 - (Number(q[1]) + 1) * c, width: c, height: c, 'class': 'swept' }, gq);
+      }
+      function poly(px, cls) { return S('polyline', { points: px.map(function (p) { return p.join(','); }).join(' '), 'class': cls }, gd); }
+      // mv, when given, is a step in progress: the corner slides across its square and the square fills or empties
+      function draw(mv) {
+        clear(gq); clear(gd);
+        var sq = squares(w), area = Object.keys(sq).length;
+        Object.keys(sq).forEach(function (key) { var r = square(key); if (mv && mv.key === key) r.style.opacity = mv.u; });
+        if (mv && !mv.added) square(mv.key).style.opacity = 1 - mv.u;
+        poly(pathOfWord(START).map(P), 'proj');
+        var pts = pathOfWord(w).map(P);
+        if (mv) { var to = pts[mv.k + 1]; pts[mv.k + 1] = [mv.from[0] + (to[0] - mv.from[0]) * mv.u, mv.from[1] + (to[1] - mv.from[1]) * mv.u]; }
+        poly(pts, 'wordpath');
+        w.split('').forEach(function (ch, k) {
+          if (mv && (k === mv.k || k === mv.k + 1)) return;        // the two letters changing places are drawn below, in motion
+          var q = labelAt(ch, pts[k], pts[k + 1]);
+          text(gd, q[0], q[1], ch, 't-atom');
+        });
+        if (mv) mv.labels.forEach(function (l) { text(gd, l.from[0] + (l.to[0] - l.from[0]) * mv.u, l.from[1] + (l.to[1] - l.from[1]) * mv.u, l.ch, 't-atom'); });
+        S('circle', { cx: x0, cy: y0, r: 4.5, 'class': 'basept' }, gd);
+        var end = P([n, n]);
+        S('circle', { cx: end[0], cy: end[1], r: 4.5, 'class': 'basept' }, gd);
+        text(gd, end[0] + 10, end[1] - 8, 'a³b³', '', 'start');
+        if (mv) { S('circle', { cx: pts[mv.k + 1][0], cy: pts[mv.k + 1][1], r: 8.5, 'class': 'corner moving' }, gd); return; }
+        for (var k = 0; k < w.length - 1; k++) {
+          if (w[k] === w[k + 1]) continue;
+          (function (k) {
+            var v = pts[k + 1];
+            var g = S('g', { 'class': 'cornerg', role: 'button', tabindex: '0', 'data-k': k, 'aria-label': 'Exchange ' + w[k] + w[k + 1] + ' for ' + w[k + 1] + w[k] + ' at letter ' + (k + 1) }, gd);
+            if (taken === 0) S('circle', { cx: v[0], cy: v[1], r: 9, 'class': 'cornerping' }, g);      // shows where to press, until the first step
+            S('circle', { cx: v[0], cy: v[1], r: 8, 'class': 'corner' }, g);
+            S('circle', { cx: v[0], cy: v[1], r: 21, 'class': 'cornerhit' }, g);                          // the target for a finger, on top
+            g.addEventListener('click', function () { swap(k); });
+            g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); refocus = k; swap(k); } });
+          })(k);
+        }
+        if (refocus !== null) { var el = gd.querySelector('[data-k="' + refocus + '"]'); if (el) el.focus(); refocus = null; }
+        $('gridab').disabled = w.indexOf('ab') < 0; $('gridba').disabled = w.indexOf('ba') < 0;
+        $('gridread').innerHTML = 'The word is <code>' + w + '</code>. Its path ends where every path in this fibre ends, at <code>a³b³</code>. Steps taken: ' + taken + '. Squares between this word and the first: ' + area + '.' +
+          (taken === 0 ? ' Select a green corner, or press a button, to exchange two letters.'
+            : taken > area ? ' The run so far is longer than it had to be. A run of ' + steps(area) + ' reaches this word.'
+            : ' No run from the first word reaches this one in fewer steps.');
+      }
+      function labelAt(ch, a, b) { return ch === 'a' ? [(a[0] + b[0]) / 2, a[1] + 16] : [a[0] - 11, (a[1] + b[1]) / 2 + 4]; }
+      // A step is always shown in motion, even where reduced motion has been asked for: the move is short and small,
+      // the reader starts it, and seeing the corner cross its square is the point of the figure.
+      function glide(ms, frame, done) {
+        var t0 = null, live = true;
+        function end() { if (!live) return; live = false; done(); }
+        requestAnimationFrame(function tick(ts) {
+          if (!live) return;
+          if (t0 === null) t0 = ts;
+          var u = Math.min(1, (ts - t0) / ms);
+          if (u < 1) { frame(u); requestAnimationFrame(tick); } else end();
+        });
+        setTimeout(end, ms + 600);      // finishes the step even if no frames are being delivered
+        return { stop: function () { live = false; } };
+      }
+      function swap(k) {
+        if (busy) return;
+        var oldPts = pathOfWord(w).map(P), was = squares(w), c1 = w[k], c2 = w[k + 1];
+        w = w.slice(0, k) + c2 + c1 + w.slice(k + 2); taken++;
+        var newPts = pathOfWord(w).map(P), now = squares(w), key = null, added = false;
+        Object.keys(now).forEach(function (q) { if (!was[q]) { key = q; added = true; } });
+        Object.keys(was).forEach(function (q) { if (!now[q]) { key = q; added = false; } });
+        var labels = [
+          { ch: c1, from: labelAt(c1, oldPts[k], oldPts[k + 1]), to: labelAt(c1, newPts[k + 1], newPts[k + 2]) },
+          { ch: c2, from: labelAt(c2, oldPts[k + 1], oldPts[k + 2]), to: labelAt(c2, newPts[k], newPts[k + 1]) }
+        ];
+        $('gridab').disabled = true; $('gridba').disabled = true;
+        busy = glide(650, function (u) { draw({ k: k, from: oldPts[k + 1], u: ease(u), key: key, added: added, labels: labels }); },
+          function () { busy = null; draw(null); });
+      }
+      function reset() { if (busy) { busy.stop(); busy = null; } w = START; taken = 0; draw(null); }
+      $('gridreset').addEventListener('click', reset);
+      // the two directions of the one relation, each applied at the first place it fits
+      $('gridab').addEventListener('click', function () { var k = w.indexOf('ab'); if (k >= 0) swap(k); });
+      $('gridba').addEventListener('click', function () { var k = w.indexOf('ba'); if (k >= 0) swap(k); });
+      reset();
+    })();
+
+    /* what is kept of a fibre: two fibres at three levels, and with cost */
+    (function () {
+      function panel(id, terms, pos, edges, o) {
+        var svg = $(id); marker(S('defs', {}, svg), id + 'g', 'ah', 6);
+        var N = terms.map(function (t, i) { return node(t, pos[i][0], pos[i][1]); });
+        var gb = S('g', {}, svg), gf = S('g', {}, svg), gl = S('g', { 'class': 'fade' }, svg), gt = S('g', {}, svg), gx = S('g', { 'class': 'fade' }, svg), gk = S('g', {}, svg);
+        // kept at every level: the line and the point
+        o.over.forEach(function (i) { S('line', { x1: N[i].x, y1: N[i].y + 11, x2: o.pt, y2: 196, 'class': 'proj' }, gb); });
+        S('line', { x1: 30, y1: 196, x2: 250, y2: 196, 'class': 'baseline' }, gb);
+        var pt = S('circle', { cx: o.pt, cy: 196, r: 4.5, 'class': 'basept' + (o.hollow ? ' hollow' : '') }, gb);
+        text(gb, o.pt, 214, o.name, o.hollow ? 'lab' : '');
+        var cx = (N[0].x + N[1].x + N[2].x) / 3, cy = (N[0].y + N[1].y + N[2].y) / 3;
+        var fill = S('polygon', { points: N.map(function (m) { return m.x + ',' + m.y; }).join(' '), 'class': 'hole' }, gf);
+        var segs = edges.map(function (e) { return seg(N[e[0]], N[e[1]]); });
+        var lines = segs.map(function (sg) { return line(gl, sg, null); });
+        var costs = segs.map(function (sg, i) { return text(gl, (sg[0][0] + sg[1][0]) / 2 + o.off[i][0], (sg[0][1] + sg[1][1]) / 2 + o.off[i][1], '1', 'lab green fade'); });
+        var rects = N.map(function (m) {
+          var r = S('rect', { x: m.x - m.w / 2, y: m.y - 11, width: m.w, height: 22, rx: 3, 'class': 'n-rect' }, gx);
+          S('text', { x: m.x, y: m.y + 4.5, 'text-anchor': 'middle', 'class': 't-atom' }, gx).textContent = m.s;
+          return r;
+        });
+        var hole = S('circle', { cx: cx, cy: cy, r: 17, 'class': 'zhole fade' }, gk), holeLab = text(gk, cx, cy + 4, 'hole', 'lab fade');
+        var trip = S('polygon', { 'class': 'roundtrip fade' }, gk);
+        var tk = S('circle', { r: 5.5, 'class': 'token fade' }, gt), tk2 = S('circle', { r: 5, 'class': 'ring fade' }, gt);
+        var nx = o.note ? o.note[0] : cx, ny = o.note ? o.note[1] : cy - 2, an = o.note ? 'start' : 'middle';
+        var notes = [text(gk, nx, ny, '', 'lab halo', an), text(gk, nx, ny + 15, '', 'lab halo', an)];
+        return { id: id, N: N, cx: cx, cy: cy, fill: fill, segs: segs, lines: lines, costs: costs, rects: rects, hole: hole, holeLab: holeLab, trip: trip, tk: tk, tk2: tk2, notes: notes, gl: gl, gx: gx, pt: pt };
+      }
+      var W0 = parse('S I I (S I I)'), W1 = contractAt(W0, redexInner(W0)), W2 = contractAt(W1, redexInner(W1));
+      var A = panel('fib-a', ['K a (I b)', 'K a b', 'a'].map(parse), [[120, 30], [206, 92], [64, 150]], [[0, 2], [0, 1], [1, 2]],
+        { over: [2], pt: 64, hollow: false, name: 'a', off: [[-10, 0], [10, -4], [6, 15]], note: [86, 170] });
+      var W = panel('fib-w', [W0, W1, W2], [[140, 30], [214, 130], [58, 130]], [[0, 1], [1, 2], [2, 0]],
+        { over: [1, 2], pt: 140, hollow: true, name: 'no value', off: [[12, -2], [0, 15], [-12, -2]], note: null });
+      var SAY = [
+        'Each fibre is counted as one piece. All that is kept is its point on the line: a value on the left, and on the right the hollow point that stands for no value.',
+        'The arrowheads are forgotten and each fibre is a graph. On the left the two routes count as one run, so the triangle is filled, and a round trip can be shrunk to nothing. On the right nothing fills the loop. A round trip there cannot be shrunk, and that is a hole.',
+        'The arrowheads are kept. On the left every run ends at the normal form a. On the right the run goes round for ever and ends nowhere.',
+        'Each step has length one. On the left one route to a has length 1 and the other has length 2. On the right the count goes on rising, and no route reaches a value at any length.'
+      ];
+      var level = 0, clock = 0, last = null, raf = null, visible = true, touched = false, seq = [];
+      function along(sg, u) { u = Math.min(1, Math.max(0, u)); return [sg[0][0] + (sg[1][0] - sg[0][0]) * u, sg[0][1] + (sg[1][1] - sg[0][1]) * u]; }
+      function tri(p, s) { p.trip.setAttribute('points', p.N.map(function (m) { return (p.cx + (m.x - p.cx) * s) + ',' + (p.cy + (m.y - p.cy) * s); }).join(' ')); }
+      function note(p, i, s) { if (p.notes[i].textContent !== s) p.notes[i].textContent = s; }
+      function frame() {
+        var t = clock, u, k;
+        if (level === 1) {
+          u = (t % 3600) / 3600;
+          tri(A, u < 0.6 ? 0.76 * (1 - ease(u / 0.6)) : 0); op(A.trip, u < 0.58 ? 1 : 0);      // shrinks away: no hole
+          tri(W, 0.76 - 0.25 * Math.sin(Math.PI * Math.min(1, u / 0.8)));                      // stopped by the hole, and returns
+        } else if (level === 2) {
+          u = (t % 3400) / 3400;
+          put(A.tk, along(A.segs[0], u / 0.42));
+          A.rects[2].setAttribute('class', 'n-rect nf' + (u >= 0.42 ? ' cur' : ''));
+          u = ((t % 3900) / 3900) * 3; k = Math.floor(u) % 3;
+          put(W.tk, along(W.segs[k], u - Math.floor(u)));
+        } else if (level === 3) {
+          var T = 1100, tt = t % (T * 4.4);
+          put(A.tk, along(A.segs[0], tt / T));
+          put(A.tk2, tt < T ? along(A.segs[1], tt / T) : along(A.segs[2], (tt - T) / T));
+          note(A, 0, tt >= T ? '1 step by one route' : ''); note(A, 1, tt >= 2 * T ? '2 steps by the other' : '');
+          tt = t % (T * 13); k = Math.floor(tt / T);
+          put(W.tk, along(W.segs[k % 3], tt / T - k));
+          note(W, 0, k + (k === 1 ? ' step' : ' steps')); note(W, 1, 'and no value');
+        }
+      }
+      function setLevel(k) {
+        level = k; clock = 0;
+        [A, W].forEach(function (p) {
+          op(p.gl, k === 0 ? 0.15 : 1); op(p.gx, k === 0 ? 0.15 : 1);
+          p.lines.forEach(function (l) { if (k >= 2) l.setAttribute('marker-end', 'url(#' + p.id + 'g)'); else l.removeAttribute('marker-end'); });
+          p.costs.forEach(function (c) { op(c, k === 3 ? 1 : 0); });
+          op(p.trip, k === 1 ? 1 : 0); op(p.tk, k >= 2 ? 1 : 0); op(p.tk2, 0);
+          p.notes.forEach(function (n) { n.textContent = ''; });
+          p.pt.setAttribute('r', k === 0 ? 7 : 4.5);
+          op(p.hole, 0); op(p.holeLab, 0);
+        });
+        A.fill.setAttribute('class', 'hole' + (k >= 1 ? ' on' : ''));
+        op(W.hole, k === 1 ? 1 : 0); op(W.holeLab, k === 1 ? 1 : 0);
+        op(A.tk2, k === 3 ? 1 : 0);
+        A.rects[2].setAttribute('class', 'n-rect' + (k >= 2 ? ' nf' : ''));
+        if (k === 2) { note(A, 0, 'every run ends here'); note(W, 0, 'never ends'); }
+        $('fread').textContent = SAY[k];
+        each('[data-f]', function (b) { b.setAttribute('aria-pressed', String(Number(b.getAttribute('data-f')) === k)); });
+        frame();
+      }
+      function halt() { seq.forEach(clearTimeout); seq = []; }
+      function playAll() {
+        halt(); setLevel(0);
+        seq.push(setTimeout(function () { setLevel(1); }, 2800));
+        seq.push(setTimeout(function () { setLevel(2); }, 9000));
+        seq.push(setTimeout(function () { setLevel(3); }, 14500));
+      }
+      each('[data-f]', function (b) { b.addEventListener('click', function () { touched = true; halt(); setLevel(Number(b.getAttribute('data-f'))); }); });
+      $('fplay').addEventListener('click', function () { touched = true; playAll(); });
+      setLevel(0);
+      // the moving parts run only while the figure is on screen
+      function tick(ts) {
+        if (last !== null) clock += Math.min(100, ts - last);
+        last = ts; frame();
+        if (visible) raf = requestAnimationFrame(tick); else { raf = null; last = null; }
+      }
+      var fig = $('fib-a').closest('figure');
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es) {
+          visible = es[0].isIntersecting;
+          if (!RM && visible && raf === null) raf = requestAnimationFrame(tick);
+        }).observe(fig);
+      }
+      if (RM) setInterval(function () { if (visible) { clock += 550; frame(); } }, 550);
+      else raf = requestAnimationFrame(tick);
+      onFirstView(fig, function () { if (!touched) playAll(); });
+    })();
+
+    /* evidence carried along runs, in two fibres */
+    (function () {
+      var kind = 'count';
+
+      // left: the loop ω ω
+      var svg = $('svg-loop'); marker(S('defs', {}, svg), 'lp', 'ah', 7);
+      var T0 = parse('S I I (S I I)'), R0 = redexInner(T0), T1 = contractAt(T0, R0), R1 = redexInner(T1), T2 = contractAt(T1, R1), R2 = redexInner(T2);
+      var N = [node(T0, 165, 44), node(T1, 255, 140), node(T2, 75, 140)];
+      var RULES = [R0, R1, R2].map(ruleName), adds = RULES.map(function (r) { return r === 'S' ? 1 : 0; });   // S, I, I: computed
+      var gb = S('g', {}, svg), ge = S('g', {}, svg), gt = S('g', {}, svg), gx = S('g', {}, svg);
+      [N[1], N[2]].forEach(function (m) { S('line', { x1: m.x, y1: m.y + 11, x2: 165, y2: 206, 'class': 'proj' }, gb); });
+      S('line', { x1: 85, y1: 206, x2: 245, y2: 206, 'class': 'baseline' }, gb);
+      S('circle', { cx: 165, cy: 206, r: 4.5, 'class': 'basept hollow' }, gb);
+      text(gb, 165, 226, 'no value', 'lab');
+      var segs = [[0, 1], [1, 2], [2, 0]].map(function (e) { return seg(N[e[0]], N[e[1]]); });
+      segs.forEach(function (sg) { line(ge, sg, 'lp'); });
+      var LP = [[236, 82, 'start'], [165, 162, 'middle'], [94, 82, 'end']];
+      var labs = LP.map(function (p) { return text(ge, p[0], p[1], '', 'lab green', p[2]); });
+      text(ge, 165, 100, 'evidence', 'lab blue halo');
+      var ev = text(ge, 165, 126, '', 'ev halo');
+      var tok = S('circle', { r: 6, 'class': 'token' }, gt);
+      N.forEach(function (m) { box(gx, m); });
+      // the marker rests just clear of ω ω, on the first arrow
+      var s0 = segs[0], d0 = Math.sqrt(Math.pow(s0[1][0] - s0[0][0], 2) + Math.pow(s0[1][1] - s0[0][1], 2));
+      var rest = [s0[0][0] + (s0[1][0] - s0[0][0]) * 7 / d0, s0[0][1] + (s0[1][1] - s0[0][1]) * 7 / d0];
+      var lapR = route([rest, s0[1], segs[1][0], segs[1][1], segs[2][0], segs[2][1], rest]);
+      // the counter changes halfway along each S-step
+      var flips = [];
+      [0, 1, 2].forEach(function (k) { if (adds[k]) flips.push(k === 0 ? (d0 - 7) / 2 : (lapR.len[2 * k] + lapR.len[2 * k + 1]) / 2); });
+      var n = 0, d = 0, anim = null, moved = false;
+      function crossed(dist) { return flips.filter(function (f) { return f <= dist; }).length; }
+      function lapSay() {
+        $('loopread').textContent = anim ? 'On the way round.'
+          : !moved ? (kind === 'count' ? 'The evidence starts at 0. Carry it round the loop in either direction.' : 'The evidence is a yes: the term satisfies some predicate that no step changes. Carry it round the loop.')
+          : kind === 'count' ? 'The term is ω ω again and the evidence is ' + String(n).replace('-', '−') + '. The text of the term has not changed, and the evidence has.'
+          : 'A yes is carried across each step as a yes, and it comes back as it left. A predicate has nothing in it that could change.';
+      }
+      function lapDraw() {
+        put(tok, lapR.at(d));
+        var txt = kind === 'count' ? String(n + crossed(d)).replace('-', '−') : 'yes';
+        if (txt !== ev.textContent) { var first = ev.textContent === ''; ev.textContent = txt; if (!first) kick(ev, 'pop'); }   // the number jumps as it changes
+        labs.forEach(function (l, k) { l.textContent = RULES[k] + '-rule' + (adds[k] && kind === 'count' ? ', +1' : ''); });
+        lapSay();
+      }
+      function lap(dir) {
+        if (anim || kanim) return;
+        moved = true;
+        var total = crossed(lapR.L);
+        if (dir < 0) { n -= total; d = lapR.L; }
+        anim = animate(2800, function (u) { d = dir > 0 ? u * lapR.L : (1 - u) * lapR.L; if (u < 1) lapDraw(); },
+          function () { anim = null; if (dir > 0) n += total; d = 0; lapDraw(); kick(tok, 'arrive'); }, 6);
+        lapDraw();
+      }
+      $('lapfwd').addEventListener('click', function () { lap(1); });
+      $('lapback').addEventListener('click', function () { lap(-1); });
+
+      // right: the fibre of K a (ω ω)
+      var svgK = $('svg-kloop'); marker(S('defs', {}, svgK), 'kp', 'ah', 7);
+      var K0 = parse('K a (S I I (S I I))'), KR0 = redexInner(K0), K1 = contractAt(K0, KR0), KR1 = redexInner(K1), K2 = contractAt(K1, KR1);
+      var C = [node(K0, 100, 30), node(K1, 100, 84), node(K2, 100, 138)], X = node(parse('a'), 288, 84, true);
+      var kAdd = ruleName(KR0) === 'S' ? 1 : 0;
+      var kb = S('g', {}, svgK), ke = S('g', {}, svgK), kt = S('g', {}, svgK), kx = S('g', {}, svgK);
+      S('line', { x1: X.x, y1: X.y + 11, x2: X.x, y2: 206, 'class': 'proj' }, kb);
+      S('line', { x1: 226, y1: 206, x2: 322, y2: 206, 'class': 'baseline' }, kb);
+      S('circle', { cx: X.x, cy: 206, r: 4.5, 'class': 'basept' }, kb);
+      text(kb, X.x, 226, 'a');
+      var c1 = seg(C[0], C[1]), c2 = seg(C[1], C[2]);
+      line(ke, c1, 'kp'); line(ke, c2, 'kp');
+      var q0 = [C[2].x - C[2].w / 2 - 3, C[2].y - 2], q1 = [-8, 84], q2 = [C[0].x - C[0].w / 2 - 3, C[0].y + 3];
+      S('path', { d: 'M ' + q0.join(' ') + ' Q ' + q1.join(' ') + ' ' + q2.join(' '), 'class': 'edge', 'marker-end': 'url(#kp)' }, ke);
+      var back = [];
+      for (var i = 0; i <= 14; i++) {
+        var u = i / 14, w0 = (1 - u) * (1 - u), w1 = 2 * u * (1 - u), w2 = u * u;
+        back.push([w0 * q0[0] + w1 * q1[0] + w2 * q2[0], w0 * q0[1] + w1 * q1[1] + w2 * q2[1]]);
+      }
+      var exits = C.map(function (m) { return seg(m, X); });
+      exits.forEach(function (sg) { line(ke, sg, 'kp', 'thin'); });
+      var kS = text(ke, 108, 62, '', 'lab green halo', 'start');
+      text(ke, 222, 48, 'K-rule', 'lab green');
+      var arrA = text(ke, X.x, 42, '', 'lab blue halo'), arrB = text(ke, X.x, 60, '', 'lab blue halo');
+      var tkA = S('circle', { r: 6, 'class': 'token' }, kt), tkB = S('circle', { r: 5.5, 'class': 'ring' }, kt);
+      C.forEach(function (m) { box(kx, m); }); box(kx, X);
+      var direct = route(exits[0]);
+      var round = route([].concat(c1, c2, back, [exits[0][0], exits[0][1]]));
+      var kstate = 'idle', kanim = null, ku = 0;
+      function kSay() {
+        $('kloopread').textContent = kstate === 'idle'
+          ? 'Two runs lead from K a (ω ω) to a. One uses the K-rule at once. The other goes round the loop first.'
+          : kstate === 'running' ? 'On the way.'
+          : kind === 'count'
+            ? 'The counter arrives as 0 by one route and as ' + kAdd + ' by the other. The two runs count as one run, since they differ only inside an argument that the K-rule throws away. The counter is not a behaviour on this fibre.'
+            : 'A yes arrives as a yes by both routes. A predicate is untroubled by the loop here, as it was on the left.';
+      }
+      function say(el, txt) { if (txt !== el.textContent) { el.textContent = txt; if (txt) kick(el, 'pop'); } }
+      function kDraw() {
+        var tA = Math.min(1, ku / 0.26), dB = ku * round.L;
+        put(tkA, direct.at(tA * direct.L)); put(tkB, round.at(dB));
+        var show = kstate !== 'idle';
+        op(tkA, show && tA < 1 ? 1 : 0); op(tkB, show && ku < 1 ? 1 : 0);
+        var vA = kind === 'count' ? '0' : 'yes', vB = kind === 'count' ? String(kAdd) : 'yes';
+        say(arrA, show && tA >= 1 ? 'at once: ' + vA : '');
+        say(arrB, kstate === 'done' ? 'after a lap: ' + vB : '');
+        var clash = kstate === 'done' && vA !== vB;
+        arrA.classList.toggle('bad', clash); arrB.classList.toggle('bad', clash);
+        kS.textContent = 'S-rule' + (kAdd && kind === 'count' ? ', +1' : '');
+        kSay();
+      }
+      $('ksend').addEventListener('click', function () {
+        if (kanim || anim) return;
+        kstate = 'running'; ku = 0;
+        kanim = animate(3800, function (u) { ku = u; if (u < 1) kDraw(); },
+          function () { kanim = null; ku = 1; kstate = 'done'; kDraw(); }, 8);
+        kDraw();
+      });
+
+      function reset() {
+        if (anim) anim.stop(); if (kanim) kanim.stop();
+        anim = null; kanim = null; n = 0; d = 0; moved = false; kstate = 'idle'; ku = 0;
+        ev.textContent = '';
+        lapDraw(); kDraw();
+      }
+      $('lapreset').addEventListener('click', reset);
+      $('evid').addEventListener('change', function () { kind = this.value; reset(); });
+      reset();
+    })();
+  })();
+
+  /* ---------- margin notes ----------
+     A run of text is whatever lies between two full-width blocks. Within a run each note sits beside its number,
+     or directly under the note before it. If the last note would then reach past the end of the run, it is moved up
+     to end where the text ends, and the notes above it move up in turn to make room. Only if a run has more notes
+     than text beside them is the run given extra room at its foot. A run also ends at the footer and at the end of the page. */
+  (function () {
+    var WIDE = 'figure.wide, .zoo, .table-wrap.full';
+    var SOLID = 'svg, table, button, select, input', TEXT = 'p, figcaption, h3, .fig-title, label, .now, .runline';
+    // Does a full-width block really reach into the margin? A narrow figure does not, and notes may stand beside it.
+    function reaches(block, edge) {
+      var hit = false, range = document.createRange();
+      Array.prototype.forEach.call(block.querySelectorAll(SOLID), function (el) { if (el.getBoundingClientRect().right > edge) hit = true; });
+      Array.prototype.forEach.call(block.querySelectorAll(TEXT), function (el) {
+        range.selectNodeContents(el);
+        if (range.getBoundingClientRect().right > edge) hit = true;
+      });
+      return hit;
+    }
+    var wideEnough = window.matchMedia ? window.matchMedia('(min-width: 821px)') : { matches: true };
+    var GAP = 14, FOOT = 6, padded = [];
+    function layout() {
+      padded.forEach(function (el) { el.style.marginBottom = ''; }); padded = [];
+      var all = Array.prototype.slice.call(document.querySelectorAll('.sidenote'));
+      if (!wideEnough.matches) {
+        document.body.classList.remove('sn-js'); all.forEach(function (n) { n.style.top = ''; });
+        each('.in-column', function (b) { b.classList.remove('in-column'); });
+        return;
+      }
+      document.body.classList.add('sn-js');
+      all.forEach(function (n) { n.parentNode.style.position = 'relative'; });
+      var sy = window.pageYOffset || document.documentElement.scrollTop || 0;
+      function top(el) { return el.getBoundingClientRect().top + sy; }
+      var blocks = Array.prototype.slice.call(document.querySelectorAll('.essay > header > *, .essay > section > *, .essay > footer > *'));
+      var column = all.length ? all[0].parentNode.getBoundingClientRect() : null;
+      var edge = column ? column.left + column.width * 1.08 : Infinity;       // where the margin begins
+      var runs = [], cur = null, narrow = [];
+      blocks.forEach(function (b) {
+        if (b.matches(WIDE)) {
+          var out = reaches(b, edge);
+          narrow.push([b, !out]);
+          if (cur && out) { cur.bottom = cur.end; cur = null; }
+          else if (cur) cur.end = b.getBoundingClientRect().bottom + sy;      // a narrow block: the run goes on past it
+          return;
+        }
+        // the footer has a rule across the whole page, so a run of text ends before it
+        if (cur && b.parentNode.tagName === 'FOOTER' && cur.last.parentNode.tagName !== 'FOOTER') { cur.bottom = cur.end; cur = null; }
+        if (!cur) { cur = { top: top(b), bottom: Infinity, items: [] }; runs.push(cur); }
+        cur.last = b; cur.end = b.getBoundingClientRect().bottom + sy;       // where the run ends, so far
+        Array.prototype.forEach.call(b.querySelectorAll('.sidenote'), function (n) {
+          var number = n.previousElementSibling.previousElementSibling;       // the label that shows the note's number
+          cur.items.push({ n: n, base: top(n.parentNode), want: top(number) - 2, h: n.offsetHeight });
+        });
+      });
+      if (cur) cur.bottom = cur.end;      // the last run ends with the page, and no note hangs below it
+      // everything has been measured; from here on only styles are set
+      narrow.forEach(function (q) { q[0].classList.toggle('in-column', q[1]); });
+      runs.forEach(function (run) {
+        var items = run.items;
+        if (!items.length) return;
+        var limit = run.bottom - FOOT, last = items[items.length - 1], i;
+        for (i = 0; i < items.length; i++) items[i].y = Math.max(items[i].want, i ? items[i - 1].y + items[i - 1].h + GAP : run.top);
+        if (last.y + last.h > limit) {
+          last.y = limit - last.h;
+          for (i = items.length - 2; i >= 0; i--) items[i].y = Math.min(items[i].y, items[i + 1].y - items[i].h - GAP);
+          if (items[0].y < run.top) {
+            items[0].y = run.top;
+            for (i = 1; i < items.length; i++) items[i].y = Math.max(items[i].y, items[i - 1].y + items[i - 1].h + GAP);
+            var need = last.y + last.h - limit;
+            if (need > 0) { run.last.style.marginBottom = Math.ceil(need) + 'px'; padded.push(run.last); }
+          }
+        }
+        items.forEach(function (it) { it.n.style.top = Math.round(it.y - it.base) + 'px'; });
+      });
+    }
+    var pending = null;
+    function soon() { clearTimeout(pending); pending = setTimeout(layout, 120); }
+    layout();
+    window.addEventListener('load', layout);
+    window.addEventListener('resize', soon);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+    if (wideEnough.addEventListener) wideEnough.addEventListener('change', layout);
+  })();
+
+  /* ---------- the large figures are redrawn when the screen crosses the narrow threshold ---------- */
+  function relayout() { applyLayout(); BUILD.forEach(function (f) { f(); }); }
+  if (NARROW.addEventListener) NARROW.addEventListener('change', relayout);
+  else if (NARROW.addListener) NARROW.addListener(relayout);
+})();
+</script>
+</body>
+</html>
