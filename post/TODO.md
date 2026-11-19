@@ -1,9 +1,9 @@
 # Post to-do: "Atoms and Probes"
 
-- [ ] **Review DAG for editorial steps: specification.** Maxine will give the flow. Encode it
-      here (or in `post/REVIEW.md`): the nodes (each editorial pass), their inputs and
-      outputs, the order between them, and what each pass may change.
-- [ ] Orthogonal model review over the essay, run through the review DAG.
+- [x] **Review DAG for editorial steps: specification.** Maxine's five passes (narrative,
+      Lean references, literature references with DOIs, figures, style), encoded in
+      `post/REVIEW.md` with semantics as prerequisite and diff check.
+- [ ] Orthogonal model review over the essay: round R1 of `post/REVIEW.md`.
 - [ ] Observation as an ingredient: decide on `notes/12-observation.md` (questions in
       §12.6), then update the essay's definition section, the three equalities, and the
       cards, and formalize (§12.5).

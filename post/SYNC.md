@@ -1,6 +1,6 @@
 # Sync: "Atoms and Probes" ↔ Lean and notes
 
-The essay (`post/atoms-and-probes.html`, received 2026-11-19 at `9d8b555`) is the public
+The essay (`post/atoms-and-probes.html`, received 2026-11-19 at `6603730`) is the public
 post. `post/post.md` is the technical draft written from the outline. This file records,
 claim by claim, what the essay says, its status, and what backs it. Statuses as in
 `README.md`. "Lean" means proved, no `sorry`, axioms in `AXIOMS.md`.
@@ -42,7 +42,7 @@ claim by claim, what the essay says, its status, and what backs it. Statuses as 
 ## 2. Edits made to the essay text (`post/atoms-and-probes.html`)
 
 Each edit is a factual correction or a status update. Prose voice kept; nothing else
-touched. Diff against `9d8b555`.
+touched. Diff against `6603730`.
 
 - **E1** (§ Running): the `ω ω` terms "run only to one another" → run to one another in a
   cycle. Its own note already says further steps lead out of the figure.
@@ -63,7 +63,7 @@ touched. Diff against `9d8b555`.
   rightmost-branch count is the reason why.
 - **E8** (footer): what has and has not been checked by machine.
 
-## 3. Lean added from the essay (`95590cb`)
+## 3. Lean added from the essay (`9245438`)
 
 `FormalComputation/SKI/Types.lean` and `FormalComputation/Predicates.lean`, listed above.
 All are elementary. Their value is that the essay's own definition of a type is connected

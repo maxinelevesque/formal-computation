@@ -9,7 +9,7 @@ dependencies, tier and status.
 > `FormalComputation/` (Mathlib v4.36.0). Where the two differ, the Lean file is
 > authoritative and the difference is logged in `PROOF_CHANGELOG.md`.
 >
-> **Status, 2026-11-17 (commit `c40763e`).** Every node of tiers 1–3 is proved in Lean
+> **Status, 2026-11-17 (commit `52b5f25`).** Every node of tiers 1–3 is proved in Lean
 > (status `LEAN`, with the declarations on the line below the header), with no `sorry`
 > and no axioms beyond `propext`, `Classical.choice`, `Quot.sound` (`AXIOMS.md`). The
 > pseudo-Lean signatures below are the original intent; D5, A1–A4, P2 and B7 were

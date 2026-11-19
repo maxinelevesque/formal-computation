@@ -118,7 +118,7 @@ No statement changes. Additions and notation:
 ## Essay layer (2026-11-19)
 
 From the essay `post/atoms-and-probes.html`. Additions only; no statement changed.
-Green at `95590cb` (CI job 3099), axioms in `AXIOMS.md`.
+Green at `9245438` (CI job 3099), axioms in `AXIOMS.md`.
 
 - `FormalComputation/SKI/Types.lean`: `IsType` (a predicate that leaks along no step),
   `Conv`, `IsType.conv`, `isType_of_conv`, `close`, `le_close`, `isType_close`, `close_le`,
@@ -133,7 +133,7 @@ Green at `95590cb` (CI job 3099), axioms in `AXIOMS.md`.
 
 ## Probe layer (2026-11-19)
 
-Green at `e49a4da` (CI job 3106).
+Green at `75f2c0d` (CI job 3106).
 
 - **K1 changed (statement): `Tm` gains variables** (`Tm.var : ℕ → Tm`), and `KFree` is
   extended (`var` is K-free). Reason: the essay's probes supply variables and read them

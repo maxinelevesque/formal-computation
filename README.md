@@ -8,6 +8,15 @@ The packet arrived with nothing mechanized. Since 2026-11-17 tiers 1–3 of
 `PROOF_MAP.md` are proved in Lean (`FormalComputation/`, status [LEAN]); every
 other claim keeps its label.
 
+## Public mirror
+
+This repository is published at
+[github.com/maxinelevesque/formal-computation](https://github.com/maxinelevesque/formal-computation).
+The Lean build runs on a private CI runner. The mirror omits the runner's workflow
+file and helper script; everything else, including every Lean file, is the same.
+`AXIOMS.md` records the axiom audit from each build. Commit hashes cited in the
+notes, and in the essay's Lean links, are mirror commits.
+
 ## Layout
 
 | Path | What it is |
