@@ -9,10 +9,13 @@
       cards, and formalize (§12.5).
 - [ ] Check the Lévy fact used in "What is kept" (any two runs to a normal form are
       permutation equivalent) against Terese, *Term Rewriting Systems*, ch. 8.
-- [ ] Lean links in the essay: inline marks and a "What has been checked by machine"
-      section, pinned to a commit on the public mirror (`scripts/lean-links.py`).
+- [x] Lean links in the essay: inline marks and a "Mechanized" section, pinned to a
+      commit on the public mirror (`scripts/lean-links.py`).
 - [ ] Publication on maxine.science: coordinate with the site threads on how posts with
       interactives are published now.
 - [ ] Decide what `post/post.md` becomes (technical companion, or retired).
-- [ ] Public mirror hygiene: `.forgejo/workflows/ci.yml` names internal hosts; keep or
-      scrub. Push to both remotes (`origin` Forgejo, `github`) on every change.
+- [x] Public mirror hygiene: the mirror is a filtered copy of main
+      (`scripts/mirror/publish.sh`): the CI workflow, `scripts/fj-ci.py` and
+      `scripts/mirror/` are dropped and private host names replaced, in every commit.
+      History rewritten 2026-11-19. On every change: push `origin`, then run the
+      publish script (never `git push github`).

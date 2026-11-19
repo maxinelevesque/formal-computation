@@ -3,7 +3,7 @@
 *Draft, 2026-11-17. Every claim carries a status. **[LEAN]** means proved in
 Lean 4 with Mathlib in the accompanying repository, with no `sorry` and no
 axioms beyond Lean's standard three; the tag links to the declaration.
-**[HAND]** means argued by hand and not machine-checked. **[CITED]** and
+**[HAND]** means argued by hand and not mechanized. **[CITED]** and
 **[MEMORY]** are published results, found by search or recalled. **[CONJ]**
 is a precise conjecture, **[SPEC]** a speculation.*
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Run on Modal by the CI runner (source root = repo root), from .forgejo/workflows/ci.yml.
-# the CI runner has already run `lake exe cache get` in the project directory.
-# Never run this on the dev machine: it builds Mathlib-importing modules.
+# The CI build script. The CI runner calls it from the repository root on a large
+# machine, after `lake exe cache get`. It builds Mathlib-importing modules, so do not
+# run it on a small machine.
 #
-# the CI runner returns only the last ~6000 characters of output to the Forgejo log,
-# so this script ends with a compact summary.
+# The runner returns only the last ~6000 characters of output to the CI log, so this
+# script ends with a compact summary.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 LOG=/tmp/lake-build.log
@@ -26,7 +26,7 @@ else
   rc_audit=0
 fi
 
-# Print the resolved manifest until one is committed (the CI runner's `cache get` creates it
+# Print the resolved manifest until one is committed (the runner's `cache get` creates it
 # before this script runs, so a before/after comparison cannot detect that case).
 if [ "$before" != "$after" ] || [ ! -f scripts/manifest-committed ]; then
   echo "LAKE_MANIFEST_BEGIN"; cat lake-manifest.json; echo "LAKE_MANIFEST_END"

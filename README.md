@@ -4,7 +4,7 @@ A starting packet for a new repo: a relational, category-theoretic account of
 computation, with a blog post and a Lean 4 formalization to be built from it.
 
 Everything here came out of one long conversation (11–13 November 2026).
-The packet arrived with nothing machine-checked. Since 2026-11-17 tiers 1–3 of
+The packet arrived with nothing mechanized. Since 2026-11-17 tiers 1–3 of
 `PROOF_MAP.md` are proved in Lean (`FormalComputation/`, status [LEAN]); every
 other claim keeps its label.
 
