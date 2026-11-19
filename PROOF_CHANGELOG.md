@@ -115,6 +115,22 @@ No statement changes. Additions and notation:
 | K6 | adds `sq_wt` (each generating square preserves the weight on a K-free source) | K6 is the equivalence closure of this. The two K-naturality squares are the ones that need K-freeness: `k_nat₂` erases an argument step, which can carry weight. |
 | K7 | `sii`, `Ω` are `abbrev` rather than `def` | So that the endpoints of `omegaLoop` match the equation lemmas of `Red.wt` at reducible transparency. Same terms. |
 
+## Essay layer (2026-11-19)
+
+From the essay `post/atoms-and-probes.html`. Additions only; no statement changed.
+Green at `95590cb` (CI job 3099), axioms in `AXIOMS.md`.
+
+- `FormalComputation/SKI/Types.lean`: `IsType` (a predicate that leaks along no step),
+  `Conv`, `IsType.conv`, `isType_of_conv`, `close`, `le_close`, `isType_close`, `close_le`,
+  `Arr`, `isType_arr`, `fundamental_K`, `fundamental_I`, `fundamental_S`, `skRun`,
+  `kaib_one_run`, `omegaLoop'` (the loop in the essay's order), `omegaLoop'_wt`,
+  `omegaLoop_permEq`, `not_absorbed'`.
+- `FormalComputation/Predicates.lean`: `beh_iff_of_subsingleton_co` and
+  `beh_iff_of_subsingleton`. A subsingleton-valued family is a behaviour iff it does not
+  leak. This connects the essay's definition of a type to Theorem A.
+- Observation: the fundamental lemmas use only the backward half of non-leaking (subject
+  expansion), and `fundamental_S` needs only its result predicate to be a type.
+
 ## Mathlib anchors (checked against v4.36.0 source)
 
 | Anchor | Status |

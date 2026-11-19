@@ -2,7 +2,8 @@
 
 Output of `#print axioms` for every declaration in `FormalComputation/Audit.lean`, from CI
 job 2942 on commit `c40763e` (Lean v4.36.0, Mathlib v4.36.0). The build has no `sorry` in
-tiers 1–3. Every declaration below depends at most on Lean's three standard axioms
+tiers 1–3. The essay-layer entries at the end are from job 3099 on `95590cb`, which has
+no `sorry` outside the stretch files. Every declaration below depends at most on Lean's three standard axioms
 (`propext`, `Classical.choice`, `Quot.sound`); none depends on `sorryAx`. CI regenerates
 this list on every push (section `==== AXIOMS ====` of the job log).
 
@@ -66,4 +67,18 @@ this list on every push (section `==== AXIOMS ====` of the job log).
 'FormalComputation.SKI.wt_permEq' depends on axioms: [propext, Quot.sound]
 'FormalComputation.SKI.not_absorbed' depends on axioms: [propext, Quot.sound]
 'FormalComputation.SKI.absorbed' depends on axioms: [propext, Quot.sound]
+
+-- essay layer (CI job 3099, commit 95590cb)
+'FormalComputation.beh_iff_of_subsingleton_co' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.beh_iff_of_subsingleton' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.IsType.conv' depends on axioms: [Classical.choice]
+'FormalComputation.SKI.isType_close' does not depend on any axioms
+'FormalComputation.SKI.close_le' depends on axioms: [Classical.choice]
+'FormalComputation.SKI.isType_arr' does not depend on any axioms
+'FormalComputation.SKI.fundamental_K' does not depend on any axioms
+'FormalComputation.SKI.fundamental_I' does not depend on any axioms
+'FormalComputation.SKI.fundamental_S' does not depend on any axioms
+'FormalComputation.SKI.kaib_one_run' depends on axioms: [propext, Quot.sound]
+'FormalComputation.SKI.omegaLoop_permEq' depends on axioms: [propext, Quot.sound]
+'FormalComputation.SKI.not_absorbed'' depends on axioms: [propext, Quot.sound]
 ```
