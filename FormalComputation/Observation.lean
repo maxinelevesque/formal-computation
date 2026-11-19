@@ -140,4 +140,102 @@ theorem familyPairing_invariant (𝒜 : DynPresentation A) (𝒪 : Set (A ⥤ Ty
 
 end Families
 
+/-! ### Pairings valued in a complete lattice -/
+
+/-- An observation **valued in `V`**: each observer gives each description a value in `V`
+(a Chu space over `V`). `V = Prop` is the pairing above; `V` an ordered set of costs gives
+directed observers (`notes/12` §12.8). -/
+structure VPairing (D : Type*) (O : Type*) (V : Type*) where
+  pass : D → O → V
+
+namespace VPairing
+
+variable {V : Type*} [CompleteLattice V] (π : VPairing D O V)
+
+/-- `T^⊥`, valued in `V`: the infimum, over the observers in `T`, of what they give `d`. -/
+def orth (T : Set O) (d : D) : V := ⨅ o ∈ T, π.pass d o
+
+/-- Sameness under the observation: every observer gives the same value. -/
+def Same (d e : D) : Prop := ∀ o, π.pass d o = π.pass e o
+
+/-- The observation is invariant along `step` when no step changes a value. -/
+def Invariant (step : D → D → Prop) : Prop :=
+  ∀ ⦃d e : D⦄, step d e → ∀ o, π.pass d o = π.pass e o
+
+/-- `T^⊥` cannot separate descriptions that the observation does not separate. -/
+theorem orth_respects (T : Set O) {d e : D} (h : π.Same d e) : π.orth T d = π.orth T e := by
+  show (⨅ o ∈ T, π.pass d o) = ⨅ o ∈ T, π.pass e o
+  exact iInf_congr fun o => iInf_congr fun _ => h o
+
+/-- For an invariant observation, no step changes the value of `T^⊥`. -/
+theorem orth_invariant {step : D → D → Prop} (hπ : π.Invariant step) (T : Set O) ⦃d e : D⦄
+    (h : step d e) : π.orth T d = π.orth T e :=
+  π.orth_respects T (hπ h)
+
+/-- More observers, smaller values: `T ⊆ T'` gives `T'^⊥ ≤ T^⊥`. -/
+theorem orth_anti {T T' : Set O} (h : T ⊆ T') (d : D) : π.orth T' d ≤ π.orth T d := by
+  show (⨅ o ∈ T', π.pass d o) ≤ ⨅ o ∈ T, π.pass d o
+  exact biInf_mono fun _ ho => h ho
+
+end VPairing
+
+/-- A **lens** between `V`-valued pairings: descriptions go forward by `get`, observers go back
+by `put`, and an observer sent back gives the value it gives forward. -/
+structure VLens {V : Type*} (π : VPairing D O V) (π' : VPairing D' O' V) where
+  get : D → D'
+  put : O' → O
+  pass_put : ∀ d o', π.pass d (put o') = π'.pass (get d) o'
+
+namespace VLens
+
+variable {V : Type*} {π : VPairing D O V} {π' : VPairing D' O' V} {π'' : VPairing D'' O'' V}
+
+/-- The identity lens. -/
+def id (π : VPairing D O V) : VLens π π := ⟨fun d => d, fun o => o, fun _ _ => rfl⟩
+
+/-- Lenses compose. -/
+def comp (ℓ : VLens π π') (m : VLens π' π'') : VLens π π'' where
+  get d := m.get (ℓ.get d)
+  put o := ℓ.put (m.put o)
+  pass_put d o := (ℓ.pass_put d (m.put o)).trans (m.pass_put (ℓ.get d) o)
+
+/-- **A lens pulls `T^⊥` back**, now as an equation of values:
+`T^⊥ (get d) = (put T)^⊥ d`. -/
+theorem preimage_orth [CompleteLattice V] (ℓ : VLens π π') (T : Set O') (d : D) :
+    π'.orth T (ℓ.get d) = π.orth (ℓ.put '' T) d := by
+  simp only [VPairing.orth, iInf_image, ℓ.pass_put]
+
+/-- A lens carries sameness forward. -/
+theorem same (ℓ : VLens π π') {d e : D} (h : π.Same d e) : π'.Same (ℓ.get d) (ℓ.get e) :=
+  fun o => (ℓ.pass_put d o).symm.trans ((h (ℓ.put o)).trans (ℓ.pass_put e o))
+
+end VLens
+
+/-! ### `V = Prop` gives back the truth-valued pairing -/
+
+/-- A truth-valued pairing as a `Prop`-valued one. -/
+def Pairing.toV (π : Pairing D O) : VPairing D O Prop := ⟨π.pass⟩
+
+/-- For `V = Prop`, the infimum `T^⊥` is the set `T^⊥`. -/
+theorem Pairing.toV_orth (π : Pairing D O) (T : Set O) (d : D) :
+    π.toV.orth T d ↔ d ∈ π.orth T := by
+  show (⨅ o ∈ T, π.pass d o) ↔ ∀ o ∈ T, π.pass d o
+  first
+    | simp only [iInf_Prop_eq]
+    | simp
+
+/-- For `V = Prop`, sameness is the same. -/
+theorem Pairing.toV_same (π : Pairing D O) {d e : D} : π.toV.Same d e ↔ π.Same d e :=
+  ⟨fun h o => Iff.of_eq (h o), fun h o => propext (h o)⟩
+
+/-- A lens of truth-valued pairings is a lens of `Prop`-valued ones. -/
+def Lens.toV {π : Pairing D O} {π' : Pairing D' O'} (ℓ : Lens π π') : VLens π.toV π'.toV :=
+  ⟨ℓ.get, ℓ.put, fun d o => propext (ℓ.pass_put d o)⟩
+
+/-- For `V = Prop`, the `V`-valued pullback lemma gives back `Lens.preimage_orth`. -/
+theorem Lens.preimage_orth_of_toV {π : Pairing D O} {π' : Pairing D' O'} (ℓ : Lens π π')
+    (T : Set O') (d : D) : ℓ.get d ∈ π'.orth T ↔ d ∈ π.orth (ℓ.put '' T) := by
+  rw [← Pairing.toV_orth, ← Pairing.toV_orth]
+  exact Iff.of_eq (ℓ.toV.preimage_orth T d)
+
 end FormalComputation.Obs

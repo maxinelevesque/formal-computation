@@ -21,6 +21,9 @@ import FormalComputation.SKI.Lenses
 import FormalComputation.Calculus
 import FormalComputation.SKI.Instance
 import FormalComputation.Tree.Calculus
+import FormalComputation.Tree.Essay
+import FormalComputation.Diamond
+import FormalComputation.ThreeClasses
 -- Stretch
 import FormalComputation.Stretch.Trace
 import FormalComputation.Stretch.Conjoint
