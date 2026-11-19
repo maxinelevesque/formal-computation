@@ -31,9 +31,10 @@
       the links are broken until then.
 - [ ] **The calculus switch** (`notes/15`): every SKI interactive in essay 1 also in tree
       calculus and interaction nets, behind one toggle.
-- [ ] Lean next: the three-classes theorem for families (Yoneda); V-valued pairings
-      (directed observers); a calculus with a one-step diamond has step count as a
-      behaviour (interaction nets, abstractly); SKI runs as a DynPresentation.
+- [x] Lean: three classes (`ThreeClasses.lean`), V-valued pairings, one-step diamond ⇒ equal
+      lengths (`Diamond.lean`), SKI runs as a DynPresentation, tree essay facts (job 3141).
+- [ ] Lean open: converse of `conv_obsEq` for SKI; counter on the tree loop; the tree
+      "runs to I" probe (equality program, cf. tree-semantics `Tree.exists_eq`).
 - [x] Public mirror hygiene: the mirror is a filtered copy of main
       (`scripts/mirror/publish.sh`): the CI workflow, `scripts/fj-ci.py` and
       `scripts/mirror/` are dropped and private host names replaced, in every commit.

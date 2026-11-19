@@ -121,4 +121,35 @@ this list on every push (section `==== AXIOMS ====` of the job log).
 'FormalComputation.SKI.calculus_probeEq_iff' depends on axioms: [propext, Classical.choice]
 'FormalComputation.Tree.calculus_confluent' depends on axioms: [propext]
 'FormalComputation.Tree.probes_read_code' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+-- tree calculus for the essay, diamond, three classes, V-valued pairings, SKI runs (CI job 3141; branch lean-next 36b67b2, merged into main)
+'FormalComputation.Diamond.equal_lengths' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Diamond.length_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Diamond.step_cost' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Obs.Lens.preimage_orth_of_toV' depends on axioms: [propext, Quot.sound]
+'FormalComputation.Obs.ObsEq.mono' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Obs.ObsEq.same' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Obs.Pairing.toV_orth' depends on axioms: [propext, Quot.sound]
+'FormalComputation.Obs.Pairing.toV_same' depends on axioms: [propext]
+'FormalComputation.Obs.VLens.preimage_orth' depends on axioms: [propext, Quot.sound]
+'FormalComputation.Obs.VLens.same' does not depend on any axioms
+'FormalComputation.Obs.VPairing.orth_anti' does not depend on any axioms
+'FormalComputation.Obs.VPairing.orth_invariant' depends on axioms: [Quot.sound]
+'FormalComputation.Obs.iso_of_obsEq_beh' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Obs.obsEq_beh_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Obs.obsEq_beh_of_iso' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Obs.obsEq_beh_of_iso_Q' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Obs.obsEq_iff_of_corep' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Obs.obsEq_of_zigzag' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Obs.obsEq_univ_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.conv_iso_Q' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.conv_obsEq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.zigzag_of_conv' depends on axioms: [propext]
+'FormalComputation.Tree.fundamental_K' depends on axioms: [propext]
+'FormalComputation.Tree.fundamental_S' depends on axioms: [propext]
+'FormalComputation.Tree.fundamental_triage' depends on axioms: [propext]
+'FormalComputation.Tree.omega_cycle' does not depend on any axioms
+'FormalComputation.Tree.sk_unsound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Tree.tree_six_distinct' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Tree.tree_six_terms' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```

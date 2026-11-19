@@ -186,6 +186,40 @@ Additions only; no earlier statement changed. Green at CI job 3131.
   read outcomes written in variables. This matches the essay's probes and is not the
   closed-tree setting of `tree-semantics`.
 
+## Tree calculus for the essay; diamond; three classes; V-valued pairings (2026-11-19)
+
+Additions only. Green at CI job 3141 (branch `lean-next`, merged).
+
+- `Tree/Essay.lean`:
+  - `tree_six_terms`: 24 cells, the six tree terms under the three probes and the triage
+    probe `triP`; the first three rows match SKI's `six_terms`.
+  - `tree_six_distinct`.
+  - `sk_unsound`: the rule `S K y → I` identifies terms that probes separate.
+  - `isType_arr`, `fundamental_K`, `fundamental_S`, `fundamental_triage`.
+  - `omega_cycle`. The cycle reduces the argument first; leftmost-outermost order does
+    not return to `ω ω`.
+- `Diamond.lean`: under the one-step diamond (interaction nets),
+  - `equal_lengths`: runs to normal form have equal length and the same end;
+  - `step_cost`;
+  - `length_le`, so a term with a normal form has no infinite run.
+- `ThreeClasses.lean`: `ObsEq 𝒪` is sameness under a class of covariant families.
+  - Natural bijections of the evaluations are required.
+  - `obsEq_univ_iff`: all families ↔ isomorphic in `A`.
+  - `obsEq_beh_iff`: behaviours ↔ isomorphic in the localization.
+    - **Stated hypothesis:** the localization's hom-sets lie in `Type v`. This is needed so
+      that its corepresentables are behaviours.
+    - The direction from isomorphic to `ObsEq` holds without the hypothesis, for any
+      localization (`obsEq_beh_of_iso`).
+  - `obsEq_of_zigzag`: invariant observers do not separate a zigzag of steps.
+- `Observation.lean`: V-valued pairings and lenses (`VPairing`, `VLens`).
+  - `orth_invariant`, `orth_anti`, `preimage_orth`, `same`.
+  - With V = Prop they agree with `Pairing` (`toV_orth`, `toV_same`,
+    `preimage_orth_of_toV`).
+- `SKI/Dyn.lean`: SKI runs as a `DynPresentation` on `Paths Tm`.
+  - `conv_obsEq`, `conv_iso_Q`: conversion gives sameness under behaviours, and an
+    isomorphism in the localization.
+  - The converses are not proved.
+
 ## Mathlib anchors (checked against v4.36.0 source)
 
 | Anchor | Status |

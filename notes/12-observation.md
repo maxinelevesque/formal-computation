@@ -33,7 +33,7 @@ via Yoneda), steps (`S`), and observers (`𝒪 ⊆ P`). The observers are contra
 descriptions. Larger classes of observers give finer equalities: a Galois connection
 between classes of observers and equivalence relations on descriptions.
 
-**The essay's three equalities are three classes of observers** [HAND; LEAN-next]:
+**The essay's three equalities are three classes of observers** [LEAN, 2026-11-19: `ThreeClasses.lean`, `obsEq_univ_iff`, `obsEq_beh_iff` (hom-sets of the localization in `Type v`), `obsEq_of_zigzag`; SKI instance `SKI/Dyn.lean`]:
 
 | Observers `𝒪` | Sameness under `𝒪` | Why |
 |---|---|---|
