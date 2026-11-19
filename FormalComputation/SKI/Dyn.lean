@@ -44,9 +44,9 @@ theorem zigzag_of_conv {t u : Tm} (h : Conv t u) :
 
 /-- **Sameness after running implies sameness under behaviours**: terms in one fibre are the
 same under any class of observers that are behaviours of the run category. -/
-theorem conv_obsEq {𝒪 : Set (RunCat ⥤ Type 1)}
+theorem conv_obsEq {𝒪 : Set (RunCat ⥤ Type)}
     (hbeh : ∀ B ∈ 𝒪, runDyn.toCopresentation.Beh B) {t u : Tm} (h : Conv t u) :
-    Obs.ObsEq 𝒪 (t : RunCat) u :=
+    Obs.ObsEq (A := RunCat) 𝒪 t u :=
   Obs.obsEq_of_zigzag runDyn hbeh (zigzag_of_conv h)
 
 /-- **Terms in one fibre are isomorphic in the localization at the steps.** -/
