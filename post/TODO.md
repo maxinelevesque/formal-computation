@@ -29,8 +29,12 @@
       (what each observation card gives up), with mechanized marks.
 - [x] `tree-semantics` will be made public (Maxine, 2026-11-19). Link it pinned to `5147cfa`;
       the links are broken until then.
-- [ ] **The calculus switch** (`notes/15`): every SKI interactive in essay 1 also in tree
-      calculus and interaction nets, behind one toggle.
+- [x] **The calculus switch** (`notes/15`): every SKI interactive in essay 1 also in tree
+      calculus and interaction nets, behind one toggle (merged 2026-11-19; lab tests 405,
+      essay tests 178; SKI output byte-identical).
+- [ ] Switch polish (browser check): empty band above the tree bundle; bent long arrows from
+      `K a (I b)`; narrow-screen tree bundle; net "One step" readability; `△` glyph width.
+- [ ] Make `tree-semantics` public (Maxine); its links in the essay are pinned to `5147cfa`.
 - [x] Lean: three classes (`ThreeClasses.lean`), V-valued pairings, one-step diamond ⇒ equal
       lengths (`Diamond.lean`), SKI runs as a DynPresentation, tree essay facts (job 3141).
 - [ ] Lean open: converse of `conv_obsEq` for SKI; counter on the tree loop; the tree
