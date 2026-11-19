@@ -166,6 +166,26 @@ Additions only; no earlier statement changed. Green at CI job 3115 (mirror commi
   `ProbeEq`), invariant by confluence; `isType_orth`; `probePred_iff_mem_orth`; the lens
   "apply to `a`"; arrow types built from lenses (`arr_iff_mem_orth`). §12.7.
 
+## Calculi with probes; tree calculus (2026-11-19)
+
+Additions only; no earlier statement changed. Green at CI job 3131.
+
+- `Calculus.lean`: the essay's probe results for any calculus with multi-hole contexts,
+  outcomes that do not step, and confluence: the chain text ⇒ running ⇒ probes,
+  congruence (as a lens), the invariant probe pairing and its types, and code-reading
+  probes seeing exactly what running sees on terms with a value.
+- `SKI/Instance.lean`: SKI is an instance; the general notions agree with the SKI ones
+  (sameness under probes and after running by definition; code equality via normal forms).
+- `Tree/Calculus.lean`: tree calculus (triage presentation) with variables. Parallel
+  reduction, complete development and the diamond are ported from `tree-semantics`
+  (`TreeCalculus/Algebra.lean`), unchanged up to namespace. New: one-step reduction,
+  confluence, probes, the instance, a certified evaluator, and `probes_read_code`
+  (`S K △` and `S K K` agree on every argument, lie in different fibres, and a triage
+  probe separates them).
+- Design choice: tree-calculus terms carry variables, as SKI's do (K1), so that probes
+  read outcomes written in variables. This matches the essay's probes and is not the
+  closed-tree setting of `tree-semantics`.
+
 ## Mathlib anchors (checked against v4.36.0 source)
 
 | Anchor | Status |

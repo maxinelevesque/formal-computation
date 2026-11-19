@@ -109,4 +109,16 @@ this list on every push (section `==== AXIOMS ====` of the job log).
 'FormalComputation.SKI.isType_orth' depends on axioms: [propext, Classical.choice, Quot.sound]
 'FormalComputation.SKI.probePred_iff_mem_orth' depends on axioms: [propext]
 'FormalComputation.SKI.arr_iff_mem_orth' depends on axioms: [propext, Quot.sound]
+
+-- calculi with probes in general; SKI and tree calculus as instances (CI job 3131; Lean sources as at development commit ecdb1cc)
+'FormalComputation.Calculus.probeEq_of_conv' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Calculus.probeEq_plug' does not depend on any axioms
+'FormalComputation.Calculus.probes_invariant' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Calculus.isType_orth' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Calculus.codeEq_iff_conv' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.Calculus.conv_normal_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.calculus_confluent' depends on axioms: [propext, Classical.choice]
+'FormalComputation.SKI.calculus_probeEq_iff' depends on axioms: [propext, Classical.choice]
+'FormalComputation.Tree.calculus_confluent' depends on axioms: [propext]
+'FormalComputation.Tree.probes_read_code' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
