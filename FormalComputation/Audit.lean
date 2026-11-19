@@ -132,3 +132,6 @@ open FormalComputation
 #print axioms Calculus.conv_normal_eq
 #print axioms SKI.calculus_confluent
 #print axioms SKI.calculus_probeEq_iff
+-- Tree calculus as a calculus with probes
+#print axioms Tree.calculus_confluent
+#print axioms Tree.probes_read_code
