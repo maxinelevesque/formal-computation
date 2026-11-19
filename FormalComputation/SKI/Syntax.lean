@@ -11,11 +11,13 @@ Steps are proof-relevant: `Step t u` is a type, so the two different reductions 
 
 namespace FormalComputation.SKI
 
-/-- **K1.** SKI terms. -/
+/-- **K1.** SKI terms, with variables. The variables have no rules of their own; the essay's
+probes supply them and read them back. -/
 inductive Tm
   | S
   | K
   | I
+  | var : ℕ → Tm
   | app : Tm → Tm → Tm
   deriving DecidableEq
 
@@ -26,6 +28,7 @@ def KFree : Tm → Prop
   | .K => False
   | .S => True
   | .I => True
+  | .var _ => True
   | .app t u => KFree t ∧ KFree u
 
 /-- **K2.** One-step reductions, as data. -/

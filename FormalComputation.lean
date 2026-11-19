@@ -13,6 +13,8 @@ import FormalComputation.SKI.Weight
 import FormalComputation.SKI.PermEq
 -- The essay layer
 import FormalComputation.SKI.Types
+import FormalComputation.SKI.Confluence
+import FormalComputation.SKI.Probes
 import FormalComputation.Predicates
 -- Stretch
 import FormalComputation.Stretch.Trace

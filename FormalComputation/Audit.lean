@@ -98,3 +98,17 @@ open FormalComputation
 #print axioms SKI.kaib_one_run
 #print axioms SKI.omegaLoop_permEq
 #print axioms SKI.not_absorbed'
+#print axioms SKI.confluent
+#print axioms SKI.conv_join
+#print axioms SKI.conv_normal_eq
+#print axioms SKI.three_fibres
+#print axioms SKI.probeEq_plug
+#print axioms SKI.probeEq_of_conv
+#print axioms SKI.probeEq_SK
+#print axioms SKI.six_terms
+#print axioms SKI.probes_not_running
+#print axioms SKI.isType_probePred
+#print axioms SKI.runsToI_not_probe
+#print axioms SKI.codeEq_iff_conv
+#print axioms SKI.not_codeEq_I_SKK
+#print axioms SKI.codeEq_Ia_a
