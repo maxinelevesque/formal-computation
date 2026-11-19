@@ -250,7 +250,7 @@ theorem sim_backward {t' u' : Tm} (s : Step t' u') :
         cases h₃
         obtain ⟨x₁, hx₁, hr⟩ := reds_K_inv hu₀
         cases hx₁
-        exact ⟨_, reds_appR .I hr, .tail y h₄⟩
+        exact ⟨_, reds_appR .I hr, .tail _ h₄⟩
   | appR f' st ih =>
     intro t h
     cases h with
