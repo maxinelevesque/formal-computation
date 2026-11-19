@@ -154,7 +154,7 @@ Green at `75f2c0d` (CI job 3106).
 
 ## Observation layer (2026-11-19)
 
-Additions only; no earlier statement changed. Green at CI job 3115 (mirror commit ).
+Additions only; no earlier statement changed. Green at CI job 3115 (mirror commit aefcd90).
 
 - **Design decision (Maxine):** observation is a pairing between descriptions and observers
   (`Obs.Pairing`), with families of the framework as a special case (`Obs.familyPairing`).
