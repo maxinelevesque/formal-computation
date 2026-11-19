@@ -112,3 +112,14 @@ open FormalComputation
 #print axioms SKI.codeEq_iff_conv
 #print axioms SKI.not_codeEq_I_SKK
 #print axioms SKI.codeEq_Ia_a
+-- Observation as a pairing, and lenses
+#print axioms Obs.Pairing.orth_invariant
+#print axioms Obs.Pairing.orth_iUnion
+#print axioms Obs.Lens.preimage_orth
+#print axioms Obs.Lens.same
+#print axioms Obs.familyPairing_invariant
+#print axioms SKI.probes_same_iff
+#print axioms SKI.probes_invariant
+#print axioms SKI.isType_orth
+#print axioms SKI.probePred_iff_mem_orth
+#print axioms SKI.arr_iff_mem_orth

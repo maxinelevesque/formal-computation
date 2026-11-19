@@ -16,6 +16,8 @@ import FormalComputation.SKI.Types
 import FormalComputation.SKI.Confluence
 import FormalComputation.SKI.Probes
 import FormalComputation.Predicates
+import FormalComputation.Observation
+import FormalComputation.SKI.Lenses
 -- Stretch
 import FormalComputation.Stretch.Trace
 import FormalComputation.Stretch.Conjoint

@@ -562,7 +562,7 @@ tree calculus and a tight and loose reading of Church–Turing.
 
 ---
 
-*Lean links point to commit `c40763e` of the repository. The axiom audit for
+*Lean links point to commit `a699a1d` of the repository. The axiom audit for
 every linked declaration is in `AXIOMS.md`; the changes made to the original
 statements are in `PROOF_CHANGELOG.md`.*
 

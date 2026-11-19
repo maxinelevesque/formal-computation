@@ -110,6 +110,7 @@ def main():
                      lambda m: f'data-lean-tree="" href="{BASE}/tree/{sha}"', new)
         new = re.sub(r'(<code data-lean-commit="">)[^<]*(</code>)', rf"\g<1>{sha[:7]}\g<2>", new)
         new = re.sub(r"^\[([^\]]+)\]: \S*formal-computation\S*$", decl_md, new, flags=re.M)
+        new = re.sub(r"(Lean links point to commit `)[0-9a-f]+(`)", rf"\g<1>{sha[:7]}\g<2>", new)
         if new != text and not a.check:
             open(f, "w", encoding="utf-8").write(new)
     print(f"{total} declaration links at {sha[:12]}; {len(problems)} problems")
