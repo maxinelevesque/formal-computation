@@ -17,7 +17,9 @@
       commit on the public mirror (`scripts/lean-links.py`).
 - [ ] Publication on maxine.science: coordinate with the site threads on how posts with
       interactives are published now.
-- [ ] Decide what `post/post.md` becomes (technical companion, or retired).
+- [x] `post/post.md` is now `post/technical-companion.md`; the series plan is `post/SERIES.md`.
+- [ ] Technical companion: add the observation layer, the three-classes theorem and the probe layer (`post/SERIES.md`).
+- [ ] Essay 2: Turi–Plotkin and the bialgebraic line, what the framework re-finds and where it generalizes (`notes/13`).
 - [x] Public mirror hygiene: the mirror is a filtered copy of main
       (`scripts/mirror/publish.sh`): the CI workflow, `scripts/fj-ci.py` and
       `scripts/mirror/` are dropped and private host names replaced, in every commit.

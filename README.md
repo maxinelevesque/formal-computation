@@ -24,7 +24,9 @@ notes, and in the essay's Lean links, are mirror commits.
 | `SUMMARY.md` | The main ideas, up front. This is the front matter of the post. |
 | `notes/01-…11-….md` | Detail sections: everything worked through, with status labels. |
 | `PROOF_MAP.md` | Every definition, lemma, theorem and conjecture, with a pseudo-Lean signature, dependencies, tier and status. |
-| `post/outline.md` | Proposed structure of the blog post and how it maps to the notes. |
+| `post/SERIES.md` | The three pieces (essay 1 "Atoms and Probes", essay 2, technical companion) and what goes in each. |
+| `post/atoms-and-probes.html` | Essay 1. |
+| `post/technical-companion.md` | The technical companion (formerly `post/post.md`). |
 | `CLAUDE.md` | Instructions for the Claude Code session that will build the Lean project and finish the writing. |
 
 ## Status labels

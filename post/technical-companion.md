@@ -1,5 +1,7 @@
 # Show me the holes: computation as a factorization system
 
+*Technical companion to the essay "Atoms and Probes" (see `post/SERIES.md`).*
+
 *Draft, 2026-11-17. Every claim carries a status. **[LEAN]** means proved in
 Lean 4 with Mathlib in the accompanying repository, with no `sorry` and no
 axioms beyond Lean's standard three; the tag links to the declaration.

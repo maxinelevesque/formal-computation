@@ -60,7 +60,7 @@ FormalComputation/
 3. Tier 1: `Orth`, `Presentation`, `LocalSystems`, `Translation`, `Collapse`.
 4. Tier 2: `Pentagon`, `Dehn`.
 5. Tier 3: `SKI`.
-6. Write the post from `post/outline.md`, `SUMMARY.md` and the notes. Up front:
+6. Write the post from `post/SERIES.md` (formerly `post/outline.md`), `SUMMARY.md` and the notes. Up front:
    main ideas and summary. After that: detail sections. Each theorem carries
    its status and, if verified, a link to the declaration.
 

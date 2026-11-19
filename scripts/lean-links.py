@@ -11,7 +11,7 @@ Links are found in two forms:
     <a data-lean-file="AXIOMS.md" href="...">                   file at the commit
     <a data-lean-tree="" href="...">                            repository at the commit
     <code data-lean-commit="">...</code>                         the short commit, as text
-* Markdown (post/post.md): reference definitions `[name]: URL` whose URL points into this
+* Markdown (post/technical-companion.md): reference definitions `[name]: URL` whose URL points into this
   repository; `name` is the declaration.
 
 A declaration name resolves to the unique declaration whose full name (namespaces + name as
@@ -24,7 +24,7 @@ import subprocess
 import sys
 
 BASE = "https://github.com/maxinelevesque/formal-computation"
-FILES = ["post/atoms-and-probes.html", "post/post.md"]
+FILES = ["post/atoms-and-probes.html", "post/technical-companion.md"]
 DECL = re.compile(
     r"^\s*(?:@\[[^\]]*\]\s*)?(?:(?:private|protected|noncomputable|nonrec|partial|unsafe)\s+)*"
     r"(?:theorem|lemma|def|abbrev|structure|class|inductive|instance)\s+([^\s:({\[]+)")

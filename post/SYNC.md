@@ -1,7 +1,7 @@
 # Sync: "Atoms and Probes" ↔ Lean and notes
 
 The essay (`post/atoms-and-probes.html`, received 2026-11-19 at `6603730`) is the public
-post. `post/post.md` is the technical draft written from the outline. This file records,
+post. `post/technical-companion.md` (formerly `post/post.md`) is the technical draft written from the outline. This file records,
 claim by claim, what the essay says, its status, and what backs it. Statuses as in
 `README.md`. "Lean" means proved, no `sorry`, axioms in `AXIOMS.md`.
 
@@ -99,7 +99,7 @@ to Theorem A by a proved statement.
 ## 6. Lean links (2026-11-19)
 
 The essay has 28 inline marks (`<a class="lean" data-lean=…>`) and a section "What has been
-checked by machine". `post/post.md` keeps its reference links. All point at the public
+checked by machine". `post/technical-companion.md` keeps its reference links. All point at the public
 mirror https://github.com/maxinelevesque/formal-computation at one pinned commit, set by
 `python3 -I scripts/lean-links.py SHA` (`--check` to verify). Re-run it after any Lean change
 that moves a declaration.
