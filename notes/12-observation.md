@@ -197,7 +197,10 @@ built by composing lenses. The pairing gives a construction of that kind here.
 - **Closure.** `T ↦ T^⊥` turns unions of tests into intersections of types [LEAN:
   `Obs.Pairing.orth_iUnion`], and `S ↦ S^⊥⊥` gives the smallest lens-built type
   containing a set `S`. Unions of types need this closure, as in realizability. [HAND]
-- **Prior art** [MEMORY; to check in the citation pass]:
+- **Prior art.** Now checked; see `notes/13` §13.B for DOIs and what was read. The nearest
+  is Klin (CMCS 2010): Chu(Set, 2) = (Set↓2^−), whose morphisms are exactly our lenses.
+  Our `put` is single-valued because observers are contexts; the modal-decomposition
+  line (Fokkink–van Glabbeek–de Wind 2006) needs sets of decompositions. Earlier list:
   - Chu spaces: Pratt.
   - Biorthogonality and ⊤⊤-closure: Pitts, *Parametric polymorphism and operational
     equivalence* (MSCS 2000); Vouillon and Melliès, *Semantic types: a fresh look at the
@@ -210,6 +213,11 @@ built by composing lenses. The pairing gives a construction of that kind here.
   bidirectional programming. Whether it matches Zya's construction needs her setting.
 
 ## 12.8 Directed observers, algebra and coalgebra [SPEC unless marked]
+
+**Update (2026-11-19).** `notes/13` corrects this section. Bisimulation as lifting with
+existence only is known: Joyal–Nielsen–Winskel, Kurz–Rosický, Hirschowitz–Lafont. What
+remains ours is the orthogonal half in the same category of runs, and the observation that
+the halves coincide for deterministic reduction (§13.0, §13.C).
 
 - **Invariant observers give algebra.** A behaviour sends each step to a bijection
   [LEAN: `beh_iff_map_bijective_co`]. The equality it gives is a quotient of descriptions

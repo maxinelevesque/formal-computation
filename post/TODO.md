@@ -19,7 +19,18 @@
       interactives are published now.
 - [x] `post/post.md` is now `post/technical-companion.md`; the series plan is `post/SERIES.md`.
 - [ ] Technical companion: add the observation layer, the three-classes theorem and the probe layer (`post/SERIES.md`).
-- [ ] Essay 2: Turi–Plotkin and the bialgebraic line, what the framework re-finds and where it generalizes (`notes/13`).
+- [x] Research: Turi–Plotkin and the bialgebraic line (`notes/13`: lineage, logical
+      connections, HO-MOS, open maps, AWFS; synthesis in §13.0).
+- [ ] Essay 2: write around §13.0 (invariant vs directed observers; distributive laws;
+      runs with 2-cells), with SKI, tree calculus and interaction nets.
+- [x] Essay 1: tree calculus (S K △ / S K K separated by a triage probe, mechanized) and
+      interaction nets (Lévy sidenote, cost card). `notes/14`.
+- [ ] Essay 1: the classification sentence and the card sort (`post/SERIES.md`).
+- [ ] Decide: is `tree-semantics` to be public? It is private on GitHub, so the essay
+      cannot link to its proofs; tree facts the essay uses are re-proved here.
+- [ ] Lean next: the three-classes theorem for families (Yoneda); V-valued pairings
+      (directed observers); a calculus with a one-step diamond has step count as a
+      behaviour (interaction nets, abstractly); SKI runs as a DynPresentation.
 - [x] Public mirror hygiene: the mirror is a filtered copy of main
       (`scripts/mirror/publish.sh`): the CI workflow, `scripts/fj-ci.py` and
       `scripts/mirror/` are dropped and private host names replaced, in every commit.
