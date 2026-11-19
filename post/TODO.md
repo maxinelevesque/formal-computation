@@ -25,7 +25,8 @@
       runs with 2-cells), with SKI, tree calculus and interaction nets.
 - [x] Essay 1: tree calculus (S K △ / S K K separated by a triage probe, mechanized) and
       interaction nets (Lévy sidenote, cost card). `notes/14`.
-- [ ] Essay 1: the classification sentence and the card sort (`post/SERIES.md`).
+- [x] Essay 1: the classification sentence (observation as a pairing) and the card sort
+      (what each observation card gives up), with mechanized marks.
 - [x] `tree-semantics` will be made public (Maxine, 2026-11-19). Link it pinned to `5147cfa`;
       the links are broken until then.
 - [ ] **The calculus switch** (`notes/15`): every SKI interactive in essay 1 also in tree
