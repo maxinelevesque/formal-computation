@@ -133,7 +133,21 @@ behaviours (probes). Nothing proved is invalidated.
   internality (comparison of calculi), abstraction (reading code), kind of answer (proofs,
   processes).
 
-## 12.6 Questions for Maxine
+## 12.6 Decisions (2026-11-19)
+
+1. **Pairing first, families as a special case** (Maxine). An observation is a pairing
+   `pass : D → O → Prop` between descriptions and observers. A class of families is the
+   special case `pass t B := B t is inhabited`. [LEAN: `Obs.Pairing`, `Obs.familyPairing`,
+   `Obs.familyPairing_invariant`] Truth-valued for now. Cost and other directed observers
+   want pairings valued in an ordered `V` (a Chu space over `V`), which is §12.8.
+2. **Where the classification goes**: proposed, awaiting Maxine. In "Atoms and Probes",
+   one sentence in the definition (observation is any pairing, and the essay studies probes)
+   and the cards sorted by which of the four properties they drop. The theory (pairings,
+   lenses, the three-classes theorem, directed observers) goes to the technical companion.
+3. **Directed observers**: discussed in §12.8; proposed as a section of the technical
+   companion, not of the essay.
+
+The questions as first asked:
 
 1. Observers as families, internal to `P` via Yoneda; or observation as an independent
    pairing (Chu space / pole)? The proposal takes families, with the pairing as the
@@ -145,3 +159,87 @@ behaviours (probes). Nothing proved is invalidated.
 3. Directed observers (cost, traces) are where "observation can see direction" lives. Is
    that the meeting point of algebra-like and coalgebra-like you were after? If so it may
    deserve its own section.
+
+## 12.7 Types built from lenses
+
+The question comes from Zya's setting. To show that a predicate is a type, one must show
+that no step changes it, which quantifies over every term and every step. Zya moved to types
+built by composing lenses. The pairing gives a construction of that kind here.
+
+- **Types as tests.** For a set `T` of observers, `T^⊥` is the set of descriptions that every
+  observer in `T` accepts. If the pairing is invariant, every `T^⊥` is a type.
+  [LEAN: `Obs.Pairing.orth_invariant`; for SKI `SKI.isType_orth`, where invariance is
+  confluence, `SKI.probes_invariant`] A probe type is the case of one test.
+  [LEAN: `SKI.probePred_iff_mem_orth`]
+- **Lenses.** A lens from `(D, O)` to `(D', O')` sends descriptions forward (`get`) and
+  observers back (`put`), so that an observer sent back gives the verdict it gives
+  forward: `pass d (put o') ↔ pass' (get d) o'`. This is a morphism of Chu spaces. Lenses
+  compose. [LEAN: `Obs.Lens.comp`]
+- **Lenses pull types back to types**: `get⁻¹(T^⊥) = (put T)^⊥`. [LEAN:
+  `Obs.Lens.preimage_orth`] A type built by composing lenses down to a set of tests is
+  therefore a type with no proof of its own. The obligations are:
+  - one invariance proof for the pairing;
+  - one equation per primitive lens, which for contexts is a computation
+    (`Probe.plug_subst`).
+
+  Nothing is enumerated per type.
+- **Example.** "Apply to `a`" is a lens. Forward it sends `t` to `t a`; back it sends `C` to
+  `C[[ ] a]`. [LEAN: `SKI.applyTo`] Arrow types are built from these lenses: if
+  `B = T^⊥`, then `A → B = (⋃_{a ∈ A} put_a T)^⊥`, for any predicate `A`. [LEAN:
+  `SKI.arr_iff_mem_orth`] The probe `[ ] x y` is the composite of two such lenses.
+- **Lenses carry sameness forward.** [LEAN: `Obs.Lens.same`] When the lenses are contexts,
+  this is the statement that sameness under the observation is a congruence. It is the
+  general form of `SKI.probeEq_plug`.
+- **The limit.** Lens-built types are exactly as fine as the observers. Over probes they
+  cannot see code: "runs to `I`" is a type but not a probe type
+  (`SKI.runsToI_not_probe`). Whether this is a defect or the point depends on what the
+  types are for. With observers that read code, lens-built types reach it.
+- **Closure.** `T ↦ T^⊥` turns unions of tests into intersections of types [LEAN:
+  `Obs.Pairing.orth_iUnion`], and `S ↦ S^⊥⊥` gives the smallest lens-built type
+  containing a set `S`. Unions of types need this closure, as in realizability. [HAND]
+- **Prior art** [MEMORY; to check in the citation pass]:
+  - Chu spaces: Pratt.
+  - Biorthogonality and ⊤⊤-closure: Pitts, *Parametric polymorphism and operational
+    equivalence* (MSCS 2000); Vouillon and Melliès, *Semantic types: a fresh look at the
+    ideal model for types* (POPL 2004); Krivine's realizability.
+  - Proof-relevant version: de Paiva's Dialectica categories and dependent lenses. There
+    `put` may depend on the description, `put : (d : D) → O' → O_d`. This is the step to
+    take when observers return evidence rather than a verdict.
+- **Caveat.** This is a reconstruction from "types as predicates built from composing
+  lenses". The lenses here need only the adjointness equation, not the get–put laws of
+  bidirectional programming. Whether it matches Zya's construction needs her setting.
+
+## 12.8 Directed observers, algebra and coalgebra [SPEC unless marked]
+
+- **Invariant observers give algebra.** A behaviour sends each step to a bijection
+  [LEAN: `beh_iff_map_bijective_co`]. The equality it gives is a quotient of descriptions
+  by conversion: what a description equals. This is the algebraic side: equational
+  theories, initial-algebra semantics, the localization of Theorem A. All three of the
+  essay's equalities are on this side.
+- **Directed observers give coalgebra.** A step acts on a directed observer by a map that
+  need not be invertible. Examples:
+  - the runs out of `t`, where a step `t → t'` sends each run out of `t'` to a run out of
+    `t` by prefixing; it is not onto, because `t` has runs that do not pass through `t'`;
+  - traces;
+  - cost, valued in Lawvere's `([0, ∞], ≥)`, where a step acts by an inequality.
+
+  The equalities these give are behavioural: bisimilarity, trace equivalence, cost
+  equivalence. They say what a description does as it runs. This is the coalgebraic side:
+  transition systems, final-coalgebra semantics.
+- **The meeting point.** Turi and Plotkin, *Towards a mathematical operational semantics*
+  (LICS 1997) [MEMORY]. Rules in the GSOS format are a distributive law of syntax over
+  behaviour. Bisimilarity is then a congruence, and the semantics by initial algebra and
+  by final coalgebra agree. In the language of §12.3 this is **internality** (observers
+  made from contexts) together with **direction**. `Obs.Lens.same` and
+  `SKI.probeEq_plug` are the invariant case of that congruence theorem.
+- **A structural guess.** Invariance is *unique* lifting against steps, the orthogonality
+  that the framework is built on. Bisimulation by open maps (Joyal, Nielsen and Winskel,
+  *Bisimulation from open maps*, Inf. & Comp. 1996 [MEMORY]) is lifting with *existence
+  only*, against extensions of paths. If this holds, algebra and coalgebra appear as unique
+  and non-unique lifting against two classes of maps in one category of runs. Algebra is
+  an orthogonal factorization system on steps; coalgebra is a weak factorization system
+  on path extensions. The lax theory, open problem 1 in `SUMMARY.md`, would sit between
+  them. Not checked: whether the open-map lifting lives in the same category as the
+  framework's lifting, or one level up.
+- **Where it goes.** A section of the technical companion, "Observers that see
+  direction". The essay keeps its cards on cost and on watching runs as they are.

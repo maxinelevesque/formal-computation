@@ -97,4 +97,16 @@ this list on every push (section `==== AXIOMS ====` of the job log).
 'FormalComputation.SKI.codeEq_iff_conv' depends on axioms: [propext, Classical.choice, Quot.sound]
 'FormalComputation.SKI.not_codeEq_I_SKK' depends on axioms: [propext, Classical.choice, Quot.sound]
 'FormalComputation.SKI.codeEq_Ia_a' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+-- observation layer (CI job 3115; Lean sources as at mirror commit )
+'FormalComputation.Obs.Pairing.orth_invariant' depends on axioms: [propext]
+'FormalComputation.Obs.Pairing.orth_iUnion' depends on axioms: [propext, Quot.sound]
+'FormalComputation.Obs.Lens.preimage_orth' depends on axioms: [propext, Quot.sound]
+'FormalComputation.Obs.Lens.same' does not depend on any axioms
+'FormalComputation.Obs.familyPairing_invariant' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.probes_same_iff' does not depend on any axioms
+'FormalComputation.SKI.probes_invariant' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.isType_orth' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.probePred_iff_mem_orth' depends on axioms: [propext]
+'FormalComputation.SKI.arr_iff_mem_orth' depends on axioms: [propext, Quot.sound]
 ```

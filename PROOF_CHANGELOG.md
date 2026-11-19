@@ -152,6 +152,20 @@ Green at `75f2c0d` (CI job 3106).
   figure (its reducer reads any outcome free of `S`, `K`, `I`). With multi-hole contexts,
   "same under every probe" is at least as strong as with single-hole contexts.
 
+## Observation layer (2026-11-19)
+
+Additions only; no earlier statement changed. Green at CI job 3115 (mirror commit ).
+
+- **Design decision (Maxine):** observation is a pairing between descriptions and observers
+  (`Obs.Pairing`), with families of the framework as a special case (`Obs.familyPairing`).
+  Truth-valued for now. See `notes/12-observation.md` §12.6.
+- `Observation.lean`: `T^⊥` (`orth`), sameness, invariance; every `T^⊥` of an invariant
+  pairing is a type; lenses (Chu morphisms) compose, carry sameness forward, and pull
+  `T^⊥` back to `(put T)^⊥`; behaviour predicates give an invariant pairing.
+- `SKI/Lenses.lean`: the essay's probes as a pairing (`probes_same_iff`: its sameness is
+  `ProbeEq`), invariant by confluence; `isType_orth`; `probePred_iff_mem_orth`; the lens
+  "apply to `a`"; arrow types built from lenses (`arr_iff_mem_orth`). §12.7.
+
 ## Mathlib anchors (checked against v4.36.0 source)
 
 | Anchor | Status |
