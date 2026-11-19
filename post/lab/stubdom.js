@@ -168,9 +168,10 @@ function makeDocument(env) {
     n._attrs.forEach(function (a) { s += ' ' + a[0] + '="' + escAttr(a[1]) + '"'; });
     var st = Object.keys(n.style).filter(function (k) { return n.style[k] !== '' && n.style[k] !== undefined; }).sort();
     if (st.length) s += ' style="' + escAttr(st.map(function (k) { return k + ': ' + n.style[k]; }).join('; ')) + '"';
-    if (n._props.checked !== undefined) s += ' data-stub-checked="' + n._props.checked + '"';
-    if (n._props.value !== undefined) s += ' data-stub-value="' + escAttr(n._props.value) + '"';
-    if (n.localName === 'option' && n._props.selected) s += ' data-stub-selected="true"';
+    // the state of a form control, where it differs from what its attributes say
+    if (n._props.checked !== undefined && n._props.checked !== n.hasAttribute('checked')) s += ' data-stub-checked="' + n._props.checked + '"';
+    if (n._props.value !== undefined && n._props.value !== n.getAttribute('value')) s += ' data-stub-value="' + escAttr(n._props.value) + '"';
+    if (n.localName === 'option' && n.parentNode && n.parentNode.localName === 'select' && n.parentNode.value === n.value && n.parentNode.querySelectorAll('option').indexOf(n) > 0) s += ' data-stub-selected="true"';
     s += '>';
     if (VOID[n.localName] && !n.childNodes.length) return s;
     return s + n.childNodes.map(serialize).join('') + '</' + n.localName + '>';

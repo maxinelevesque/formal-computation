@@ -28,11 +28,10 @@ function table(rows) {
 /* ---------- SKI ---------- */
 section('Combinatory logic (ski.js)');
 
-// the essay's own reducer, extracted from the page, to compare behaviour
+// the essay's own reducer, as it was before the essay used ski.js (kept in essay-reducer.js), to compare behaviour
+var essay = require('./essay-reducer.js');
 var html = fs.readFileSync(path.join(__dirname, '..', 'atoms-and-probes.html'), 'utf8');
-var a0 = html.indexOf('/* ---------- reducer ---------- */'), a1 = html.indexOf('/* ---------- the bundle');
-check(a0 > 0 && a1 > a0, 'found the reducer in the essay');
-var essay = new Function(html.slice(a0, a1) + '\nreturn { parse: parse, plain: plain, pretty: pretty, redexes: redexes, redexOuter: redexOuter, redexInner: redexInner, contractAt: contractAt, runOuter: runOuter, ruleOf: ruleOf };')();
+check(html.indexOf('SKI = CALC.ski') > 0 && html.indexOf('/* ---- post/lab/ski.js ---- */') > 0, 'the essay now runs on the inlined ski.js');
 
 // the six terms and three probes of the bench, and the readings the essay's figure shows
 var TERMS = ['I', 'S K K', 'S K S', 'K I', 'K (S K K)', 'K'];

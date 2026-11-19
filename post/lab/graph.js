@@ -133,6 +133,12 @@
      the line, the other states in layers by their distance to it (for the fibre with no
      value: by distance from its first states). opts: width, height, orientation ('wide': line
      along the bottom; 'tall': line down the right side), measure(label) -> box width.
+     opts.layering: 'nearest' (default: the shortest distance to the normal form) or 'longest'
+     (the longest run to it, so that every step goes down at least one layer).
+     opts.slots: a step over more than one layer gets a slot in each layer it crosses; its edge has
+     via: the points of those slots, from source to target.
+     opts.rings: a fibre with no value whose states lie on one loop is drawn as a ring, in the
+     order its states were given, clockwise from the top, rather than as a column.
      Returns { nodes: [{ i, x, y, w, label, fibre, nf, layer }], edges: [{ from, to, rule }],
                fibres: { id: { x, y, label } }, line: [x1, y1, x2, y2], vb, width, height }. */
   function layoutBundle(graph, opts) {
@@ -153,6 +159,23 @@
           var j = graph.edges[e].from;
           if (layer[j] < 0 && st[j].fibre === f.id) { layer[j] = layer[q[h]] + 1; q.push(j); }
         });
+        if (opts.layering === 'longest') {
+          // the longest run to the normal form (the fibre has a value, so no loop is expected; if one is met, keep the shortest)
+          var memo = {}, onPath = {}, loop = false;
+          var longest = function (i) {
+            if (memo[i] !== undefined) return memo[i];
+            if (onPath[i]) { loop = true; return 0; }
+            onPath[i] = true;
+            var best = 0;
+            st[i].out.forEach(function (e) { var j = graph.edges[e].to; if (st[j].fibre === f.id && j !== i) best = Math.max(best, 1 + longest(j)); });
+            onPath[i] = false;
+            memo[i] = best;
+            return best;
+          };
+          var lay = {};
+          mem.forEach(function (i) { lay[i] = longest(i); });
+          if (!loop) mem.forEach(function (i) { layer[i] = lay[i]; });
+        }
       } else {
         // first states: those no step of the fibre enters; on a bare loop, the first given term
         var roots = mem.filter(function (i) { return !st[i].in.some(function (e) { return st[graph.edges[e].from].fibre === f.id; }); });
@@ -175,42 +198,110 @@
     var gap = opts.gap || 14, fgap = opts.fibreGap || 28;
     var nodes = st.map(function (s, i) { return { i: i, label: s.label, w: measure(s.label), fibre: s.fibre, nf: s.normal, layer: layer[i], cycle: !!s.onCycle }; });
     var bands = [], cursor = 0;
+    var ringOf = {}, slotsOf = {}, slotLayer = {}, slotAlong = {};
+    graph.fibres.forEach(function (f) {
+      var mem = byFibre[f.id];
+      if (!opts.rings || f.nf !== null || mem.length < 3 || !mem.every(function (i) { return st[i].onCycle; })) return;
+      // a ring: offsets from its centre, wide enough that no two boxes meet
+      var n = mem.length, ry = opts.ringRy || Math.max(44, 12.5 * n), rx = 30, off;
+      for (var tries = 0; tries < 200; tries++, rx += 4) {
+        off = mem.map(function (i, k) { var a = -Math.PI / 2 + 2 * Math.PI * k / n; return { i: i, dx: rx * Math.cos(a), dy: ry * Math.sin(a) }; });
+        var clash = off.some(function (a, p) { return off.some(function (b, q) {
+          return q > p && Math.abs(a.dx - b.dx) < (nodes[a.i].w + nodes[b.i].w) / 2 + 12 && Math.abs(a.dy - b.dy) < 30;
+        }); });
+        if (!clash) break;
+      }
+      var box = { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity };
+      off.forEach(function (o) {
+        box.x0 = Math.min(box.x0, o.dx - nodes[o.i].w / 2); box.x1 = Math.max(box.x1, o.dx + nodes[o.i].w / 2);
+        box.y0 = Math.min(box.y0, o.dy - 11); box.y1 = Math.max(box.y1, o.dy + 11);
+      });
+      ringOf[f.id] = { off: off, box: box };
+    });
     graph.fibres.forEach(function (f) {
       var rows = [];
+      if (ringOf[f.id]) {
+        var rg = ringOf[f.id], size = tall ? rg.box.y1 - rg.box.y0 : rg.box.x1 - rg.box.x0;
+        rg.off.forEach(function (o) {
+          nodes[o.i].along = cursor + (tall ? o.dy - rg.box.y0 : o.dx - rg.box.x0);
+          nodes[o.i].ring = o; nodes[o.i].layer = 0;
+        });
+        bands.push({ id: f.id, label: f.label, start: cursor, end: cursor + size, anchor: cursor + (tall ? -rg.box.y0 : -rg.box.x0), ring: rg });
+        cursor += size + fgap;
+        return;
+      }
       byFibre[f.id].forEach(function (i) { (rows[layer[i]] = rows[layer[i]] || []).push(i); });
-      var along = {};
+      // with opts.slots, a step over more than one layer gets a slot (a dummy, named 'd<edge>_<layer>') in each
+      // layer it crosses, so that the rows leave a way through for it
+      var succOf = {};
+      byFibre[f.id].forEach(function (i) { succOf[i] = st[i].out.map(function (e) { return graph.edges[e].to; }); });
+      if (opts.slots) {
+        byFibre[f.id].forEach(function (i) { succOf[i] = []; });
+        graph.edges.forEach(function (e, k) {
+          if (st[e.from].fibre !== f.id || st[e.to].fibre !== f.id) return;
+          var hi = layer[e.from], lo = layer[e.to], prev = e.from;
+          for (var Ly = hi - 1; Ly > lo; Ly--) {
+            var id = 'd' + k + '_' + Ly;
+            (rows[Ly] = rows[Ly] || []).push(id); succOf[prev].push(id); succOf[id] = []; prev = id;
+            (slotsOf[k] = slotsOf[k] || []).push(id); slotLayer[id] = Ly;
+          }
+          succOf[prev].push(e.to);
+        });
+      }
+      function size(i) { return typeof i === 'string' ? 10 : tall ? 22 : nodes[i].w; }
+      var along = {}, bary = {}, rank = {};
       // place rows from the line outward; each row ordered by the mean place of its successors
       var bandW = 0;
       rows.forEach(function (row) {
         if (!row) return;
-        var w = row.reduce(function (a, i) { return a + (tall ? 22 : nodes[i].w) + gap; }, -gap);
+        var w = row.reduce(function (a, i) { return a + size(i) + gap; }, -gap);
         if (w > bandW) bandW = w;
       });
+      function placeRow(row) {
+        var w = row.reduce(function (a, i) { return a + size(i) + gap; }, -gap), x = cursor + (bandW - w) / 2;
+        row.forEach(function (i) { along[i] = x + size(i) / 2; x += size(i) + gap; });
+      }
+      // order a row by the mean place of its neighbours (ties: the order it had)
+      function orderRow(row, nb) {
+        row.forEach(function (i, k) { rank[i] = k; });
+        row.forEach(function (i) {
+          var ns = nb[i].filter(function (j) { return along[j] !== undefined; });
+          bary[i] = ns.length ? ns.reduce(function (a, j) { return a + along[j]; }, 0) / ns.length : (along[i] !== undefined ? along[i] : Infinity);
+          if (typeof i !== 'string') nodes[i].bary = bary[i];
+        });
+        row.sort(function (a, b) { return bary[a] - bary[b] || rank[a] - rank[b]; });
+      }
       rows.forEach(function (row, r) {
         if (!row) return;
-        if (r > 0) {
-          row.forEach(function (i) {
-            var succ = st[i].out.map(function (e) { return graph.edges[e].to; }).filter(function (j) { return along[j] !== undefined; });
-            nodes[i].bary = succ.length ? succ.reduce(function (a, j) { return a + along[j]; }, 0) / succ.length : Infinity;
-          });
-          row.sort(function (a, b) { return nodes[a].bary - nodes[b].bary || a - b; });
-        }
-        var w = row.reduce(function (a, i) { return a + (tall ? 22 : nodes[i].w) + gap; }, -gap), x = cursor + (bandW - w) / 2;
-        row.forEach(function (i) { var size = tall ? 22 : nodes[i].w; along[i] = x + size / 2; x += size + gap; });
+        if (r > 0) orderRow(row, succOf);
+        placeRow(row);
       });
+      if (opts.slots) {
+        // sweep back from the outside in (by the rows above), then out again (by the rows below)
+        var predOf = {};
+        rows.forEach(function (row) { (row || []).forEach(function (i) { predOf[i] = []; }); });
+        Object.keys(succOf).forEach(function (i) { succOf[i].forEach(function (j) { if (predOf[j]) predOf[j].push(isNaN(i) ? i : Number(i)); }); });
+        for (var r2 = rows.length - 2; r2 >= 0; r2--) if (rows[r2]) { orderRow(rows[r2], predOf); placeRow(rows[r2]); }
+        for (r2 = 1; r2 < rows.length; r2++) if (rows[r2]) { orderRow(rows[r2], succOf); placeRow(rows[r2]); }
+      }
+      Object.keys(slotLayer).forEach(function (id) { if (along[id] !== undefined && slotAlong[id] === undefined) slotAlong[id] = along[id]; });
       byFibre[f.id].forEach(function (i) { nodes[i].along = along[i]; });
       var anchor = f.nf !== null ? along[f.nf] : cursor + bandW / 2;
       bands.push({ id: f.id, label: f.label, start: cursor, end: cursor + bandW, anchor: anchor });
       cursor += bandW + fgap;
     });
     var total = Math.max(1, cursor - fgap);
+    function ringBox(n) { return ringOf[n.fibre].box; }
+    function ringBottom(n) { return ringOf[n.fibre].box.y1 - 11; }
+    var slotXY = null;
     var out = { nodes: nodes, edges: graph.edges.map(function (e) { return { from: e.from, to: e.to, rule: e.rule }; }), fibres: {} };
     if (!tall) {
       var W = Math.max(opts.width || 720, total + 40), rowH = opts.rowGap || 70;
       var H = opts.height || (nLayers * rowH + 80);
       rowH = Math.min(rowH, (H - 80) / Math.max(1, nLayers));
       var lineY = H - 14, x0 = (W - total) / 2, nfY = lineY - 60;
-      nodes.forEach(function (n) { n.x = x0 + n.along; n.y = nfY - n.layer * rowH; });
+      nodes.forEach(function (n) { n.x = x0 + n.along; n.y = n.ring ? nfY + n.ring.dy - ringBottom(n) : nfY - n.layer * rowH; });
+      slotXY = function (id) { return [x0 + slotAlong[id], nfY - slotLayer[id] * rowH]; };
       bands.forEach(function (b) { out.fibres[b.id] = { x: x0 + b.anchor, y: lineY, label: b.label, from: x0 + b.start, to: x0 + b.end }; });
       out.line = [20, lineY, W - 20, lineY];
       out.width = W; out.height = H;
@@ -222,7 +313,8 @@
       var Wt = opts.width || 380, lineX = Wt - 60, Ht = Math.max(opts.height || 424, total + 40), y0 = (Ht - total) / 2;
       var colX = [], x = lineX - 40;
       for (var c = 0; c < nLayers; c++) { colX[c] = x - (colW[c] || 0) / 2; x -= (colW[c] || 0) + 16; }
-      nodes.forEach(function (n) { n.x = colX[n.layer]; n.y = y0 + n.along; });
+      nodes.forEach(function (n) { n.x = n.ring ? lineX - 40 - (ringBox(n).x1 - n.ring.dx) : colX[n.layer]; n.y = y0 + n.along; });
+      slotXY = function (id) { return [colX[slotLayer[id]], y0 + slotAlong[id]]; };
       bands.forEach(function (b) { out.fibres[b.id] = { x: lineX, y: y0 + b.anchor, label: b.label, from: y0 + b.start, to: y0 + b.end }; });
       out.line = [lineX, 16, lineX, Ht - 12];
       var left = Math.min(0, Math.round(x));
@@ -230,6 +322,15 @@
       out.vb = left + ' 0 ' + (Wt - left) + ' ' + Ht;
     }
     out.orientation = tall ? 'tall' : 'wide';
+    // the slots of a long step, from its source to its target
+    out.edges.forEach(function (e, k) { if (slotsOf[k]) e.via = slotsOf[k].map(function (id) { return slotXY(id); }); });
+    // the view box also covers every box (a ring may reach past the layers)
+    var vb = out.vb.split(' ').map(Number), bx0 = vb[0], by0 = vb[1], bx1 = vb[0] + vb[2], by1 = vb[1] + vb[3];
+    nodes.forEach(function (n) {
+      bx0 = Math.min(bx0, Math.floor(n.x - n.w / 2 - 8)); bx1 = Math.max(bx1, Math.ceil(n.x + n.w / 2 + 8));
+      by0 = Math.min(by0, Math.floor(n.y - 30)); by1 = Math.max(by1, Math.ceil(n.y + 20));
+    });
+    out.vb = bx0 + ' ' + by0 + ' ' + (bx1 - bx0) + ' ' + (by1 - by0);
     return out;
   }
 
