@@ -135,3 +135,38 @@ open FormalComputation
 -- Tree calculus as a calculus with probes
 #print axioms Tree.calculus_confluent
 #print axioms Tree.probes_read_code
+-- Tree calculus in the essay's figures (the calculus switch)
+#print axioms Tree.tree_six_terms
+#print axioms Tree.tree_six_distinct
+#print axioms Tree.sk_unsound
+#print axioms Tree.isType_arr
+#print axioms Tree.fundamental_K
+#print axioms Tree.fundamental_S
+#print axioms Tree.fundamental_triage
+#print axioms Tree.omega_cycle
+-- A one-step diamond makes cost a property of the term
+#print axioms Diamond.equal_lengths
+#print axioms Diamond.step_cost
+#print axioms Diamond.length_le
+-- Three classes of observers
+#print axioms Obs.ObsEq.mono
+#print axioms Obs.ObsEq.same
+#print axioms Obs.obsEq_univ_iff
+#print axioms Obs.obsEq_iff_of_corep
+#print axioms Obs.iso_of_obsEq_beh
+#print axioms Obs.obsEq_beh_of_iso
+#print axioms Obs.obsEq_beh_iff
+#print axioms Obs.obsEq_beh_of_iso_Q
+#print axioms Obs.obsEq_of_zigzag
+-- Pairings valued in a complete lattice
+#print axioms Obs.VPairing.orth_invariant
+#print axioms Obs.VPairing.orth_anti
+#print axioms Obs.VLens.preimage_orth
+#print axioms Obs.VLens.same
+#print axioms Obs.Pairing.toV_orth
+#print axioms Obs.Pairing.toV_same
+#print axioms Obs.Lens.preimage_orth_of_toV
+-- SKI runs as a dynamic presentation
+#print axioms SKI.zigzag_of_conv
+#print axioms SKI.conv_obsEq
+#print axioms SKI.conv_iso_Q
