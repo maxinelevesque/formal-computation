@@ -359,7 +359,7 @@ footer { margin-top: 4rem; border-top: 1px solid var(--rule); padding-top: 1.3re
 
 /* the calculus switch: one radio group at the top, and a small copy in each figure it changes */
 .calc-switch { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0 18px; font-family: var(--sans); font-size: 0.86rem; }
-.calc-switch[hidden] { display: none; }
+.calc-switch[hidden], .calc-bar[hidden] { display: none; }
 .calc-switch label { position: relative; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .calc-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
 .calc-switch span { display: inline-block; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; padding: 6px 1px; }
@@ -2397,7 +2397,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
     Object.keys(B.FIBS).forEach(function (k) { name[B.FIBS[k]] = k; });
     var fib = {};
     g.fibres.forEach(function (f) { var p = Lb.fibres[f.id]; fib[name[f.label]] = [r1(p.x), r1(p.y)]; });
-    var vb = Lb.vb.split(' ').map(Number), x0 = vb[0], y0 = vb[1], W = vb[2], H = vb[3];
+    var vb = Lb.vb.split(' ').map(function (x) { return Math.round(Number(x)); }), x0 = vb[0], y0 = vb[1], W = vb[2] + 1, H = vb[3] + 1;
     var pos = Lb.nodes.map(function (n) { return [r1(n.x), r1(n.y)]; });
     // the points under the normal forms, and under the two terms of the loop nearest the line, are joined to the line
     var ring = B.NODES.map(function (n, i) { return i; }).filter(function (i) { return B.NODES[i].cyc; });
@@ -3480,8 +3480,8 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
         C = [node(pretty(T0), 100, 28), node(pretty(T1), 100, 82), node(pretty(T2), 100, 136)];
         X = node('a', 288, 82, true); q1 = [-8, 82];
       } else {
-        C = KLOOP().map(function (s, k) { return node(s, 128, 20 + 31 * k); });
-        X = node('a', 296, 82, true); q1 = [-10, 82];
+        C = KLOOP().map(function (s, k) { return node(s, 128, 20 + 33 * k); });
+        X = node('a', 296, 86, true); q1 = [-10, 86];
       }
       var chain = [];
       for (var k = 0; k + 1 < C.length; k++) chain.push(arrow(ex, 'm2', C[k], C[k + 1]));
@@ -3977,7 +3977,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
           var lastA = la.g.states.map(function (s, i) { return i; }).filter(function (i) { return la.g.states[i].normal; })[0];
           A = netPanel('fib-a', la, { last: lastA, name: 'a', hollow: false, note: [36, 172], orders: ['outer', 'inner'] });
           var lw = lattice(TREE.parse('ω ω'), 5);
-          W = netPanel('fib-w', lw, { last: 0, name: 'no value', hollow: true, note: [150, 30], orders: ['outer'], max: 5, more: true });
+          W = netPanel('fib-w', lw, { last: 0, name: 'no value', hollow: true, note: [24, 30], orders: ['outer'], max: 5, more: true });
           W.cx = 140; W.cy = 92;
         }
       }
@@ -4012,7 +4012,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
           note(A, 1, tt >= rb.length * T ? (mode === 'net' ? word(rb.length) + ' in another' : count(A, rb.length) + (mode === 'ski' ? ' by the other' : ' by the longest')) : '');
           var nw = W.segs.length, TW = W.T;
           tt = t % (TW * (mode === 'net' ? nw + 4 : 13)); k = Math.floor(tt / TW);
-          if (mode === 'net') { put(W.tk, alongSteps(W.segs, tt, TW)); note(W, 0, Math.min(k, nw) + (k >= nw ? ' and more' : '') + (Math.min(k, nw) === 1 ? ' interaction' : ' interactions')); }
+          if (mode === 'net') { put(W.tk, alongSteps(W.segs, tt, TW)); note(W, 0, Math.min(k, nw) + (Math.min(k, nw) === 1 ? ' interaction' : ' interactions') + (k >= nw ? ', and on' : '')); }
           else { put(W.tk, along(W.segs[k % nw], tt / TW - k)); note(W, 0, k + (k === 1 ? ' step' : ' steps')); }
           note(W, 1, 'and no value');
         }
@@ -4159,9 +4159,9 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
           kAdd = ruleName(KR0) === 'S' ? 1 : 0;
           q1 = [-8, 84]; kSat = [108, 62, 'start']; kRat = [222, 48];
         } else {
-          C = treeCycle().map(function (c, k) { return node('K a (' + c.s + ')', 128, 22 + 31 * k); }); X = node('a', 296, 84, true);
+          C = treeCycle().map(function (c, k) { return node('K a (' + c.s + ')', 128, 22 + 33 * k); }); X = node('a', 296, 88, true);
           kAdd = 1;     // the first step of the lap is the S-step that copies ω
-          q1 = [-10, 84]; kSat = [122, r1((C[0].y + C[1].y) / 2 + 4), 'end']; kRat = [226, 44];
+          q1 = [-10, 88]; kSat = [122, r1((C[0].y + C[1].y) / 2 + 4), 'end']; kRat = [226, 44];
         }
         var kb = S('g', {}, svgK), ke = S('g', {}, svgK), kt = S('g', {}, svgK), kx = S('g', {}, svgK);
         S('line', { x1: X.x, y1: X.y + 11, x2: X.x, y2: 206, 'class': 'proj' }, kb);

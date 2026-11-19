@@ -159,16 +159,27 @@ eq(ka.length - 1, 1, 'K a (ω ω): one step (the K-rule)');
 var kaIn = graph.runPath(tree, 'K a (ω ω)', 'inner');
 check(kaIn.cyc, 'K a (ω ω), arguments first: loops');
 
+// The bench's fourth probe is triP of FormalComputation/Tree/Essay.lean, readShape (extract [ ]):
+//   extract   = triage (K △) (K (K △)) (K I)      the right branch of a fork; a leaf or a stem goes to △△△
+//   readShape = triage x (triage y (K z) △) △      a leaf reads x, a stem of a leaf y, a stem of a stem z
+// It separates all three identities (Tree.tree_six_terms), where SEP above separates only I from the other two.
+var TRIP = 'triage(x, triage(y, K z, △), △) (triage(K △, K (K △), K I) [ ])';
+eq(tree.key(tree.parse(TRIP)), tree.key(tree.app(
+  tree.triage(tree.atom('x'), tree.triage(tree.atom('y'), tree.app(tree.K, tree.atom('z')), tree.leaf), tree.leaf),
+  tree.app(tree.triage(tree.app(tree.K, tree.leaf), tree.app(tree.K, tree.app(tree.K, tree.leaf)), tree.app(tree.K, tree.I)), tree.atom('[ ]')))),
+  'the triage probe is readShape (extract [ ]), as in Tree/Essay.lean');
+var sp2 = tree.run(tree.plug(SEP, 'S K (△K)'), 'outer');
+eq(tree.print(sp2[sp2.length - 1]), 'y', 'the older probe reads y from S K (△K) as from S K K: it does not separate them');
 var TTERMS = ['I', 'S K K', 'S K (△K)', 'K I', 'K (S K K)', 'K'];
-var TPROBES = [[], ['x'], ['x', 'y'], SEP];
+var TPROBES = [[], ['x'], ['x', 'y'], TRIP];
 var TPNAMES = ['[ ]', '[ ] x', '[ ] x y', 'triage'];
 var TEXPECT = [
   ['I', 'x', 'x y', 'x'],
   ['S K K', 'x', 'x y', 'y'],
-  ['S K (△K)', 'x', 'x y', 'y'],
+  ['S K (△K)', 'x', 'x y', 'z'],
   ['K I', 'I', 'y', 'I'],
   ['K (S K K)', 'S K K', 'y', 'S K K'],
-  ['K', 'K x', 'x', 'y']
+  ['K', 'K x', 'x', 'K △']
 ];
 var treeRows = [['term'].concat(TPNAMES)], treeNF = {};
 TTERMS.forEach(function (s, r) {
@@ -184,6 +195,16 @@ TTERMS.forEach(function (s, r) {
 });
 table(treeRows);
 console.log('  (n) = steps, outermost; * = not read: the outcome contains △');
+var tkeys = TTERMS.map(function (s, r) { return TPROBES.map(function (p, c) { var t = treeNF[r + ',' + c].term; return tree.isOutcome(t) ? tree.print(t) : ''; }).join('|'); });
+var tpts = {}, tn = 0;
+eq(tkeys.map(function (k) { return tpts[k] || (tpts[k] = ++tn); }).join(','), '1,2,3,4,4,5', 'tree bench: the triage probe separates the three identities; K I and K (S K K) still agree on these four probes');
+// Tree.tree_six_distinct: the triage probe after [ ] x tells K I from K (S K K)
+var KI = tree.run(tree.plug(TRIP.replace('[ ]', '([ ] x)'), 'K I'), 'outer', 200), KSKK = tree.run(tree.plug(TRIP.replace('[ ]', '([ ] x)'), 'K (S K K)'), 'outer', 200);
+eq(tree.print(KI[KI.length - 1]) + ' / ' + tree.print(KSKK[KSKK.length - 1]), 'x / y', 'the triage probe after [ ] x reads x from K I and y from K (S K K) (Lean: triP_x_KI, triP_x_KI\')');
+// the loop of ω ω as in Lean (Tree.omega_cycle): the left I ω first, then the right one
+var LC = ['ω ω', 'I ω (I ω)', 'K ω (△ω) (I ω)', 'ω (I ω)', 'ω (K ω (△ω))'];
+var lcg = graph.reductionGraph(tree, LC, { closed: true });
+eq(lcg.edges.map(function (e) { return e.from + '>' + e.to + ' ' + e.rule.replace('the ', ''); }).join(', '), '0>1 S-rule, 1>2 S-rule, 2>3 K-rule, 3>4 S-rule, 4>0 K-rule', 'the Lean loop of ω ω: five steps, and no other step among its terms');
 
 /* ---------- interaction nets ---------- */
 section('Interaction nets (net.js, eager table of tree-semantics)');
@@ -287,6 +308,12 @@ console.log('  eager K a (ω ω): reads a after ' + first + ' interactions; afte
 var mr = kn, rr = net.rng(3), readA = -1;
 for (var t2 = 0; t2 < 400; t2++) { mr = net.step(mr, 'random', rr).t; if (readA < 0 && tree.print(net.readback(mr).term) === 'a') readA = t2 + 1; }
 check(readA > 0 && !net.isNormal(mr), 'eager K a (ω ω), a random order: reads a (after ' + readA + '), never finishes');
+
+// the net of ω ω does not loop: no net of its outermost run comes round again in 1000 interactions
+var wr = net.run(net.parse('ω ω'), 'outer', 1000), wk = {}, wrep = 0;
+wr.forEach(function (n) { var k = net.key(n); if (wk[k]) wrep++; wk[k] = true; });
+check(wr.length === 1001 && wrep === 0, 'the net of ω ω: 1000 interactions, and no net repeats (' + wrep + ')');
+console.log('  the net of ω ω: ' + net.size(wr[0]) + ' agents at the start, ' + net.size(wr[1000]) + ' after 1000 interactions; no net repeats');
 
 // compile and read back agree on values; key is invariant under renaming
 ['I', 'K (S K K)', 'S K (△K)', 'ω', '△ (x y) z'].forEach(function (s) {

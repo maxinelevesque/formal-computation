@@ -106,3 +106,36 @@ agreement.
 4. **Inline** the modules into the single-file essay (it stays one file), and re-run
    `lean-links.py`.
 5. **Review round R1** over the result.
+
+### Status (2026-11-19, branch `essay-calculi`)
+
+Steps 1 to 4 are done; step 5 (review round R1, in a browser) is next. Details in `post/lab/README.md`, "In the essay".
+
+- **Switch.** A radio group "Combinatory logic · Tree calculus · Interaction nets" under the introduction,
+  with the tree legend (the five rules, `K = △△`, `I = △(△K)△`, `S x y = △(△x)y`, `ω = S I I`) and a net legend
+  shown in their modes; a small copy (Combinators · Trees · Nets) in the controls row of each of the nine
+  figures that change. State in the hash (`#calc=tree`, `#calc=net`). Not sticky: the copies sit in the
+  controls rows instead.
+- **Inlining.** `scripts/inline-calc.py` (idempotent, `--check`). The essay's reducer is `CALC.ski`. Every SKI
+  figure is byte-identical to before (`post/lab/essay-test.js`: 1118 snapshots, on load and after a tour of
+  the other two modes).
+- **Figures.** All of §15.2 is drawn, with these choices:
+  - The bench's fourth probe is the mechanized one, `triP` of `Tree/Essay.lean`: `readShape (extract [ ])`. It
+    reads `x`, `y`, `z` from `I`, `S K K`, `S K (△K)` and nothing from the other three, so the tree table has
+    five points; the note adds that after `[ ] x` it also separates `K I` from `K (S K K)` (`tree_six_distinct`).
+  - The tree loop of `ω ω` is the Lean cycle (`Tree.omega_cycle`): the left `I ω` is reduced first. The figures
+    follow it whatever the order chosen; the counter advances at the S-step at the root (`ω ω → I ω (I ω)`).
+  - The tree bundle has nineteen terms, laid out by `layoutBundle` with two new options: `slots` (a slot in each
+    layer a long step crosses) and `rings` (the loop as a ring).
+  - Nets: the hero shows one term at a time, with the lattice of reachable nets; the loop is left out of its
+    list, since its net never stops growing. The counter figure stays in tree calculus in net mode, with a note.
+  - The net `ω ω` panel of the fibres figure shows the lattice to depth 5: no loop, so no hole (no net of the
+    outermost run repeats in 1000 interactions; checked, not proved).
+- **Marks.** New `lean` marks (`href="#"` until `lean-links.py` is re-run after the Lean branch is merged):
+  `Tree.tree_six_terms`, `Tree.tree_six_distinct`, `Tree.sk_unsound`, `Tree.fundamental_K`, `Tree.fundamental_S`,
+  `Tree.fundamental_triage`, `Tree.omega_cycle`, `Diamond.equal_lengths`. Existing names carry their links at
+  `785035a`. tree-semantics results are plain links (`class="ts"`) pinned to `5147cfa`: `Tree.exists_eq`,
+  `Ix.Steps.equal_lengths`, `Ix.strong_confluence`, `Ix.fire_commute`, `Ix.TC.eager_sound`,
+  `Ix.Lazy.discarded_divergence`.
+- **To do.** Re-run `lean-links.py` after the merge; review in a browser (the width of `△` in the mono font,
+  the narrow tree bundle, the net view of a single step).
