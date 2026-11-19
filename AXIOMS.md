@@ -2,8 +2,8 @@
 
 Output of `#print axioms` for every declaration in `FormalComputation/Audit.lean`, from CI
 job 2942 on commit `c40763e` (Lean v4.36.0, Mathlib v4.36.0). The build has no `sorry` in
-tiers 1–3. The essay-layer entries at the end are from job 3099 on `95590cb`, which has
-no `sorry` outside the stretch files. Every declaration below depends at most on Lean's three standard axioms
+tiers 1–3. The essay-layer entries are from job 3099 on `95590cb`, and the probe-layer
+entries from job 3107 on `fcfc56b`; neither has any `sorry` outside the stretch files. Every declaration below depends at most on Lean's three standard axioms
 (`propext`, `Classical.choice`, `Quot.sound`); none depends on `sorryAx`. CI regenerates
 this list on every push (section `==== AXIOMS ====` of the job log).
 
@@ -81,4 +81,20 @@ this list on every push (section `==== AXIOMS ====` of the job log).
 'FormalComputation.SKI.kaib_one_run' depends on axioms: [propext, Quot.sound]
 'FormalComputation.SKI.omegaLoop_permEq' depends on axioms: [propext, Quot.sound]
 'FormalComputation.SKI.not_absorbed'' depends on axioms: [propext, Quot.sound]
+
+-- probe layer (CI job 3107, commit fcfc56b; Lean sources as at e49a4da)
+'FormalComputation.SKI.confluent' depends on axioms: [Classical.choice]
+'FormalComputation.SKI.conv_join' depends on axioms: [Classical.choice]
+'FormalComputation.SKI.conv_normal_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.three_fibres' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.probeEq_plug' depends on axioms: [propext]
+'FormalComputation.SKI.probeEq_of_conv' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.probeEq_SK' depends on axioms: [Classical.choice]
+'FormalComputation.SKI.six_terms' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.probes_not_running' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.isType_probePred' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.runsToI_not_probe' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.codeEq_iff_conv' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.not_codeEq_I_SKK' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.codeEq_Ia_a' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
