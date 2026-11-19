@@ -429,8 +429,9 @@ theorem probes_read_code :
   · exact EqvGen.trans _ _ _ (Calculus.reds_conv (L := calculus) (idT_apply z))
       (EqvGen.symm _ _ (Calculus.reds_conv (L := calculus) (idT'_apply z)))
   · exact absurd (Calculus.conv_normal_eq calculus_confluent h isNormal_idT isNormal_idT')
-      (by decide)
+      (show idT ≠ idT' by decide)
   · have h' := (h sep (V 0)).1 sep_idT
-    exact absurd (Calculus.reads_unique calculus_confluent h' sep_idT') (by decide)
+    exact absurd (Calculus.reads_unique calculus_confluent h' sep_idT')
+      (show (V 0 : Tm ℕ) ≠ V 1 by decide)
 
 end FormalComputation.Tree

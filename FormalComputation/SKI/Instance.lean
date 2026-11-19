@@ -37,8 +37,14 @@ theorem calculus_probeEq_iff {t u : Tm} : calculus.ProbeEq t u ↔ ProbeEq t u :
 /-- The general sameness after running is the essay's. -/
 theorem calculus_conv_iff {t u : Tm} : calculus.Conv t u ↔ Conv t u := Iff.rfl
 
+/-- Normal forms are the same in both formulations. -/
+theorem calculus_isNormal_iff {t : Tm} : calculus.IsNormal t ↔ IsNormal t :=
+  ⟨fun h u s => h u ⟨s⟩, fun h u s => h u s.some⟩
+
 /-- The general sameness under probes that read code is the essay's. -/
-theorem calculus_codeEq_iff {t u : Tm} : calculus.CodeEq t u ↔ CodeEq t u := Iff.rfl
+theorem calculus_codeEq_iff {t u : Tm} : calculus.CodeEq t u ↔ CodeEq t u :=
+  forall_congr' fun _ => forall_congr' fun _ =>
+    iff_congr (and_congr Iff.rfl calculus_isNormal_iff) (and_congr Iff.rfl calculus_isNormal_iff)
 
 /-- For example, the general theorem gives back `probeEq_of_conv` for SKI. -/
 example {t u : Tm} (h : Conv t u) : ProbeEq t u :=

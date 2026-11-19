@@ -7,6 +7,98 @@ Status: research log being assembled into a synthesis. Each source is tagged:
 
 DOIs were checked against Crossref or DataCite unless marked otherwise.
 
+## 13.0 Synthesis
+
+### The picture Maxine started from is in the literature, in parts
+
+**Algebra and coalgebra meet in distributive laws.**
+- Turi and Plotkin show that rules in GSOS format are a distributive law of syntax
+  over behaviour.
+- Two consequences follow:
+  - the semantics by initial algebra and by final coalgebra agree;
+  - bisimilarity is a congruence, by naturality, without a per-calculus proof.
+- The line runs from Plotkin's SOS, which began as reduction semantics, through
+  rule formats, Aczel–Mendler, Rutten and Beck, to Turi–Plotkin. After them come
+  Lenisa–Power–Watanabe and Klin's survey, and then higher-order abstract GSOS
+  (Goncharov, Milius, Schröder, Tsampas, Urbat 2023–26), which treats **SKI**.
+  See 13.A and 13.C.
+
+**Observation as a pairing is a logical connection.**
+- Our pairing and lenses are Chu(Set, 2) and its morphisms.
+- Klin (CMCS 2010) states Chu(Set, 2) = (Set↓2^−).
+- Pavlovic, Mislove and Worrell (2006) frame testing as Σ × Θ → Ω.
+- Compositionality of logics with respect to SOS (Klin, LICS 2007; Fokkink, van
+  Glabbeek, de Wind 2006) is our `put` through contexts.
+- T^⊥ is Pitts's ⊤⊤ and Krivine's orthogonality.
+- "More observers, finer equality" through a Galois connection is van Glabbeek's
+  spectrum, and Beohar, Gurke, König and Messing (CSL 2023) for metrics.
+- See 13.B.
+
+**Bisimulation as lifting with existence only** is known: open maps (Joyal, Nielsen,
+Winskel), with weak factorization systems in Kurz–Rosický and Hirschowitz–Lafont.
+
+### What appears to be ours [inferred; absence searched for, not proved]
+
+1. **Invariant observation along a category of runs.** Behaviours are functors out of
+   the *localization* at the steps. This differs from bisimilarity: it identifies terms
+   in one fibre, so it agrees with bisimilarity only for deterministic systems. Turi and
+   Plotkin leave "the reductional approach" open. Klin's survey has no reduction
+   semantics. No bialgebraic treatment found makes runs a category with 2-cells.
+2. **One chain of observer classes** gives syntax, conversion and contextual equivalence
+   as three equalities.
+3. **Unique against non-unique lifting in one category of runs.** The algebraic,
+   orthogonal half is the framework. The coalgebraic, weak half is open maps.
+   - For deterministic reduction the two coincide.
+   - Non-uniqueness appears with nondeterministic reduction, which is where Lévy's
+     2-cells live.
+
+   *Conjecture:* modulo permutation equivalence, lifts are unique up to 2-cells.
+4. **Theorem B** (simulations induce adjunctions) speaks to an open problem named in
+   both Klin's survey and the higher-order papers: morphisms of distributive laws, for
+   translations and compilers.
+5. **Runs with 2-cells as intensional structure**: Lévy squares, ℤ-valued holes, cost as
+   a Dehn function. The final coalgebra erases these. Polygraphs (Guiraud–Malbos) and
+   2-categorical rewriting (Hirschowitz 2013) have the 2-cells but no observation
+   theory.
+
+### Where to generalize, in order of payoff
+
+1. **Rule formats for presentations.**
+   - Generate the steps of a presentation by an abstract (higher-order) GSOS law.
+   - Then derive congruence of sameness under probes from naturality, instead of
+     per-calculus proofs (`probeEq_plug` for SKI and tree calculus).
+   - Our `Calculus` layer is the elementary shadow of this.
+2. **Compare equalities on SKI.**
+   - Our probe equivalence and conversion, against strong and weak applicative
+     bisimilarity in the higher-order papers.
+   - A concrete, checkable test of where the localization and the final coalgebra
+     agree.
+3. **V-valued pairings.**
+   - Lawvere distances and Isbell conjugation for directed observers: cost, traces.
+   - Tools: Beohar et al.'s Galois connections, codensity lifting, Gavazzo's
+     applicative distances.
+   - The lax middle already has two models: lax bialgebras (weak similarity) and lax
+     orthogonal factorization systems (Clementino–López Franco).
+4. **Lenses as delta lenses.**
+   - Clarke's construction turns an orthogonal factorization system and an idempotent
+     comonad into an algebraic weak factorization system whose right maps are delta
+     lenses.
+   - Compare with our Chu lenses on (E, M).
+5. **Holes as coverings.** Dubut, Goubault and Goubault-Larrecq's unfolding as a
+   universal covering, and Guiraud–Malbos homotopy bases, are language for the ℤ-valued
+   hole of ω ω.
+
+### For essay 2
+
+The centre:
+- Invariant observers (algebra: what a term equals) against observers that see
+  direction (coalgebra: what a term does).
+- Distributive laws as the place they meet.
+- The framework's addition: runs form a category with 2-cells, so the meeting can be
+  studied one level up, where unique and non-unique lifting sit side by side.
+
+The examples: SKI, tree calculus and interaction nets.
+
 ## 13.A The lineage from SOS to Turi–Plotkin
 
 ### Sources (DOIs checked to resolve)
