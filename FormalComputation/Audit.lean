@@ -84,3 +84,17 @@ open FormalComputation
 #print axioms SKI.wt_permEq
 #print axioms SKI.not_absorbed
 #print axioms SKI.absorbed
+
+-- The essay layer ("Atoms and Probes")
+#print axioms beh_iff_of_subsingleton_co
+#print axioms beh_iff_of_subsingleton
+#print axioms SKI.IsType.conv
+#print axioms SKI.isType_close
+#print axioms SKI.close_le
+#print axioms SKI.isType_arr
+#print axioms SKI.fundamental_K
+#print axioms SKI.fundamental_I
+#print axioms SKI.fundamental_S
+#print axioms SKI.kaib_one_run
+#print axioms SKI.omegaLoop_permEq
+#print axioms SKI.not_absorbed'

@@ -11,6 +11,9 @@ import FormalComputation.Dehn
 import FormalComputation.SKI.Syntax
 import FormalComputation.SKI.Weight
 import FormalComputation.SKI.PermEq
+-- The essay layer
+import FormalComputation.SKI.Types
+import FormalComputation.Predicates
 -- Stretch
 import FormalComputation.Stretch.Trace
 import FormalComputation.Stretch.Conjoint
