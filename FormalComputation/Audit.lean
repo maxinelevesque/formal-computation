@@ -166,3 +166,7 @@ open FormalComputation
 #print axioms Obs.Pairing.toV_orth
 #print axioms Obs.Pairing.toV_same
 #print axioms Obs.Lens.preimage_orth_of_toV
+-- SKI runs as a dynamic presentation
+#print axioms SKI.zigzag_of_conv
+#print axioms SKI.conv_obsEq
+#print axioms SKI.conv_iso_Q

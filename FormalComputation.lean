@@ -24,6 +24,7 @@ import FormalComputation.Tree.Calculus
 import FormalComputation.Tree.Essay
 import FormalComputation.Diamond
 import FormalComputation.ThreeClasses
+import FormalComputation.SKI.Dyn
 -- Stretch
 import FormalComputation.Stretch.Trace
 import FormalComputation.Stretch.Conjoint
