@@ -123,3 +123,12 @@ open FormalComputation
 #print axioms SKI.isType_orth
 #print axioms SKI.probePred_iff_mem_orth
 #print axioms SKI.arr_iff_mem_orth
+-- Calculi with probes, in general; SKI as an instance
+#print axioms Calculus.probeEq_of_conv
+#print axioms Calculus.probeEq_plug
+#print axioms Calculus.probes_invariant
+#print axioms Calculus.isType_orth
+#print axioms Calculus.codeEq_iff_conv
+#print axioms Calculus.conv_normal_eq
+#print axioms SKI.calculus_confluent
+#print axioms SKI.calculus_probeEq_iff

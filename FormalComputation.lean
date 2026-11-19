@@ -18,6 +18,8 @@ import FormalComputation.SKI.Probes
 import FormalComputation.Predicates
 import FormalComputation.Observation
 import FormalComputation.SKI.Lenses
+import FormalComputation.Calculus
+import FormalComputation.SKI.Instance
 -- Stretch
 import FormalComputation.Stretch.Trace
 import FormalComputation.Stretch.Conjoint
