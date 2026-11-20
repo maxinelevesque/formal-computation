@@ -152,4 +152,8 @@ this list on every push (section `==== AXIOMS ====` of the job log).
 'FormalComputation.Tree.sk_unsound' depends on axioms: [propext, Classical.choice, Quot.sound]
 'FormalComputation.Tree.tree_six_distinct' depends on axioms: [propext, Classical.choice, Quot.sound]
 'FormalComputation.Tree.tree_six_terms' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+-- linked in the essay, added to the audit in review R1 (CI job 3155)
+'FormalComputation.SKI.probePred_respects' does not depend on any axioms
+'FormalComputation.SKI.omegaLoop'_wt' depends on axioms: [propext, Quot.sound]
 ```
