@@ -117,3 +117,19 @@ The could finding is at the editor's judgement.
 
 Could findings are at the editor's judgement. Every listed trope instance is fixed or
 rewritten.
+
+## Diff checks
+
+- D (21 findings): all fixed (commit a2c8a45).
+- The closed-instance decision: commit 559cdad..b553b19.
+- D2 (12 findings, 7 partly resolved items): fixed (7610597).
+- D3: 3 block and 2 should findings.
+  - **Rejected, with reason:** the pin finding. Re-pinning makes a new commit, so the
+    newest mirror commit can never be the pinned one. The links are pinned to `bd254f3`,
+    whose Lean files are identical, and `lean-links.py bd254f3 --check` reports 0
+    problems. The check is run against the pin.
+  - **Fixed by the author:** the closed-instance wording ("passes exactly when it passes on
+    all closed instances"); the tree loop's lack of a normal form, scoped as argued, with
+    the tree readout and a predicate note; the bare-hole law; the closed-instance mark in
+    the recap; the code readout's scope.
+  - **Snapshot:** 4 entries, as listed in the fixture's `source` field.
