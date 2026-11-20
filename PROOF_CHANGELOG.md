@@ -220,6 +220,32 @@ Additions only. Green at CI job 3141 (branch `lean-next`, merged).
     isomorphism in the localization.
   - The converses are not proved.
 
+## Closed instances: the essay's reading rule (2026-11-20)
+
+**Decision (Maxine, on the lead's recommendation).** The essay reads outcomes only on terms
+without variables. Terms with variables are compared through all their closed instances
+(`ProbeEqCl`), the largest substitution-stable equality inside sameness under probes.
+
+The two simpler rules fail:
+- **The permissive rule (`ProbeEq`, as in the earlier Lean).** It reads the term's own
+  variables. It is not stable under substitution: `probeEq_not_subst_stable` (`a I` ≡ `a K`,
+  yet `I I` ≢ `I K`).
+- **The strict rule (only the probe's fresh variables are readable, on open terms).** It makes
+  a variable look like a term with no value. This is argued, not mechanized.
+
+On terms without variables the three agree (`probeEqCl_iff_of_closed`). So every earlier
+result about closed terms is unchanged, and no statement was weakened.
+
+`SKI/Closed.lean` adds:
+- substitution, and steps, runs and conversion stable under it;
+- `ProbeEqCl` with `probeEqCl_of_conv`, `probeEqCl_subst` (for any substitution) and
+  `probeEqCl_plug`;
+- `not_probeEqCl_var_loop`;
+- `not_probeEqCl_aI_aK`;
+- `probeEq_aI_aK`, by a swap simulation.
+
+Green at CI job 3172.
+
 ## Mathlib anchors (checked against v4.36.0 source)
 
 | Anchor | Status |

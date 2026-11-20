@@ -251,3 +251,14 @@ the halves coincide for deterministic reduction (§13.0, §13.C).
   framework's lifting, or one level up.
 - **Where it goes.** A section of the technical companion, "Observers that see
   direction". The essay keeps its cards on cost and on watching runs as they are.
+
+## 12.9 The reading rule for open terms (decided 2026-11-20)
+
+Probes read outcomes only on terms without variables. Open terms are compared through all
+their closed instances: the largest substitution-stable equality inside sameness under
+probes. In the structural reading, the observation is natural for the substitution action
+on terms in context.
+
+The permissive rule reads the term's own variables, and it is not natural:
+`probeEq_not_subst_stable`. The strict rule makes a variable look like divergence. See
+PROOF_CHANGELOG ("Closed instances") and `SKI/Closed.lean`.
