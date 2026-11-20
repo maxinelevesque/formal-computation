@@ -156,4 +156,12 @@ this list on every push (section `==== AXIOMS ====` of the job log).
 -- linked in the essay, added to the audit in review R1 (CI job 3155)
 'FormalComputation.SKI.probePred_respects' does not depend on any axioms
 'FormalComputation.SKI.omegaLoop'_wt' depends on axioms: [propext, Quot.sound]
+
+-- linked in the essay after R1 apply (CI job 3164)
+'FormalComputation.Obs.Pairing' does not depend on any axioms
+'FormalComputation.Presentation' does not depend on any axioms
+'FormalComputation.SKI.codeEq_of_conv' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.isType_runsToI' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.le_close' does not depend on any axioms
+'FormalComputation.SKI.skRun' does not depend on any axioms
 ```
