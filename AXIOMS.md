@@ -165,7 +165,15 @@ this list on every push (section `==== AXIOMS ====` of the job log).
 'FormalComputation.SKI.le_close' does not depend on any axioms
 'FormalComputation.SKI.skRun' does not depend on any axioms
 
--- closed instances (SKI/Closed.lean; CI job 3172; lines the CI log tail did not show are covered by its summary: 0 entries depend on sorryAx)
+-- closed instances (SKI/Closed.lean; CI jobs 3172 and 3176)
+'FormalComputation.SKI.Probe.subst_plug' depends on axioms: [propext]
+'FormalComputation.SKI.Step.subst' does not depend on any axioms
+'FormalComputation.SKI.conv_subst' depends on axioms: [Classical.choice]
+'FormalComputation.SKI.probeEqCl_equivalence' does not depend on any axioms
+'FormalComputation.SKI.probeEqCl_iff_of_closed' depends on axioms: [propext]
+'FormalComputation.SKI.probeEqCl_of_conv' depends on axioms: [propext, Classical.choice, Quot.sound]
+'FormalComputation.SKI.probeEqCl_subst' depends on axioms: [propext]
+'FormalComputation.SKI.reds_subst' depends on axioms: [Classical.choice]
 'FormalComputation.SKI.not_probeEqCl_aI_aK' depends on axioms: [propext, Classical.choice, Quot.sound]
 'FormalComputation.SKI.not_probeEqCl_var_loop' depends on axioms: [propext, Classical.choice]
 'FormalComputation.SKI.not_probeEq_II_IK' depends on axioms: [propext, Classical.choice, Quot.sound]
