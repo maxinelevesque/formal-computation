@@ -173,3 +173,10 @@ open FormalComputation
 -- linked in the essay but missing from the audit (R1, L pass)
 #print axioms SKI.probePred_respects
 #print axioms SKI.omegaLoop'_wt
+-- linked in the essay after R1 apply
+#print axioms SKI.skRun
+#print axioms SKI.le_close
+#print axioms SKI.isType_runsToI
+#print axioms SKI.codeEq_of_conv
+#print axioms Obs.Pairing
+#print axioms Presentation
