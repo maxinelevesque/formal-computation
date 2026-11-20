@@ -170,3 +170,6 @@ open FormalComputation
 #print axioms SKI.zigzag_of_conv
 #print axioms SKI.conv_obsEq
 #print axioms SKI.conv_iso_Q
+-- linked in the essay but missing from the audit (R1, L pass)
+#print axioms SKI.probePred_respects
+#print axioms SKI.omegaLoop'_wt

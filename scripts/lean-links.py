@@ -76,7 +76,7 @@ def main():
     ap.add_argument("--check", action="store_true")
     a = ap.parse_args()
     sha = git("rev-parse", a.sha).strip()
-    git("fetch", "-q", "github")
+    subprocess.run(["git", "fetch", "-q", "github"], capture_output=True)  # best effort; the check uses the cached ref
     on_mirror = subprocess.run(["git", "merge-base", "--is-ancestor", sha, "github/main"]).returncode == 0
     problems = [] if on_mirror else [f"commit {sha[:12]} is not on github/main"]
     decls = index(sha)
@@ -111,8 +111,12 @@ def main():
         new = re.sub(r'(<code data-lean-commit="">)[^<]*(</code>)', rf"\g<1>{sha[:7]}\g<2>", new)
         new = re.sub(r"^\[([^\]]+)\]: \S*formal-computation\S*$", decl_md, new, flags=re.M)
         new = re.sub(r"(Lean links point to commit `)[0-9a-f]+(`)", rf"\g<1>{sha[:7]}\g<2>", new)
-        if new != text and not a.check:
-            open(f, "w", encoding="utf-8").write(new)
+        if new != text:
+            if a.check:
+                stale = sum(1 for x, y in zip(re.findall(r'href="[^"]*"', text), re.findall(r'href="[^"]*"', new)) if x != y)
+                problems.append(f"{f}: {stale} stored link(s) differ from the pin {sha[:12]} (re-run without --check)")
+            else:
+                open(f, "w", encoding="utf-8").write(new)
     print(f"{total} declaration links at {sha[:12]}; {len(problems)} problems")
     for p in problems:
         print("  " + p)
