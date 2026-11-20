@@ -238,6 +238,18 @@ svg text.t-atom { fill: var(--atom); }
 .cell.sealed { color: var(--muted); font-family: var(--sans); font-style: italic; }
 .cell[aria-pressed="true"] { border-color: var(--ink); background: var(--wash); }
 .pt { font-family: var(--sans); font-weight: 600; text-align: center; font-feature-settings: "lnum"; }
+/* on a phone the table of probes keeps to the column: smaller type, tighter cells, a count under its reading;
+   if it still does not fit, it scrolls inside its frame and the row labels stay in view */
+.grid-wrap { overflow-x: auto; max-width: 100%; }
+@media (max-width: 640px) {
+  .grid { font-size: 0.8rem; }
+  .grid th, .grid td { padding: 2px 4px 2px 0; }
+  .cell { padding: 5px 5px; white-space: normal; }
+  .cell .ncount { display: block; margin-left: 0; line-height: 1.15; }
+  .grid th[scope="row"] { position: sticky; left: 0; z-index: 1; background: var(--paper); }
+}
+.calc-note code.long { white-space: normal; }
+.controls [hidden] { display: none; }
 
 /* tables: rules only */
 .table-wrap { overflow-x: auto; clear: both; }
@@ -336,8 +348,6 @@ footer { margin-top: 4rem; border-top: 1px solid var(--rule); padding-top: 1.3re
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .edge.leak { animation: pulse 1.1s ease-in-out infinite alternate; }
-  @keyframes pulse { from { opacity: 1; } to { opacity: 0.35; } }
   /* short cues: a point reached, a reading landed, a number changed, a square swept */
   /* drawn with stroke width and type size, which every browser animates alike */
   .arrive { stroke: var(--run); animation: arrive 0.9s ease-out 1 forwards; }
@@ -354,7 +364,7 @@ footer { margin-top: 4rem; border-top: 1px solid var(--rule); padding-top: 1.3re
   @keyframes land { 0% { box-shadow: 0 0 0 0 currentColor; transform: scale(1.12); } 100% { box-shadow: 0 0 0 12px transparent; transform: scale(1); } }
 }
 @media (prefers-reduced-motion: reduce) {
-  .fade, .n-rect, .hole { transition: none; }
+  .fade, .n-rect, .hole, .n-dot, .lattice { transition: none; }
 }
 
 /* the calculus switch: one radio group at the top, and a small copy in each figure it changes */
@@ -483,11 +493,11 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
         <p id="benchverdict"></p>
       </div>
       <div>
-        <table class="grid" id="grid"></table>
+        <div class="grid-wrap" role="region" aria-label="Readings of the six terms" tabindex="0"><table class="grid" id="grid"></table></div>
         <p class="readout" id="benchread"></p>
       </div>
     </div>
-    <figcaption>Each row is a term and each column a probe. Select a cell to run that experiment: the term is placed in the probe, the run is played a step at a time, and the reading lands in the cell. The last column numbers the points: rows with the same readings in every column have the same number.</figcaption>
+    <figcaption>Each row is a term and each column a probe. Select a cell to run that experiment: the term is placed in the probe, the run is played a step at a time, and the reading lands in the cell. The last column numbers the points: rows with the same readings in every column have the same number.<span data-only="net"> The small green number in a cell is run data, the number of interactions the browser’s reducer took. It is not part of the reading, and the points ignore it. A probe that also returned the count would tell <code>K I</code> from <code>K (S K K)</code>.</span></figcaption>
     <p class="calc-note" data-calc="tree net"><b>In tree calculus</b> the rows are <code>I</code>, <code>S K K</code>, <code>S K (△K)</code>, <code>K I</code>, <code>K (S K K)</code> and <code>K</code>, and a fourth probe is added, the triage probe. It takes the right branch of the term’s top fork, then uses that branch’s shape to choose <i>x</i>, <i>y</i> or <i>z</i>. A leaf gives <i>x</i>, a stem of a leaf gives <i>y</i>, and a stem of a stem gives <i>z</i>. For example <code>I</code> is <code>△(△K)△</code>, whose right branch is the leaf <code>△</code>, so the probe reads <i>x</i> from it. The probe therefore separates the three identities, which no probe of combinatory logic can do.<a class="lean" data-lean="Tree.tree_six_terms" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Tree/Essay.lean#L101" title="Mechanized: Tree.tree_six_terms" aria-label="Mechanized: Tree.tree_six_terms">lean</a> <code>K I</code> and <code>K (S K K)</code> still share a point here, but the triage probe used after <code>[ ] x</code> tells them apart too: in tree calculus no two of the six terms are the same under probes.<a class="lean" data-lean="Tree.tree_six_distinct" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Tree/Essay.lean#L161" title="Mechanized: Tree.tree_six_distinct" aria-label="Mechanized: Tree.tree_six_distinct">lean</a> Written out, the triage probe is <code class="long">triage(x, triage(y, K z, △), △) (triage(K △, K (K △), K I) [ ])</code>, where <code>triage(a, b, c)</code> is <code>△(△ a b) c</code>.</p>
     <p class="calc-note" data-calc="net"><b>In interaction nets</b> each experiment is compiled to a net and run by interactions, and the readings are those of tree calculus. Each cell also shows, as a small number, how many interactions its run took in the browser’s reducer. That number is the same for every order of interactions, because the interactions of a net commute: any two runs between the same nets have the same length.<a class="lean" data-lean="Diamond.equal_lengths" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Diamond.lean#L90" title="Mechanized: Diamond.equal_lengths" aria-label="Mechanized: Diamond.equal_lengths">lean</a><a class="ts" href="https://github.com/maxinelevesque/tree-semantics/blob/5147cfad47f152f30dac95f8344105c867561b5c/TreeCalculus/IxConfluence.lean#L308" title="Mechanized in tree-semantics: Ix.Steps.equal_lengths" aria-label="Mechanized in tree-semantics: Ix.Steps.equal_lengths">lean</a> The count is not part of the reading, and the points group the rows by their readings alone. The card on cost, near the end of the essay, lets a probe return the count as well. Selecting a cell shows the term at the result port as the interactions go, with the number done so far in brackets.</p>
   </figure>
@@ -529,6 +539,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
     <div class="controls">
       <label class="check" for="focus">Term <select id="focus" class="mono"></select></label>
       <label class="check" for="order">Order <select id="order"><option value="outer">outermost redex first</option><option value="inner">arguments first</option></select></label>
+      <span class="check" id="ordercyc" hidden>Order: shown cycle</span>
     </div>
     <div class="now" id="now"></div>
     <div class="controls">
@@ -538,7 +549,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
     </div>
     <div class="stage"><svg id="svg-hero" role="img" aria-label="Fourteen terms drawn beside the values they run to. Each arrow is one step. Terms joined by steps are grouped over one point on a line."></svg></div>
     <p class="readout" id="heroread"></p>
-    <figcaption>Each box is a term and each arrow is a step. A box with a dark outline is a normal form. The line has one point for each fibre shown, and a hollow point marks the fibre with no value. The green arrows are the run of the chosen term under the chosen order, and the green dot is the term reached so far. Select any box to run that term.</figcaption>
+    <figcaption><span data-only="ski tree">Each box is a term and each arrow is a step. A box with a dark outline is a normal form. The line has one point for each fibre shown, and a hollow point marks the fibre with no value. The green arrows are the run of the chosen term under the chosen order, and the green dot is the term reached so far. Select any box to run that term, or choose it under Term. A term of the loop is run round the cycle shown, and Order then says so.</span><span data-only="net">Each dot is a net and each line one interaction. Time runs from left to right, or from top to bottom on a narrow screen. Follow the green path with Time, or choose another starting term under Term. Under ‘One step’ the net itself is drawn.</span></figcaption>
     <p class="calc-note" data-calc="tree"><b>In tree calculus</b> the same situations are written in trees, and every arrow keeps its intermediate terms. An I-step becomes two steps, the S-rule and then the K-rule, as in <code>I a → K a (△a) → a</code>, so the bundle has nineteen terms. The loop <code>ω ω</code> has five: the S-rule copies <code>ω</code>, and each <code>I ω</code> then takes two steps to <code>ω</code>, the left one first.<a class="lean" data-lean="Tree.omega_cycle" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Tree/Essay.lean#L229" title="Mechanized: Tree.omega_cycle" aria-label="Mechanized: Tree.omega_cycle">lean</a> Two runs that leave a term can still be continued until they meet.<a class="lean" data-lean="Tree.calculus_confluent" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Tree/Calculus.lean#L348" title="Mechanized: Tree.calculus_confluent" aria-label="Mechanized: Tree.calculus_confluent">lean</a></p>
   </figure>
   <p>The last view is the classical account of what a program means. A program denotes a value, and a type sorts programs by their values.<label for="sn8" class="sn-num"></label><input type="checkbox" id="sn8" class="sn-toggle"><span class="sidenote">D. S. Scott and C. Strachey, ‘Toward a mathematical semantics for computer languages’, Technical Monograph PRG-6, Oxford University Computing Laboratory, 1971.</span> Nothing in that account is false. It is obtained from the fuller picture by discarding everything except the line and its points.</p>
@@ -559,7 +570,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
     </div>
     <div class="stage"><svg id="svg-base" role="img" aria-label="The same fourteen terms. A dotted line joins each one to a point on the line. Changing the equality slides the points together or apart."></svg></div>
     <p class="readout" id="baseread"></p>
-    <figcaption>The boxes do not move. Only the points on the line do, and they take the colour of what decides the equality: ochre for text, green for running, blue for probes. Each equality is coarser than the one before it.</figcaption>
+    <figcaption>The boxes do not move. Only the points on the line do, and they take the colour of what decides the equality: ochre for text, green for running, blue for probes. <span id="basecap">Each equality is coarser than the one before it.</span></figcaption>
     <p class="calc-note" data-calc="tree net"><b>In tree calculus</b> the third identity is <code>S K (△K)</code>, and probes can triage. The triage probe of the first figure reads <i>x</i>, <i>y</i> and <i>z</i> from <code>I</code>, <code>S K K</code> and <code>S K (△K)</code>, so sameness under probes keeps the three apart, and it puts the points where sameness after running does. The rule <code>S K y → I</code> is therefore unsound here: it joins fibres that probes keep apart. Its steps are drawn in red.<a class="lean" data-lean="Tree.sk_unsound" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Tree/Essay.lean#L182" title="Mechanized: Tree.sk_unsound" aria-label="Mechanized: Tree.sk_unsound">lean</a><span data-only="net"> In interaction nets the figure keeps these tree terms. The first figure ran their probes as nets, with the same readings.</span></p>
   </figure>
   <p>The three are named here by what decides them, and each name keeps its colour for the rest of the essay. <span class="atom">Sameness of text</span> identifies two descriptions only when they are the same tree. It is the equality that atoms give. <span class="run">Sameness after running</span> identifies descriptions that lie in one fibre, that is, descriptions joined to one another by steps. It is the only one of the three defined by running. A proof assistant in which every term it compares has a value can decide this equality by running both sides to their values, and it calls the equality definitional. <span class="probe">Sameness under probes</span> identifies descriptions that no probe can tell apart. It is the equality that probes give, and it is usually called contextual or observational equivalence.<label for="sn10" class="sn-num"></label><input type="checkbox" id="sn10" class="sn-toggle"><span class="sidenote">Morris, cited in note 4, and G. D. Plotkin, ‘LCF considered as a programming language’, <em>Theoretical Computer Science</em> 5(3), 1977, 223–255.</span></p>
@@ -642,7 +653,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
   <p>Length was seen in the figure of fourteen terms, where <code>K a (I b)</code> reached <code>a</code> in one step or in two. The cost of a run is the number of its steps. That this number is a fair measure of cost, within a polynomial factor of time on a machine, is itself a theorem, and it holds for particular orders of evaluation.<label for="sn15" class="sn-num"></label><input type="checkbox" id="sn15" class="sn-toggle"><span class="sidenote">P. van Emde Boas, ‘Machine models and simulations’, in J. van Leeuwen (ed.), <em>Handbook of Theoretical Computer Science</em>, vol. A, Elsevier, 1990, 1–66; B. Accattoli and U. Dal Lago, ‘(Leftmost-outermost) beta reduction is invariant, indeed’, <em>Logical Methods in Computer Science</em> 12(1:4), 2016.</span> Whether two runs between the same terms are the same run is not settled by the steps. A calculus may declare that two such runs count as one, and then every behaviour has to respect the declaration, so that evidence carried along either run arrives in the same state. The other two are drawn below.</p>
   <figure class="wide">
     <div class="fig-title">Two fibres from the inside</div>
-    <div class="controls"><div class="calc-switch small" hidden></div></div>
+    <div class="controls"><button type="button" class="btn" id="exitpause">Pause</button><div class="calc-switch small" hidden></div></div>
     <div class="multiples">
       <div>
         <svg id="svg-pent" viewBox="0 0 330 222" role="img" aria-label="Five bracketings of four letters, joined by five steps into a pentagon. Two markers leave the top term by different routes and arrive at the same bottom term, which stands over one point."></svg>
@@ -805,6 +816,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
       <button type="button" class="tab" data-f="2" aria-pressed="false">With direction</button>
       <button type="button" class="tab" data-f="3" aria-pressed="false">With cost</button>
       <button type="button" class="btn go" id="fplay">Play all four</button>
+      <button type="button" class="btn" id="fpause">Pause</button>
       <div class="calc-switch small" hidden></div>
     </div>
     <div class="multiples">
@@ -818,14 +830,14 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
       </div>
     </div>
     <p class="readout" id="fread" aria-live="polite"></p>
-    <figcaption>On the left, the fibre of <code>K a (I b)</code>, which has two runs to <code>a</code>. On the right, the loop <code>ω ω</code>. Each view keeps more of the two fibres than the one before. The dashed black line in the view called ‘A graph’ is a round trip.</figcaption>
+    <figcaption><span data-only="ski">On the left, the fibre of <code>K a (I b)</code>, which has two runs to <code>a</code>. On the right, the loop <code>ω ω</code>.</span><span data-only="tree">On the left, the fibre of <code>K a (I b)</code> in trees, which has three runs to <code>a</code>. On the right, the loop <code>ω ω</code>, of five terms.</span><span data-only="net">On the left, every net that <code>K a (I b)</code> can reach, one dot to a net. On the right, the first five layers of the nets that <code>ω ω</code> can reach.</span> Each view keeps more of the two fibres than the one before. The dashed black line in the view called ‘A graph’ is a round trip.</figcaption>
     <p class="calc-note" data-calc="tree"><b>In tree calculus</b> the I-step is expanded, so <code>K a (I b)</code> has three runs to <code>a</code>, of one, two and three steps, and they all count as one. The loop <code>ω ω</code> has five terms.<a class="lean" data-lean="Tree.omega_cycle" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Tree/Essay.lean#L229" title="Mechanized: Tree.omega_cycle" aria-label="Mechanized: Tree.omega_cycle">lean</a></p>
     <p class="calc-note" data-calc="net"><b>In interaction nets</b> the left panel is every net that <code>K a (I b)</code> can reach, by the number of interactions done. Its runs are paths through this lattice. Where two interactions can both fire, firing them in either order gives the same net, and the two orders close a square.<a class="ts" href="https://github.com/maxinelevesque/tree-semantics/blob/5147cfad47f152f30dac95f8344105c867561b5c/TreeCalculus/IxCommutation.lean#L96" title="Mechanized in tree-semantics: Ix.fire_commute" aria-label="Mechanized in tree-semantics: Ix.fire_commute">lean</a> Every complete run has the same length, ten interactions as the browser counts them.<a class="lean" data-lean="Diamond.equal_lengths" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Diamond.lean#L90" title="Mechanized: Diamond.equal_lengths" aria-label="Mechanized: Diamond.equal_lengths">lean</a> Without arrowheads each square is a round trip, and it is filled when the two orders count as one run. The right panel shows the first five layers of the nets that <code>ω ω</code> can reach. They contain squares too, and so round trips. In the outermost run checked with the essay’s reducer, no net repeats in the first thousand interactions, so that run does not come back round. Whether the whole fibre of <code>ω ω</code> has a hole is left open here.</p>
   </figure>
   <p>On a fibre without holes, keeping the graph or the direction tells a type nothing that the single point did not. Evidence, it will be recalled, is whatever a family attaches to a term: a yes or a no for a predicate, and a proof or a number for a richer family. On a fibre without holes, evidence carried along any two runs between the same terms arrives in the same state. A behaviour is the framework’s wider notion of type, in which each step carries evidence across in exactly one way. Over such a fibre it amounts to evidence attached to the value, and for a predicate to a yes or a no about the value. In a calculus whose rules do not overlap, such as combinatory logic, the fibre over a value is of this kind, provided that runs are counted as one in the standard way of Lévy’s theory. Two steps at separate places can be taken in either order. When a step discards an argument, a step taken inside that argument beforehand leaves nothing behind, as in the two runs of <code>K a (I b)</code>. When a step copies an argument, a step taken inside it beforehand stands for the same step taken in each copy afterwards. Runs that differ in these ways count as one, and by Lévy’s theory any two runs that end at the value then count as one. The step from there to the absence of holes is the framework’s own, and it has been mechanized: a fibre in which every term has a single run to one term, so counted, has no holes, and a behaviour over it amounts to evidence about that term.<a class="lean" data-lean="beh_equiv_type_of_terminal_co" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/LocalSystems.lean#L254" title="Mechanized: beh_equiv_type_of_terminal_co" aria-label="Mechanized: beh_equiv_type_of_terminal_co">lean</a> Each step of a round trip, followed by the run from its end to that term, is a run to that term, and so it counts as one with the run from its start. The round trip can therefore be pulled onto that term a step at a time, and there it is empty.<label for="sn23" class="sn-num"></label><input type="checkbox" id="sn23" class="sn-toggle"><span class="sidenote">The identification is due to Lévy and is treated in Huet and Lévy, cited in note 7, and in Terese, <em>Term Rewriting Systems</em>, Cambridge University Press, 2003, chapter 8. That any two runs to a value are identified is Huet and Lévy’s normal derivation theorem (part I, theorem 3.26): either run, projected along the other, leaves nothing to do at the value. The ways of counting runs as one are shown to agree in V. van Oostrom and R. de Vrijer, ‘Four equivalent equivalences of reductions’, <em>Electronic Notes in Theoretical Computer Science</em> 70(6), 2002, 21–61, <a href="https://doi.org/10.1016/S1571-0661(04)80599-1">doi:10.1016/S1571-0661(04)80599-1</a>. Among the pairs it identifies are a run that discards an argument at once and a run that first takes a step inside that argument. In interaction nets no step discards or copies another, so two steps from one net always commute in a single square, and every run to the end has the same length: Y. Lafont, ‘Interaction nets’, <em>POPL</em> 1990, 95–108, <a href="https://doi.org/10.1145/96709.96718">doi:10.1145/96709.96718</a>; ‘Interaction combinators’, <em>Information and Computation</em> 137, 1997, 69–101, <a href="https://doi.org/10.1006/inco.1997.2643">doi:10.1006/inco.1997.2643</a>.<a class="lean" data-lean="SKI.kaib_one_run" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/SKI/Types.lean#L98" title="Mechanized: SKI.kaib_one_run" aria-label="Mechanized: SKI.kaib_one_run">lean</a> For holes left by overlapping rules, see Squier, Otto and Kobayashi, cited in note 16.</span> This is why types as predicates serve such calculi well, and why keeping only the line has seemed to lose nothing. The calculus of bracketings, with its one rule <code>(xy)z → x(yz)</code>, is not of this kind. Its rule can be used at two places in <code>((xy)z)w</code> that share a bracket, neither use discards or copies the other, and the pentagon is the hole that this overlap leaves<a class="lean" data-lean="Pentagon.top_ne_bot_localized" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Pentagon.lean#L74" title="Mechanized: Pentagon.top_ne_bot_localized" aria-label="Mechanized: Pentagon.top_ne_bot_localized">lean</a>, which is why it needs an equation of its own.</p>
   <p>Where a hole remains after runs have been counted in this way, the levels come apart, and the loop <code>ω ω</code> is the smallest example. The figure attaches a piece of evidence to a term and carries it along runs. The evidence is either a yes, or a counter that the S-rule, <code>S x y z → x z (y z)</code>, advances by one. On the left is the loop <code>ω ω</code>, in which the S-rule is used once in each lap, so that the counter counts laps. On the right is the fibre of <code>K a (ω ω)</code>, where the same loop sits inside an argument that the K-rule, <code>K x y → x</code>, discards.</p>
   <figure class="wide">
-    <div class="fig-title">Evidence carried along runs, in two fibres</div>
+    <div class="fig-title">Evidence carried along runs, in two fibres<span data-only="net">: a tree-calculus example</span></div>
     <div class="controls">
       <label class="check" for="evid">Evidence <select id="evid"><option value="count">a counter</option><option value="yes">a yes</option></select></label>
       <button type="button" class="btn" id="lapreset">Start again</button>
@@ -845,7 +857,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
         <p id="kloopread" class="says" aria-live="polite"></p>
       </div>
     </div>
-    <figcaption>The counter is advanced by one at each use of the S-rule and is otherwise left alone. Unmarked arrows in the cycles are uses of the I-rule.</figcaption>
+    <figcaption><span data-only="ski">The counter is advanced by one at each use of the S-rule and is otherwise left alone. Unmarked arrows in the cycles are uses of the I-rule.</span><span data-only="tree net">The counter advances by one at the S-step at the root, <code>ω ω → I ω (I ω)</code>, which copies <code>ω</code>. The other steps leave it alone, including the S-steps inside the expanded I-steps.</span></figcaption>
     <p class="calc-note" data-calc="tree"><b>In tree calculus</b> the loop has five steps.<a class="lean" data-lean="Tree.omega_cycle" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Tree/Essay.lean#L229" title="Mechanized: Tree.omega_cycle" aria-label="Mechanized: Tree.omega_cycle">lean</a> The counter advances at the use of the S-rule that copies <code>ω</code>, <code>ω ω → I ω (I ω)</code>. The other two uses of the S-rule are the expanded I-steps and leave it alone, as the I-rule did. Inside <code>K a (ω ω)</code> a lap still counts for nothing.</p>
     <p class="calc-note" data-calc="net"><b>In interaction nets</b> the figure stays in tree calculus, and both panels are tree examples. In the run of the net of <code>ω ω</code> that was checked, no net comes round again, so there is no lap to go round. Nothing is discarded either. The eraser of <code>K a (ω ω)</code> waits on its argument instead of throwing it away. Different orders of interaction can reach the same net, as round a square, and a run that finishes takes the same number of interactions in every order.<a class="lean" data-lean="Diamond.equal_lengths" href="https://github.com/maxinelevesque/formal-computation/blob/d58539e1b007615b7305d38d117455c6d0f0ceff/FormalComputation/Diamond.lean#L90" title="Mechanized: Diamond.equal_lengths" aria-label="Mechanized: Diamond.equal_lengths">lean</a> A counter on nets could add one for each interaction and take one away for each interaction taken back. Both routes round a square then add two, so they agree there. Whether such a counter is a behaviour on the whole fibre of <code>K a (ω ω)</code> is not settled here.</p>
   </figure>
@@ -2451,6 +2463,39 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
   syncSwitches();
   window.addEventListener('hashchange', function () { setCalc(calcFromHash(), false); });
 
+  /* The accessible description of each large figure, for tree calculus and for nets. Combinatory logic keeps the
+     one written in the page. */
+  var ARIA = {
+    'svg-hero': {
+      tree: 'Nineteen tree terms drawn beside the values they run to. Each arrow is one step. Terms joined by steps are grouped over one point on a line.',
+      net: 'The nets that the chosen term can reach, drawn as dots placed by the number of interactions done, from left to right, or from top to bottom on a narrow screen. The green path is the run in the chosen order. Under One step the net itself is drawn.' },
+    'svg-base': { tree: 'The same nineteen tree terms. A dotted line joins each one to a point on the line. Changing the equality slides the points together or apart.' },
+    'svg-paint': { tree: 'The same nineteen tree terms, shaded where the chosen predicate holds. A red arrow marks a step with one shaded end and one unshaded end.' },
+    'svg-code': { tree: 'The same nineteen tree terms, with the points placed by sameness under probes. The probes of tree calculus read code, so I, S K K and S K (△K) stand on three points.' },
+    'svg-lemma': { tree: 'Three terms in a row: △△, then △△ u v, then u. A dashed arrow labelled as a probe joins the first to the second. A solid arrow labelled as the K-rule joins the second to the third. A dot that marks membership in a type moves from the third term back to the first.' },
+    'svg-exit': {
+      tree: 'Five terms in a cycle, the loop of K a (ω ω) in trees. An arrow leaves each of them for the normal form a, which stands over one point. One marker goes round the cycle and another takes the first exit.',
+      net: 'The eager net of K a (ω ω). Its result port reads a after three interactions, while a count of the interactions of the whole net goes on rising.' },
+    'fib-a': {
+      tree: 'The fibre of K a (I b) in trees: four terms, with three routes to the normal form a, over a point marked a. The views show it as one point, as a filled shape in which a round trip shrinks to nothing, with arrows that end at a, and with the lengths of the routes.',
+      net: 'Every net that K a (I b) can reach, drawn as dots placed by the number of interactions done, over a point marked a. Where two interactions can both fire, the two orders close a square.' },
+    'fib-w': {
+      tree: 'The loop omega omega in trees: five terms in a cycle, over a hollow point marked no value. The views show it as one hollow point, as a ring with a hole that a round trip cannot shrink past, with a marker going round, and with a count of steps that keeps rising.',
+      net: 'The first five layers of the nets that omega omega can reach, drawn as dots, over a hollow point marked no value. They contain squares, each a round trip that swapping two interactions fills.' },
+    'svg-loop': { tree: 'The five tree terms of the loop omega omega, joined in a cycle by five steps, over a hollow point marked no value. A marker travels round the cycle, and the evidence it carries is shown in the middle.' },
+    'svg-kloop': { tree: 'Five terms in a cycle, each with an arrow out to the normal form a, which stands over one point. One marker goes straight to a and another goes once round the cycle first. The evidence each arrives with is shown beside a.' }
+  };
+  var ARIA_SKI = {};
+  Object.keys(ARIA).forEach(function (id) { var el = $(id); if (el) ARIA_SKI[id] = el.getAttribute('aria-label'); });
+  function syncAria() {
+    Object.keys(ARIA).forEach(function (id) {
+      var el = $(id), m = ARIA[id];
+      if (el) el.setAttribute('aria-label', calc === 'ski' ? ARIA_SKI[id] : m[calc] || m.tree);
+    });
+  }
+  syncAria();
+  onCalc(syncAria);
+
   /* ---------- the bundle: positions are laid out by hand, arrows are computed ----------
      In combinatory logic the fourteen terms are laid out by hand. In tree calculus (and for nets, whose
      read-backs are tree terms) the bundle holds the same situations in trees, closed under one-step
@@ -2962,7 +3007,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
           b.className = 'cell ' + (ex.own ? 'own' : read ? 'text' : 'sealed');
           b.setAttribute('aria-pressed', String(on));
           b.setAttribute('aria-label', (typeof p === 'string' ? 'The triage probe' : 'The probe ' + ctx(c)) + ' on ' + t + ': ' + (read ? 'reads ' + ex.out : 'not read') +
-            (mode === 'net' ? ', after ' + ex.count + (ex.count === 1 ? ' interaction' : ' interactions') : ''));
+            (mode === 'net' ? ', run data: ' + ex.count + (ex.count === 1 ? ' interaction' : ' interactions') : ''));
           key.push(read ? ex.out : '');
         });
         keys.push(key.join('|'));
@@ -3010,7 +3055,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
         : mode === 'ski'
           ? 'Rows with the same readings in every column cannot be told apart by these probes, nor by any other probe that reads only what it supplied.'
           : 'The triage probe reads code, and it separates the three identities. Rows with the same readings in every column cannot be told apart by these four probes.' +
-            (mode === 'net' ? ' The small numbers count interactions: each is the same for every order of interactions.' : ''));
+            (mode === 'net' ? ' The small numbers are run data, the interactions each run took in the browser’s reducer. They are not part of the reading, and the points ignore them. A run that finishes takes the same number in every order.' : ''));
       each('[data-r]', function (b) { if (b.classList.contains('tab')) b.setAttribute('aria-pressed', String(b.getAttribute('data-r') === reading)); });
     }
     grid.addEventListener('click', function (ev) {
@@ -3024,7 +3069,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
     code.addEventListener('change', function () { touched = true; render(false, true); });
     onCalc(function () { setup(); buildGrid(); prev = {}; render(false); });
     render(false);
-    onFirstView(grid, function () { if (!touched) render(true); });
+    if (!RM) onFirstView(grid, function () { if (!touched) render(true); });
   })();
 
   /* ---------- running: four views ----------
@@ -3046,7 +3091,11 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
     }
     fillFocus();
 
+    // a term of the loop is always run round the cycle drawn, so for it Order gives way to a label that says so
+    var ordLab = ord.parentNode, cycLab = $('ordercyc');
+    function syncOrder() { var loop = !isNet() && NODES[start].f === 'loop'; ordLab.hidden = loop; cycLab.hidden = !loop; }
     function buildPath() {
+      syncOrder();
       if (isNet()) { netPath(); return; }
       var p = pathOf(start, order);
       path = p.path; cyc = p.cyc;
@@ -3070,8 +3119,18 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
       });
       var fib = NODES[start].f;
       v.nodes.forEach(function (n, ni) {
-        op(n.g, level === 1 ? (ni === i ? 1 : ni === nxt ? 0.5 : 0) : level === 2 ? (inPath[ni] ? 1 : 0) : level === 3 ? 1 : 0.1);
+        var o = level === 1 ? (ni === i ? 1 : ni === nxt ? 0.5 : 0) : level === 2 ? (inPath[ni] ? 1 : 0) : level === 3 ? 1 : 0.1;
+        op(n.g, o);
         n.r.setAttribute('class', 'n-rect' + (NODES[ni].nf ? ' nf' : '') + (level !== 4 && ni === here ? ' cur' : ''));
+        // a box that cannot be seen cannot be reached: not by the keyboard, the pointer or a screen reader
+        var gone = o === 0;
+        if (gone !== !!n.gone) {
+          n.gone = gone;
+          n.g.setAttribute('tabindex', gone ? '-1' : '0');
+          if (gone) n.g.setAttribute('aria-hidden', 'true'); else n.g.removeAttribute('aria-hidden');
+          n.g.style.pointerEvents = gone ? 'none' : '';
+          if (gone && document.activeElement === n.g) focus.focus();     // keep the focus on a control that is still there
+        }
       });
       v.edges.forEach(function (e, ei) {
         var hot = level === 1 ? ei === nowEdge : (level === 2 || level === 3) && inEdge[ei];
@@ -3304,13 +3363,13 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
       }
       ord.value = order;
       fillFocus(); focus.value = start;
-      if (c !== 'net') buildPath();
+      if (c !== 'net') buildPath(); else syncOrder();
       build();
     });
     if (isNet()) { ord.innerHTML = '<option value="outer">outermost first</option><option value="inner">innermost first</option><option value="random">random</option>'; tab3.textContent = 'All the states'; }
     if (!isNet()) buildPath();
     build();
-    onFirstView(svg, function () { if (!touched) play(); });
+    if (!RM) onFirstView(svg, function () { if (!touched) play(); });
   })();
 
   /* ---------- equalities: one figure for the three, one for the effect of reading code ----------
@@ -3411,6 +3470,10 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
         : m === 'testsep' ? 'The triage probe reads x from I, y from S K K and z from ' + third + ', so the three do not share a point. Probes that can read code put the points where running does.' +
           (st.rule ? ' The rule S K y → I would join them, so it is unsound here.' : '')
         : 'In the table of six terms and three probes, I, S K K and S K S had the same readings in every column, so they share a point.');
+      // the caption's order of the three holds unless the added rule joins terms that probes keep apart
+      $('basecap').textContent = BN.id !== 'ski' && st.rule
+        ? 'The added rule merges three terms that probes still distinguish, so here sameness under probes is not coarser than sameness after running.'
+        : 'Each equality is coarser than the one before it.';
       each('[data-m]', function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-m') === st.mode)); });
     });
     each('[data-m]', function (b) { b.addEventListener('click', function () { st.mode = b.getAttribute('data-m'); render(true); }); });
@@ -3477,7 +3540,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
       var spread = NODES.map(function (n, i) { return !on[i] && hit[n.f]; });
       v.nodes.forEach(function (n, i) {
         n.r.setAttribute('class', 'n-rect' + (NODES[i].nf ? ' nf' : '') + (on[i] ? ' paint' + pb : ''));
-        n.g.setAttribute('aria-pressed', String(on[i]));
+        n.g.setAttribute('aria-pressed', String(!!(on[i] || (closed && spread[i]))));     // pressed if shown shaded
       });
       v.edges.forEach(function (e, ei) {
         var leak = !closed && leaks.indexOf(ei) >= 0;
@@ -3511,8 +3574,14 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
         rd.textContent = 'The shading has been extended to every term joined to a shaded one by steps in either direction. It covers ' + word(fibs) + (fibs === 1 ? ' whole fibre' : ' whole fibres') + ', and the dashed boxes are the terms that were added.';
       }
     }
+    // a hand edit starts from the shading on show: the predicate, or its closure if it has been closed
     function toggle(i) {
-      if (sel.value !== 'custom') { custom = NODES.map(current().f); sel.value = 'custom'; }
+      if (sel.value !== 'custom' || closed) {
+        var on = NODES.map(current().f), hit = {};
+        NODES.forEach(function (n, k) { if (on[k]) hit[n.f] = true; });
+        custom = NODES.map(function (n, k) { return !!on[k] || (closed && !!hit[n.f]); });
+        sel.value = 'custom';
+      }
       custom[i] = !custom[i]; closed = false; render();
     }
     sel.addEventListener('change', function () { closed = false; render(); });
@@ -3699,14 +3768,15 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
       exitNet.top = top; exitNet.X = X;
       var s = arrow(ex, 'm2', top, X);
       box(ex, top); box(ex, X);
+      S('text', { x: 92, y: 71, 'class': 'lab green' }, ex).textContent = 'reads a after';
       S('text', { x: 92, y: 85, 'class': 'lab green' }, ex).textContent = exitNet.first + ' interactions';
       S('line', { x1: X.x, y1: X.y + 11, x2: X.x, y2: 198, 'class': 'proj' }, ex);
       S('line', { x1: 24, y1: 198, x2: 150, y2: 198, 'class': 'baseline' }, ex);
       exitNet.pt = S('circle', { cx: X.x, cy: 198, r: 4.5, 'class': 'basept' }, ex);
       S('text', { x: X.x, y: 216, 'text-anchor': 'middle', 'class': 'lab' }, ex).textContent = 'the result port reads a';
-      // the detached work: the eraser of K waits on the net of ω ω, which keeps running
+      // the count is of the whole net, from the start: the eraser of K waits on the net of ω ω, which keeps running
       S('rect', { x: 186, y: 22, width: 132, height: 150, rx: 8, 'class': 'detached-box' }, ex);
-      S('text', { x: 252, y: 42, 'text-anchor': 'middle', 'class': 'lab' }, ex).textContent = 'the net of ω ω';
+      S('text', { x: 252, y: 42, 'text-anchor': 'middle', 'class': 'lab' }, ex).textContent = 'the whole net';
       S('circle', { cx: 252, cy: 92, r: 24, 'class': 'proj' }, ex);
       exitNet.count = S('text', { x: 252, y: 99, 'text-anchor': 'middle', 'class': 'ev' }, ex);
       exitNet.count.style.fill = 'var(--run)';
@@ -3740,17 +3810,31 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
       put(tk3, along(lap, q((ms % lapMs) / lapMs, exitMode === 'ski' ? 6 : 10)));
       put(tk3b, along(out, q(Math.min(1, ((ms % 4200) / 4200) / 0.3), 2)));
     }
-    var visible = true, raf = null, clock = 0;
-    function loop(ts) { clock = ts; frame(ts); raf = visible ? requestAnimationFrame(loop) : null; }
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (es) {
-        visible = es[0].isIntersecting;
-        if (!RM && visible && raf === null) raf = requestAnimationFrame(loop);
-      }).observe(pent.closest('figure'));
+    // The markers move while the figure is on screen, and Pause stops them. Under reduced motion they start
+    // still, at rest at the ends of their routes, and Play moves them in plain jumps.
+    var visible = true, raf = null, clock = 0, last = null, started = false, paused = RM, hop = null, pauseBtn = $('exitpause');
+    function loop(ts) {
+      if (last === null) { if (!started) clock = ts; started = true; } else clock += ts - last;
+      last = ts; frame(clock);
+      if (visible && !paused) raf = requestAnimationFrame(loop); else { raf = null; last = null; }
     }
-    frame(0);
-    if (RM) setInterval(function () { if (visible) { clock += 600; frame(clock); } }, 600);
-    else raf = requestAnimationFrame(loop);
+    function go() {
+      if (paused || !visible) return;
+      if (RM) { if (hop === null) hop = setInterval(function () { if (visible && !paused) { clock += 600; frame(clock); } }, 600); }
+      else if (raf === null) raf = requestAnimationFrame(loop);
+    }
+    function halt() {
+      if (raf !== null) { cancelAnimationFrame(raf); raf = null; last = null; }
+      if (hop !== null) { clearInterval(hop); hop = null; }
+    }
+    pauseBtn.addEventListener('click', function () { paused = !paused; if (paused) halt(); pauseBtn.textContent = paused ? 'Play' : 'Pause'; go(); });
+    pauseBtn.textContent = paused ? 'Play' : 'Pause';
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; go(); }).observe(pent.closest('figure'));
+    }
+    if (RM) clock = 2940;       // both routes of the pentagon ended, and the ring at a
+    frame(clock);
+    go();
   })();
 
   /* ---------- changing the ingredients ---------- */
@@ -4131,9 +4215,9 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
         ],
         net: [
           'Each fibre is counted as one piece. All that is kept is its point on the line: the value a on the left, and on the right the hollow point that stands for no value.',
-          'The arrowheads are forgotten and each fibre is a graph. On the left the squares fill everything between the runs, and a round trip can be shrunk to nothing. On the right the nets of ω ω only spread out: there is no loop, and so no hole.',
-          'The arrowheads are kept. On the left every run ends at the same net, which reads a. On the right every run goes on for ever, and no net comes round again.',
-          'Each interaction has length one. On the left every run to a has the same length, ten interactions, whatever the order. On the right the count goes on rising.'
+          'The arrowheads are forgotten and each fibre is a graph. On the left the lattice is made of squares. Counting the two orders round a square as one run fills it, and the round trip shown shrinks to nothing. On the right the first layers of ω ω contain squares too, each a round trip that swapping two interactions fills. Whether the whole fibre of ω ω has a hole is not settled here.',
+          'The arrowheads are kept. On the left every run ends at the same net, which reads a. On the right the run shown goes on growing, and in the outermost run checked no net repeats in the first thousand interactions.',
+          'Each interaction has length one. On the left every run to a has the same length, ten interactions as the browser counts them, whatever the order. On the right the count goes on rising.'
         ]
       };
       var A, W, mode = null;
@@ -4167,6 +4251,8 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
       }
       buildPanels();
       var level = 0, clock = 0, last = null, raf = null, visible = true, touched = false, seq = [];
+      // paused: the moving parts stand still, at a state that shows the view (REST, in ms) when a view is chosen
+      var paused = RM, hop = null, REST = [0, 1080, 2040, 3600], pauseBtn = $('fpause');
       function along(sg, u) { u = Math.min(1, Math.max(0, u)); return [sg[0][0] + (sg[1][0] - sg[0][0]) * u, sg[0][1] + (sg[1][1] - sg[0][1]) * u]; }
       // along a route of steps, T ms to a step
       function alongSteps(r, tt, T) { var k = Math.min(Math.floor(tt / T), r.length - 1); return along(r[k], (tt - k * T) / T); }
@@ -4202,7 +4288,7 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
         }
       }
       function setLevel(k) {
-        level = k; clock = 0;
+        level = k; clock = paused ? REST[k] : 0;
         [A, W].forEach(function (p) {
           op(p.gl, k === 0 ? 0.15 : 1); op(p.gx, k === 0 ? 0.15 : 1);
           p.lines.forEach(function (l) { if (k >= 2) l.setAttribute('marker-end', 'url(#' + p.id + 'g)'); else l.removeAttribute('marker-end'); });
@@ -4237,18 +4323,26 @@ a.lean:hover, a.lean:focus-visible, a.ts:hover, a.ts:focus-visible { color: var(
       function tick(ts) {
         if (last !== null) clock += Math.min(100, ts - last);
         last = ts; frame();
-        if (visible) raf = requestAnimationFrame(tick); else { raf = null; last = null; }
+        if (visible && !paused) raf = requestAnimationFrame(tick); else { raf = null; last = null; }
       }
+      // under reduced motion the parts move only after Play, and then in plain jumps
+      function go() {
+        if (paused || !visible) return;
+        if (RM) { if (hop === null) hop = setInterval(function () { if (visible && !paused) { clock += 550; frame(); } }, 550); }
+        else if (raf === null) raf = requestAnimationFrame(tick);
+      }
+      pauseBtn.addEventListener('click', function () {
+        touched = true; paused = !paused;
+        if (paused) { if (raf !== null) { cancelAnimationFrame(raf); raf = null; last = null; } if (hop !== null) { clearInterval(hop); hop = null; } }
+        pauseBtn.textContent = paused ? 'Play' : 'Pause'; go();
+      });
+      pauseBtn.textContent = paused ? 'Play' : 'Pause';
       var fig = $('fib-a').closest('figure');
       if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function (es) {
-          visible = es[0].isIntersecting;
-          if (!RM && visible && raf === null) raf = requestAnimationFrame(tick);
-        }).observe(fig);
+        new IntersectionObserver(function (es) { visible = es[0].isIntersecting; go(); }).observe(fig);
       }
-      if (RM) setInterval(function () { if (visible) { clock += 550; frame(); } }, 550);
-      else raf = requestAnimationFrame(tick);
-      onFirstView(fig, function () { if (!touched) playAll(); });
+      go();
+      if (!RM) onFirstView(fig, function () { if (!touched) playAll(); });
     })();
 
     /* evidence carried along runs, in two fibres. In tree calculus (and for nets, which have no loop to

@@ -6,8 +6,12 @@
         node post/lab/essay-test.js --write-snapshot OLD.html
       and show the differences against an old copy with
         node post/lab/essay-test.js --diff OLD.html
+      Review R1 (pass G) changed 14 snapshots on purpose; the fixture's "source" field lists them.
    2. The switch: every mode, every figure rendered and driven without exceptions; no duplicate ids;
       the hash round-trips; the calculus notes show only in their mode.
+   3-6. What the figures show in tree calculus and in nets.
+   7. Keyboard (no hidden box in the tab order), captions and labels by mode, reduced motion (nothing moves
+      by itself), Pause, and the width of the net bench at 390 px.
    Plain Node, no packages. */
 'use strict';
 var fs = require('fs');
@@ -227,7 +231,7 @@ T.click(cell(T, 2, 3)); T.advance(20000);
 check(/z/.test(T.$('benchverdict').textContent) && /triage/.test(T.$('benchsay').textContent), 'tree bench: the triage cell of S K (△K) runs and reads z');
 N.click(cell(N, 1, 3)); N.advance(20000);
 check(/46 interactions in all/.test(N.$('benchrun').textContent), 'net bench: the run line counts the interactions (' + N.$('benchrun').textContent.slice(-60) + ')');
-check(/same for every order/.test(N.$('benchread').textContent), 'net bench: the readout says the count is the same for every order');
+check(/run data/.test(N.$('benchread').textContent) && /same number in every order/.test(N.$('benchread').textContent), 'net bench: the readout calls the counts run data, the same number in every order');
 // running
 check(T.$('focus').options.length === 19, 'tree hero: nineteen terms (' + T.$('focus').options.length + ')');
 check(/^Nineteen terms/.test(T.$('heroread').textContent), 'tree hero: the readout counts nineteen terms');
@@ -405,6 +409,157 @@ section('Nets, one step: the labels of free ports');
   check(clash.length === 0, width + ': no two labels of free ports overlap (' + clash.slice(0, 3).join('; ') + ')');
   check(hit.length === 0, width + ': no label overlaps an agent (' + hit.slice(0, 3).join('; ') + ')');
   console.log('  ' + width + ': ' + nets + ' nets drawn, labels apart');
+});
+
+/* ---------- 7. figures: keyboard, captions and labels by mode, reduced motion, a phone's width ---------- */
+section('Keyboard, captions by mode, reduced motion, phone width');
+// the text a reader sees of an element in a calculus: words marked data-only for other calculi are left out
+function shownText(el, mode) {
+  return (function walk(n) {
+    if (n.nodeType === 3) return n.data;
+    var only = n.getAttribute && n.getAttribute('data-only');
+    if (only && only.split(' ').indexOf(mode) < 0) return '';
+    return n.childNodes.map(walk).join('');
+  })(el).replace(/\s+/g, ' ').trim();
+}
+function figOf(env, id) { return env.$(id).closest('figure'); }
+// hidden boxes leave the tab order, the pointer and the accessibility tree
+['ski', 'tree'].forEach(function (c) {
+  var e = load(c), bad = [];
+  function audit(what) {
+    e.$('svg-hero').querySelectorAll('g.pick').forEach(function (g) {
+      var gone = String(g.style.opacity) === '0', ok = gone
+        ? g.getAttribute('tabindex') === '-1' && g.getAttribute('aria-hidden') === 'true' && g.style.pointerEvents === 'none'
+        : g.getAttribute('tabindex') === '0' && !g.hasAttribute('aria-hidden') && !g.style.pointerEvents;
+      if (!ok) bad.push(what + ': ' + g.getAttribute('aria-label'));
+    });
+  }
+  [1, 2, 3, 4, 1].forEach(function (l) {
+    e.click(e.document.querySelector('[data-l="' + l + '"]')); e.advance(200); audit('view ' + l);
+    e.click(e.$('play')); e.advance(1500); audit('view ' + l + ', playing');
+  });
+  check(bad.length === 0, c + ': every box out of sight is out of the tab order and every box in sight is in it (' + bad.slice(0, 3).join('; ') + ')');
+  // a focused box that disappears hands the focus to the Term selector
+  e.change(e.$('focus'), '1'); e.advance(200); e.change(e.$('time'), '0'); e.advance(50);
+  var start = e.$('svg-hero').querySelectorAll('g.pick')[1];
+  start.focus(); e.click(e.$('play')); e.advance(3000);
+  check(e.document.activeElement === e.$('focus'), c + ': the focus moves to Term when its box leaves the view');
+  e.click(e.document.querySelector('[data-l="3"]')); e.advance(100);
+  check(e.$('svg-hero').querySelectorAll('g.pick').every(function (g) { return g.getAttribute('tabindex') === '0'; }), c + ': in All the terms every box can be reached');
+  // a term of the loop: Order gives way to the label of the cycle shown
+  var loopAt = e.$('focus').options.filter(function (o) { return /ω|S I I/.test(o.textContent); })[0].value;
+  e.change(e.$('focus'), loopAt); e.advance(200);
+  check(e.$('order').parentNode.hidden && !e.$('ordercyc').hidden && /shown cycle/.test(e.$('ordercyc').textContent), c + ': for a term of the loop, Order says it shows the cycle');
+  e.change(e.$('focus'), '0'); e.advance(200);
+  check(!e.$('order').parentNode.hidden && e.$('ordercyc').hidden, c + ': for another term, Order is back');
+});
+// captions, titles and labels, by mode
+var S0 = load('ski'), modes = { ski: S0, tree: T, net: N };
+var cap = {};
+Object.keys(modes).forEach(function (m) {
+  cap[m] = {
+    hero: shownText(figOf(modes[m], 'svg-hero').querySelector('figcaption'), m),
+    bench: shownText(figOf(modes[m], 'grid').querySelector('figcaption'), m),
+    benchTitle: shownText(figOf(modes[m], 'grid').querySelector('.fig-title'), m),
+    exitH: shownText(modes[m].$('svg-exit').parentNode.querySelector('h3'), m),
+    counter: shownText(figOf(modes[m], 'svg-loop').querySelector('figcaption'), m),
+    counterTitle: shownText(figOf(modes[m], 'svg-loop').querySelector('.fig-title'), m),
+    fib: shownText(figOf(modes[m], 'fib-a').querySelector('figcaption'), m)
+  };
+});
+check(/^Each box is a term/.test(cap.ski.hero) && /^Each box is a term/.test(cap.tree.hero) && /^Each dot is a net/.test(cap.net.hero) && !/box/.test(cap.net.hero), 'running: the caption speaks of boxes for terms and of dots for nets');
+check(/left to right/.test(cap.net.hero), 'running: in nets the caption says which way time runs');
+check(cap.ski.benchTitle === 'Six terms under three probes' && cap.tree.benchTitle === 'Six terms under four probes' && cap.net.benchTitle === 'Six terms under four probes', 'bench: three probes, or four with triage (' + cap.tree.benchTitle + ')');
+check(/run data/.test(cap.net.bench) && !/run data/.test(cap.tree.bench) && !/run data/.test(cap.ski.bench), 'bench: only in nets does the caption call the counts run data');
+check(cap.net.exitH === 'An answer before the run ends' && cap.ski.exitH === 'A loop with exits' && cap.tree.exitH === 'A loop with exits', 'exits: the net panel is an answer before the run ends');
+check(/S-step at the root/.test(cap.tree.counter) && /S-step at the root/.test(cap.net.counter) && /each use of the S-rule/.test(cap.ski.counter), 'counter: in trees and nets the caption names the S-step at the root');
+check(/tree-calculus example/.test(cap.net.counterTitle) && !/tree-calculus/.test(cap.tree.counterTitle), 'counter: in nets the title says the panels are a tree example');
+check(/two runs/.test(cap.ski.fib) && /three runs/.test(cap.tree.fib) && /every net/.test(cap.net.fib), 'fibres: the caption describes the panels of each mode');
+var ARIA_IDS = ['svg-hero', 'svg-base', 'svg-paint', 'svg-code', 'svg-lemma', 'svg-exit', 'fib-a', 'fib-w', 'svg-loop', 'svg-kloop'];
+var page = stub.load(html, { width: 1200 });     // the labels as written in the page
+check(ARIA_IDS.every(function (id) { return S0.$(id).getAttribute('aria-label') === page.$(id).getAttribute('aria-label'); }), 'labels: combinatory logic keeps the accessible descriptions written in the page');
+check(ARIA_IDS.every(function (id) { return !/[Ff]ourteen|three terms in a cycle/.test(T.$(id).getAttribute('aria-label')) && !/[Ff]ourteen|three terms in a cycle/.test(N.$(id).getAttribute('aria-label')); }), 'labels: no tree or net description speaks of fourteen terms or a cycle of three');
+check(/nets/.test(N.$('svg-hero').getAttribute('aria-label')) && /[Nn]ineteen/.test(T.$('svg-hero').getAttribute('aria-label')), 'labels: running is described as nets in nets and as nineteen terms in trees');
+// the three equalities: a caption that holds when the rule is added in trees
+var T2 = load('tree');
+check(/coarser than the one before/.test(T2.$('basecap').textContent), 'equalities: without the rule the caption orders the three equalities');
+T2.click(T2.$('addrule')); T2.advance(1500);
+check(/probes still distinguish/.test(T2.$('basecap').textContent), 'equalities: with the rule in trees the caption says it merges what probes distinguish');
+S0.click(S0.$('addrule')); S0.advance(1500);
+check(/coarser than the one before/.test(S0.$('basecap').textContent), 'equalities: with the rule in combinatory logic the caption is unchanged');
+S0.click(S0.$('addrule')); S0.advance(1500);
+// a predicate closed: what is shown shaded is pressed, and a hand edit starts from it
+var P = load('ski');
+P.change(P.$('pred'), 'hasK'); P.advance(100); P.click(P.$('closeit')); P.advance(3000);
+var gs = P.$('svg-paint').querySelectorAll('g.pick'), shaded = gs.map(function (g) { return /paint|spread/.test(g.querySelector('rect.n-rect').getAttribute('class')); });
+check(gs.every(function (g, i) { return g.getAttribute('aria-pressed') === String(shaded[i]); }), 'types: after closing, aria-pressed follows the shading shown');
+var k = shaded.indexOf(true, shaded.indexOf(true) + 1);
+P.click(gs[k]); P.advance(100);
+var gs2 = P.$('svg-paint').querySelectorAll('g.pick'), now = gs2.map(function (g) { return /paint/.test(g.querySelector('rect.n-rect').getAttribute('class')); });
+check(P.$('pred').value === 'custom' && now.every(function (x, i) { return x === (i === k ? false : shaded[i]); }), 'types: a box selected after closing starts from the closed shading');
+// reduced motion: nothing moves until the reader asks
+var STILL = ['svg-pent', 'svg-exit', 'fib-a', 'fib-w', 'svg-hero', 'grid', 'svg-loop', 'svg-kloop', 'svg-lemma'];
+['ski', 'tree', 'net'].forEach(function (c) {
+  var e = stub.load(html, { width: 1200, reducedMotion: true, hash: c === 'ski' ? '' : '#calc=' + c });
+  e.advance(3000);
+  var a = STILL.map(function (id) { return e.$(id).outerHTML; });
+  e.advance(15000);
+  var moved = STILL.filter(function (id, i) { return e.$(id).outerHTML !== a[i]; });
+  check(moved.length === 0, c + ', reduced motion: no figure changes by itself (' + moved.join(', ') + ')');
+  [1, 2, 3].forEach(function (l) { e.click(e.document.querySelector('[data-f="' + l + '"]')); e.advance(300); });
+  var f = e.$('fib-w').outerHTML + e.$('fib-a').outerHTML; e.advance(10000);
+  check(f === e.$('fib-w').outerHTML + e.$('fib-a').outerHTML, c + ', reduced motion: a view of the fibres chosen by hand stands still');
+  check(e.$('exitpause').textContent === 'Play' && e.$('fpause').textContent === 'Play', c + ', reduced motion: the moving figures start paused');
+  e.click(e.$('exitpause')); e.advance(100);
+  var p0 = e.$('svg-pent').outerHTML + e.$('svg-exit').outerHTML; e.advance(2500);
+  check(p0 !== e.$('svg-pent').outerHTML + e.$('svg-exit').outerHTML, c + ', reduced motion: Play sets the two fibres moving');
+  e.click(e.$('exitpause')); e.advance(100);
+  var p1 = e.$('svg-pent').outerHTML + e.$('svg-exit').outerHTML; e.advance(5000);
+  check(p1 === e.$('svg-pent').outerHTML + e.$('svg-exit').outerHTML, c + ', reduced motion: Pause stops them');
+});
+// normal motion: Pause stops the repeating figures, Play starts them again
+(function () {
+  var e = stub.load(html, { width: 1200 });
+  e.advance(1000);
+  check(e.$('exitpause').textContent === 'Pause' && e.$('fpause').textContent === 'Pause', 'pause: the moving figures start playing');
+  e.click(e.$('exitpause')); e.click(e.document.querySelector('[data-f="2"]')); e.click(e.$('fpause')); e.advance(100);
+  var a = e.$('svg-exit').outerHTML + e.$('fib-w').outerHTML; e.advance(4000);
+  check(a === e.$('svg-exit').outerHTML + e.$('fib-w').outerHTML, 'pause: Pause holds both repeating figures still');
+  e.click(e.$('exitpause')); e.click(e.$('fpause')); e.advance(1500);
+  check(a !== e.$('svg-exit').outerHTML + e.$('fib-w').outerHTML, 'pause: Play starts them again');
+})();
+check(/\.grid-wrap \{ overflow-x: auto;/.test(html) && !/animation: pulse/.test(html) && /prefers-reduced-motion: reduce\) \{\n  [^}]*\.n-dot, \.lattice \{ transition: none; \}/.test(html), 'stylesheet: the table scrolls in its frame if need be, the leak is steady, and net dots do not fade under reduced motion');
+/* The net bench at 390 px. There is no layout engine here, so the width is estimated from the stylesheet's
+   narrow rules (under 640 px): type 0.8rem, cells 5 px padding and a 1 px border, 4 px between columns, the
+   count under its reading, a reading wrapping at spaces. A character of IBM Plex Mono is 0.6 em, of Plex Sans at
+   most 0.56 em; a △ 1.15 em. Headers and row labels do not wrap. The column is 390 − 2 × 18 = 354 px. */
+function textW(s, em, mono) { var d = s.split('△').length - 1; return (s.length - d) * em * (mono ? 0.6 : 0.56) + d * em * 1.15; }
+[['tree', T], ['net', N]].forEach(function (pair) {
+  var e = stub.load(html, { width: 390, hash: '#calc=' + pair[0] }); e.advance(3000);
+  var grid = e.$('grid'), rows = grid.querySelectorAll('tr'), cols = [];
+  var G = 12.8, HEAD = 0.82 * 16, CELL = 0.94 * G;
+  rows.forEach(function (tr) {
+    tr.children.forEach(function (td, c) {
+      var w;
+      if (td.localName === 'th' && td.parentNode.parentNode.localName === 'thead') {
+        var code = td.querySelector('code');
+        w = code ? textW(code.textContent, HEAD, true) : textW(td.textContent, HEAD, false);
+      } else if (td.getAttribute('scope') === 'row') w = textW(td.textContent, CELL, true);
+      else if (td.querySelector('.cell')) {
+        var b = td.querySelector('.cell'), mono = !/sealed/.test(b.getAttribute('class'));
+        var read = b.childNodes.filter(function (n) { return n.nodeType === 3; }).map(function (n) { return n.data; }).join('');
+        var cnt = b.querySelector('.ncount'), words = read.split(' ').map(function (x) { return textW(x, CELL, mono); });
+        w = Math.max(Math.max.apply(null, words), cnt ? textW(cnt.textContent, 0.8 * CELL, false) : 0) + 12;
+      } else w = textW(td.textContent, G, false);
+      cols[c] = Math.max(cols[c] || 0, w + 4);
+    });
+  });
+  var total = Math.round(cols.reduce(function (a, x) { return a + x; }, 0));
+  check(total <= 354, pair[0] + ' bench at 390 px: the table fits the 354 px column (estimated ' + total + ' px)');
+  console.log('  ' + pair[0] + ' bench at 390 px: about ' + total + ' px wide');
+  // and nothing in the notes is wider than the column: unbreakable code is short
+  var wide = e.document.querySelectorAll('.calc-note code').filter(function (c) { return !/long/.test(c.getAttribute('class') || '') && textW(c.textContent, 0.86 * 0.82 * 16, true) > 342; });
+  check(wide.length === 0, pair[0] + ' at 390 px: no unbreakable code in a note is wider than the column (' + wide.map(function (c) { return c.textContent; }).join('; ') + ')');
 });
 
 console.log('\n' + passes + ' checks passed, ' + failures + ' failed.');
