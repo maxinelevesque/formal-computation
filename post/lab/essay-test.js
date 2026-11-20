@@ -6,7 +6,7 @@
         node post/lab/essay-test.js --write-snapshot OLD.html
       and show the differences against an old copy with
         node post/lab/essay-test.js --diff OLD.html
-      Review R1 changed 14 snapshots on purpose in pass G and 2 in pass D; the fixture's "source" field lists them.
+      Review R1 and its follow-ups changed some snapshots on purpose; the fixture's "source" field lists each change.
    2. The switch: every mode, every figure rendered and driven without exceptions; no duplicate ids;
       the hash round-trips; the calculus notes show only in their mode.
    3-6. What the figures show in tree calculus and in nets.
