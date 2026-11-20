@@ -112,6 +112,22 @@ open FormalComputation
 #print axioms SKI.codeEq_iff_conv
 #print axioms SKI.not_codeEq_I_SKK
 #print axioms SKI.codeEq_Ia_a
+-- Probes read closed terms
+#print axioms SKI.Step.subst
+#print axioms SKI.reds_subst
+#print axioms SKI.conv_subst
+#print axioms SKI.Probe.subst_plug
+#print axioms SKI.probeEqCl_equivalence
+#print axioms SKI.probeEqCl_of_conv
+#print axioms SKI.probeEqCl_iff_of_closed
+#print axioms SKI.probeEqCl_subst
+#print axioms SKI.probeEqCl_plug
+#print axioms SKI.not_reads_Ω_app
+#print axioms SKI.not_probeEqCl_var_loop
+#print axioms SKI.not_probeEq_II_IK
+#print axioms SKI.not_probeEqCl_aI_aK
+#print axioms SKI.probeEq_aI_aK
+#print axioms SKI.probeEq_not_subst_stable
 -- Observation as a pairing, and lenses
 #print axioms Obs.Pairing.orth_invariant
 #print axioms Obs.Pairing.orth_iUnion

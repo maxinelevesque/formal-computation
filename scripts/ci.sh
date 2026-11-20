@@ -43,7 +43,7 @@ if [ "$rc" -eq 124 ]; then echo "lake build TIMED OUT after ${BUDGET}s"; fi
 echo "sorry warnings: $(grep -cE "declaration uses .sorry." "$LOG" || true)"
 grep -E -B1 "declaration uses .sorry." "$LOG" | grep -oE "FormalComputation/[A-Za-z/]+\.lean:[0-9]+" | sort | uniq | head -60 || true
 echo "source lines with sorry (outside comments): $(grep -rnw --include='*.lean' sorry FormalComputation | grep -vE '^[^:]+:[0-9]+:\s*(--|/-)' | grep -vE '`sorry`|sorryAx' | wc -l)"
-for tier in "tier1:Orth Presentation LocalSystems Translation Collapse" "tier2:Pentagon Dehn" "tier3:SKI/Syntax SKI/Weight SKI/PermEq" "essay:SKI/Types SKI/Confluence SKI/Probes Predicates Observation SKI/Lenses Calculus SKI/Instance Tree/Calculus Tree/Essay Diamond ThreeClasses SKI/Dyn" "stretch:Stretch/Trace Stretch/Conjoint Stretch/PentQuotient Stretch/RedCat"; do
+for tier in "tier1:Orth Presentation LocalSystems Translation Collapse" "tier2:Pentagon Dehn" "tier3:SKI/Syntax SKI/Weight SKI/PermEq" "essay:SKI/Types SKI/Confluence SKI/Probes SKI/Closed Predicates Observation SKI/Lenses Calculus SKI/Instance Tree/Calculus Tree/Essay Diamond ThreeClasses SKI/Dyn" "stretch:Stretch/Trace Stretch/Conjoint Stretch/PentQuotient Stretch/RedCat"; do
   name=${tier%%:*}; files=""
   for m in ${tier#*:}; do files="$files FormalComputation/$m.lean"; done
   n=$(cat $files 2>/dev/null | grep -vE '^\s*(--|/-)' | grep -wc sorry || true)

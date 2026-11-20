@@ -15,6 +15,7 @@ import FormalComputation.SKI.PermEq
 import FormalComputation.SKI.Types
 import FormalComputation.SKI.Confluence
 import FormalComputation.SKI.Probes
+import FormalComputation.SKI.Closed
 import FormalComputation.Predicates
 import FormalComputation.Observation
 import FormalComputation.SKI.Lenses
