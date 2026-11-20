@@ -1,5 +1,5 @@
 {
- "source": "post/atoms-and-probes.html, blob 1356f7b (before the calculus switch). Updated in review R1, pass G, in 14 snapshots and nowhere else: hero level 1, hero level 2 and hero step (#svg-hero), where boxes out of sight leave the tab order (tabindex -1, aria-hidden, no pointer events); and paint closed hasK, hasA, small and normal (#svg-paint), where aria-pressed follows the closed shading; each at 1200 and 400.",
+ "source": "post/atoms-and-probes.html, blob 1356f7b (before the calculus switch). Updated in review R1, pass G, in 14 snapshots and nowhere else: hero level 1, hero level 2 and hero step (#svg-hero), where boxes out of sight leave the tab order (tabindex -1, aria-hidden, no pointer events); and paint closed hasK, hasA, small and normal (#svg-paint), where aria-pressed follows the closed shading; each at 1200 and 400. Updated in review R1, pass D, in 2 snapshots and nowhere else: paint probeA #paintread at 1200 and 400, whose note now says that the predicate is defined by the context [ ] a with the reading a, a probe under the plainer rule of the Lean statements.",
  "snapshots": {
   "1200 load #svg-tree": "b237f45c7af82c97",
   "1200 load #grid": "591619210eaeced5",
@@ -497,7 +497,7 @@
   "1200 paint halts #closeit": "4dcd00ffe1fd4557",
   "1200 paint probeA #svg-paint": "29dc411e3fdb8282",
   "1200 paint probeA #verdict": "2901f344db06c920",
-  "1200 paint probeA #paintread": "e6fe8b577db000f3",
+  "1200 paint probeA #paintread": "c6a689d5f4bc7f09",
   "1200 paint probeA #closeit": "4dcd00ffe1fd4557",
   "1200 paint custom #svg-paint": "131237d14f6f3114",
   "1200 paint custom #verdict": "2901f344db06c920",
@@ -1056,7 +1056,7 @@
   "400 paint halts #closeit": "4dcd00ffe1fd4557",
   "400 paint probeA #svg-paint": "98a388b56cf9cae8",
   "400 paint probeA #verdict": "2901f344db06c920",
-  "400 paint probeA #paintread": "e6fe8b577db000f3",
+  "400 paint probeA #paintread": "c6a689d5f4bc7f09",
   "400 paint probeA #closeit": "4dcd00ffe1fd4557",
   "400 paint custom #svg-paint": "edf3dc47e02f36c9",
   "400 paint custom #verdict": "2901f344db06c920",
