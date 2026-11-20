@@ -78,8 +78,8 @@ def Step.subst (σ : ℕ → Tm) : {t u : Tm} → Step t u → Step (t.subst σ)
   | _, _, .i x => .i (x.subst σ)
   | _, _, .k x y => .k (x.subst σ) (y.subst σ)
   | _, _, .s x y z => .s (x.subst σ) (y.subst σ) (z.subst σ)
-  | _, _, .appL u s => .appL (u.subst σ) (Step.subst σ s)
-  | _, _, .appR t s => .appR (t.subst σ) (Step.subst σ s)
+  | _, _, .appL u st => .appL (u.subst σ) (Step.subst σ st)
+  | _, _, .appR t st => .appR (t.subst σ) (Step.subst σ st)
 
 theorem reds_subst (σ : ℕ → Tm) {t u : Tm} (h : Reds t u) : Reds (t.subst σ) (u.subst σ) := by
   induction h with
