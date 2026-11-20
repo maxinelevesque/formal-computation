@@ -137,5 +137,16 @@ Steps 1 to 4 are done; step 5 (review round R1, in a browser) is next. Details i
   `785035a`. tree-semantics results are plain links (`class="ts"`) pinned to `5147cfa`: `Tree.exists_eq`,
   `Ix.Steps.equal_lengths`, `Ix.strong_confluence`, `Ix.fire_commute`, `Ix.TC.eager_sound`,
   `Ix.Lazy.discarded_divergence`.
-- **To do.** Re-run `lean-links.py` after the merge; review in a browser (the width of `△` in the mono font,
-  the narrow tree bundle, the net view of a single step).
+- **Polish (2026-11-20), after a browser check.** Details in `post/lab/README.md`.
+  - Wide tree bundle: the view box is fitted to the content (the empty band of about 120 units above it is gone).
+  - The two long steps `K a (I b) → a` and `K a (K b (△b)) → a` are each one cubic Bézier, the least bent that
+    clears every box (`layoutBundle`'s `curves`), in place of the polylines through the slots.
+  - Narrow tree bundle: the ring of `ω ω` no longer widens the first column, and empty columns are dropped; the
+    steps within a column (`K a (I b) → K a (K b (△b)) → K a b`) join neighbours; the frame is 434 units wide, inside the
+    440 px cap. Ring neighbours side by side are at least 30 apart (an arrow of 6 units before).
+  - Nets, one step: `layoutNet` spreads the free ports of a row so that no two labels overlap, nor a label an agent.
+  - Box widths: a label with `△` is measured in the browser (`getComputedTextLength`, again once the fonts load);
+    under the stub a `△` counts 1.15 em. Labels without `△` keep 7.6 a character, so combinatory logic is unchanged.
+  - `essay-test.js` checks each of these (and still the 1118 snapshots of combinatory logic).
+- **To do.** In a real browser: the two long curves of the wide bundle (they bow right round the fibre of `a`; a
+  re-layering that makes them short would widen the figure to about 1250 units), the font-load redraw, and a phone.

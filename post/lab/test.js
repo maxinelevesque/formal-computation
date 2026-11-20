@@ -407,6 +407,15 @@ check(fx.every(function (x, i) { return i === 0 || x > fx[i - 1]; }), 'fibre poi
 var lnet = net.layoutNet(net.run(net.parse('K a (ω ω)'), 'outer', 60).pop()), coin = 0;
 lnet.agents.forEach(function (a, i) { lnet.agents.forEach(function (b, j) { if (j > i && Math.abs(a.x - b.x) < 20 && Math.abs(a.y - b.y) < 20) coin++; }); });
 eq(coin, 0, 'layoutNet: no two agents coincide');
+// the labels of free ports: none overlaps another (a and b share a T agent in K a (I b) after four interactions)
+var labClash = 0;
+net.run(net.parse('K a (I b)'), 'outer', 20).concat(net.run(net.parse('K a b'), 'outer', 20)).forEach(function (n) {
+  var fr = net.layoutNet(n).free;
+  fr.forEach(function (p, i) { fr.forEach(function (q, j) {
+    if (j > i && p.label.x < q.label.x + q.label.w && q.label.x < p.label.x + p.label.w && p.label.y < q.label.y + q.label.h && q.label.y < p.label.y + p.label.h) labClash++;
+  }); });
+});
+eq(labClash, 0, 'layoutNet: no two labels of free ports overlap');
 var TNODES = ['S K K a', 'K a (I b)', 'K a (K a)', 'I a', 'K a b', 'a', 'I I', 'K I a', 'I', 'S K K', 'S K (△K)', 'ω ω'];
 var gt = graph.reductionGraph(tree, TNODES, { max: 80, maxDepth: 6 });
 console.log('  tree bundle from ' + TNODES.length + ' terms: ' + gt.states.length + ' states, ' + gt.edges.length + ' steps, fibres: ' +

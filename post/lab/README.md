@@ -13,7 +13,7 @@ Plain browser scripts (ES5, `var` and `function`), no dependencies. Each attache
 | `graph.js` | `CALC.graph` | reduction graphs, runs, and an automatic bundle layout, for any of the three |
 | `test.js` | | the tests of the modules: `node post/lab/test.js` (about five minutes; no packages) |
 | `essay-test.js` | | the essay under a stub DOM: `node post/lab/essay-test.js` (seconds) |
-| `stubdom.js` | | the stub DOM: an HTML parser, the selectors and element methods the essay uses, a fake clock |
+| `stubdom.js` | | the stub DOM: an HTML parser, the selectors and element methods the essay uses, a fake clock; `textLength` stands in for `getComputedTextLength` |
 | `essay-ski-snapshot.json` | | hashes of every figure of the essay before the switch, for `essay-test.js` |
 | `essay-reducer.js` | | the essay's SKI reducer before the switch, verbatim, for `test.js` to compare with |
 | `demo.html` | | a standalone page: open it in a browser (load order: ski, tree, net, graph) |
@@ -65,7 +65,10 @@ S(x, y), omega, triage(a, b, c)` as terms.
 - `compile(term)`, `compileApp(f, x)` (Lean's `compile f x`), `start(string)`.
 - `activePairs(net)` (= `redexes`, nearest the result first), `fire(net, pair)`.
 - `readback(net)` gives `{ term, pending, garbage, ok }`; `size(net)`; `key(net)`.
-- `layoutNet(net)` gives triangles, ports, wires as cubic curves, free ports, and a `viewBox`.
+- `layoutNet(net)` gives triangles, ports, wires as cubic curves, free ports, and a `viewBox`. The labels of
+  free ports never overlap one another or an agent: ports of one row are spread apart as little as will do
+  (touching labels are packed `labelGap`, default 8, apart and centred on their ports), and a label that still
+  meets an agent moves down half a row. Each free port carries its label's box, `label: { x, y, w, h }`.
 - `print(net, { size: true })` appends the agent count.
 
 **`graph.js`** has three functions.
@@ -75,15 +78,23 @@ S(x, y), omega, triage(a, b, c)` as terms.
   - `closed: true` keeps only the given terms and the steps between them, as the essay's bundle does.
 - `runPath(calc, t, strategy, { max })`: stops at a normal form, at a repeated state (`cyc`,
   `cycleStart`), or at the cap.
-- `layoutBundle(graph, { width, height, orientation: 'wide' | 'tall', layering, slots, rings })`: the hero figure's conventions.
+- `layoutBundle(graph, { width, height, orientation: 'wide' | 'tall', layering, slots, curves, rings, measure })`: the hero figure's conventions.
   - Each fibre sits over its own point of the line, in the order of the given terms, with "no value" last.
   - The normal form is nearest the line, and the other states are layered by their distance to it:
     the shortest (`layering: 'nearest'`, the default) or the longest run to it (`'longest'`).
   - `slots: true`: a step over more than one layer gets a slot in each layer it crosses (Sugiyama's dummy
     nodes), its edge gets `via`, the slots' points, and the rows are ordered by sweeps both ways.
+  - `curves: true` (with `slots`): such an edge also gets `curve`, the two control points of one cubic Bézier from
+    the source's centre to the target's, the least bent (control points moved off the chord at a third and two
+    thirds, on one side, the slots' side first) that clears every other box by 6 across and 5 up and down.
   - `rings: true`: a fibre with no value whose states lie on one loop is drawn as a ring, in the given order,
-    clockwise from the top, instead of as a column.
-  - Returns nodes `{ x, y, w, label }`, edges (with `via`), fibre points, the line, and a `viewBox` that covers every box.
+    clockwise from the top, instead of as a column. Neighbours side by side on a ring are at least 30 apart. In the
+    tall orientation a ring sits below the columns and does not widen them.
+  - Two states joined by a step within one row (with `'nearest'`) are kept side by side, sources first,
+    `linkGap` (default 12) further apart.
+  - `measure(label)`: a box's width; the default is 7.6 a character, 1.15 em (14.4) for each `△`, and 14.
+  - Returns nodes `{ x, y, w, label }`, edges (with `via`, `curve`), fibre points, the line, and a `viewBox` fitted to the
+    content: every box (with room above for a marker), every curve, and the line.
 
 ## Interaction nets: conventions taken from tree-semantics
 
@@ -190,7 +201,12 @@ and `/* END CALC */`, in a script of their own before the essay's. Running it ag
 drives every figure through a fixed scenario (every bench cell, every hero term in both orders, every
 predicate, every tab and button, with fake time) at 1200 and 400 px, and compares 1118 serialised figures and
 readouts with hashes of the essay before the switch (blob `1356f7b`). It checks this on load and again after a
-tour of tree calculus and nets. `--diff OLD.html` shows any difference.
+tour of tree calculus and nets. `--diff OLD.html` shows any difference. It also checks the tree bundle's layout at
+both widths (no box touches another or is outside the view box; no arrow crosses a box; every bent arrow is one
+Bézier curve, and a cubic clears the boxes by 3; no arrow shorter than 12; at most 40 above the highest box; the narrow
+one at most 440 wide; widths with 1.15 em a `△`, or the measured width when `textLength` stands in for
+`getComputedTextLength`), and in nets the one-step view of every net of every term in three orders: no two labels of
+free ports overlap, and none overlaps an agent.
 
 **The switch.** One state, `calc` in `ski | tree | net`, kept in the hash (`#calc=tree`, `#calc=net`; none for
 combinatory logic). Ten radio groups (the main one under the introduction, and a small one in the controls row
@@ -215,8 +231,16 @@ I a, K a b, a, I I, K I a, I, S K K, S K (△K)`), then the intermediate terms t
 reducts (`K a (△a)`, `K a (K b (△b))`, `K I (△I)`), then the loop of `ω ω` as in `Tree.omega_cycle`: `ω ω → I ω (I ω)
 → K ω (△ω) (I ω) → ω (I ω) → ω (K ω (△ω)) → ω ω`, the left `I ω` first. (Leftmost-outermost does not return to
 `ω ω`, and `'inner'` reduces the right one first; the figures follow the Lean cycle whatever the order.) Wide
-screens: `layering: 'longest'`, `slots`, `rings`, about 970 units wide. At 820 px and below: `layering: 'nearest'`,
-`rings`, and an arrow that would cross a box is bent as little as will clear it.
+screens: `layering: 'longest'`, `slots`, `curves`, `rings`, about 1030 units wide and 340 high: the two long steps
+(`K a (I b) → a`, `K a (K b (△b)) → a`) are single cubic curves round the right of the fibre. At 820 px and below:
+`layering: 'nearest'`, `rings` (below the columns), the steps within a column kept between neighbours, and an arrow
+that would cross a box bent as one quadratic curve, as little as will clear it; 434 units wide, inside the 440 px frame.
+
+**Box widths.** The essay's `boxW(label)` is 7.6 a character and 14 (as before, so combinatory logic is unchanged). A label
+with `△` is measured with `getComputedTextLength` in the browser (the glyph may come from a fallback font), and measured
+again when the fonts have loaded, the tree figures redrawn if a width changed. Under the stub DOM a `△` counts 1.15 em
+(14.4). `layoutBundle` is given the same `measure`. (In one headless Chromium, `△` measured 13.0 at 12.5 px, against 7.5 to
+8.0 for a plain character, before and after the web fonts loaded; which font drew it was not checked.)
 
 ## Not done here
 

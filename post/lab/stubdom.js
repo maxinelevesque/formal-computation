@@ -3,6 +3,7 @@
    and runs timers and animation frames on a fake clock, so runs are deterministic.
 
      var env = require('./stubdom.js').load(html, { width: 1200, hash: '#calc=tree' });
+     (also reducedMotion: true, and textLength: function (s) -> width, to stand in for getComputedTextLength)
      env.advance(5000);                 // run timers and frames for 5 s of fake time
      env.click(el); env.change(el, v);  // events
      env.$(id).outerHTML                // serialised, attributes in the order they were set */
@@ -313,6 +314,8 @@ function load(html, opts) {
   var width = opts.width || 1200;
   var env = { now: 0, timers: [], frames: [], seq: 0, errors: [] };
   var doc = makeDocument(env);
+  // opts.textLength(s): the width of a text, as a browser's getComputedTextLength would give it (none by default)
+  if (opts.textLength) doc.Element.prototype.getComputedTextLength = function () { return opts.textLength(this.textContent); };
   doc.parse(html);
   doc.documentElement = doc.querySelector('html');
   doc.body = doc.querySelector('body');

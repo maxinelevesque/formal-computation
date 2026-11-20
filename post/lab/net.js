@@ -498,9 +498,54 @@
         if (isFree(p)) { x = margin + 20 + gx * (free.length); y = top + (maxDepth + 1) * gy; }
         else { x = at[owner(p)].x + 6; y = top + (maxDepth + 1) * gy; }
       }
-      fpos[f] = { x: x, y: y, nx: 0, ny: f === '@' ? 1 : -1 };
       free.push({ name: f === '@' ? 'result' : f.slice(1), port: f, x: x, y: y });
     });
+    /* Labels of free ports: the name is drawn centred under its port (12 below; 'result' 4 above). No two
+       labels may overlap, and none may overlap an agent: the ports of a row are spread apart, as little as
+       will do (clusters of touching labels are centred on the mean of their ports), and a label that still
+       meets an agent moves down a row. Each free port gets its label's box: label { x, y, w, h }. */
+    var cw = opts.charWidth || 7.6, pad = opts.labelGap || 8;
+    function labelBox(fp) {
+      var w = fp.name.length * (fp.port === '@' ? 6.4 : cw) + 2;
+      fp.label = { x: fp.x - w / 2, y: fp.port === '@' ? fp.y - 14 : fp.y + 2, w: w, h: 13 };
+    }
+    var rowsOf = {};
+    free.forEach(function (fp) { if (fp.port !== '@') (rowsOf[fp.y] = rowsOf[fp.y] || []).push(fp); });
+    Object.keys(rowsOf).forEach(function (y) {
+      var row = rowsOf[y].slice().sort(function (a, b) { return a.x - b.x || (a.port < b.port ? -1 : 1); });
+      var want = row.map(function (fp) { return fp.x; }), half = row.map(function (fp) { return (fp.name.length * cw + 2) / 2; });
+      // clusters of touching labels, packed pad apart, each placed so that its ports are nearest (on mean) to
+      // where they would be alone; a cluster that then meets the one before is merged with it
+      var cl = [];
+      row.forEach(function (fp, k) {
+        cl.push({ members: [k], offs: [half[k]], width: 2 * half[k], left: want[k] - half[k] });
+        for (;;) {
+          var c = cl[cl.length - 1], p = cl[cl.length - 2];
+          if (!p || c.left >= p.left + p.width + pad) break;
+          var members = p.members.concat(c.members), offs = [], x = 0;
+          members.forEach(function (m, q) { x += q ? half[members[q - 1]] + pad + half[m] : half[m]; offs.push(x); });
+          var left = members.reduce(function (a, m, q) { return a + want[m] - offs[q]; }, 0) / members.length;
+          cl.pop(); cl.pop();
+          cl.push({ members: members, offs: offs, width: x + half[members[members.length - 1]], left: left });
+        }
+      });
+      var shift = Math.max(0, 2 - cl[0].left);
+      cl.forEach(function (c) { c.members.forEach(function (m, q) { row[m].x = c.left + shift + c.offs[q]; }); });
+    });
+    free.forEach(labelBox);
+    function hitsAgent(b) {
+      return agents.some(function (ag) {
+        var xs = ag.triangle.map(function (p) { return p[0]; }), ys = ag.triangle.map(function (p) { return p[1]; });
+        return b.x < Math.max.apply(null, xs) + 2 && Math.min.apply(null, xs) - 2 < b.x + b.w && b.y < Math.max.apply(null, ys) + 2 && Math.min.apply(null, ys) - 2 < b.y + b.h;
+      });
+    }
+    function hitsLabel(fp) {
+      return free.some(function (o) { return o !== fp && fp.label.x < o.label.x + o.label.w && o.label.x < fp.label.x + fp.label.w && fp.label.y < o.label.y + o.label.h && o.label.y < fp.label.y + fp.label.h; });
+    }
+    free.forEach(function (fp) {
+      for (var tries = 0; tries < 6 && (hitsAgent(fp.label) || hitsLabel(fp)); tries++) { fp.y += fp.port === '@' ? -gy / 2 : gy / 2; labelBox(fp); }
+    });
+    free.forEach(function (fp) { fpos[fp.port] = { x: fp.x, y: fp.y, nx: 0, ny: fp.port === '@' ? 1 : -1 }; });
     function portPos(p) {
       if (isFree(p)) return fpos[p];
       return at[owner(p)].ports[slot(p)];
@@ -519,6 +564,7 @@
            r1(B.x + B.nx * k) + ' ' + r1(B.y + B.ny * k) + ' ' + r1(B.x) + ' ' + r1(B.y) });
     });
     var width = margin * 2 + 40 + Math.max(0, slotX - 1) * gx, height = top + (maxDepth + 1) * gy + margin;
+    free.forEach(function (fp) { width = Math.max(width, fp.label.x + fp.label.w + margin); height = Math.max(height, fp.label.y + fp.label.h + margin / 2); });
     var mainEnd = blocks.length && blocks[0].main ? margin + 20 + blocks[0].x1 * gx + gx / 2 : null;
     return { agents: agents, wires: wires, free: free, width: width, height: height, loops: net.loops,
              viewBox: '0 0 ' + r1(width) + ' ' + r1(height), detachedFrom: blocks.length > 1 ? mainEnd : null };

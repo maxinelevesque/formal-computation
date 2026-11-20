@@ -314,27 +314,97 @@ check(/html\[data-calc="tree"\] \.calc-note\[data-calc~="tree"\]/.test(html), 't
 
 /* ---------- 5. the tree bundle's layout ---------- */
 section('The tree bundle, laid out');
-[1200, 400].forEach(function (width) {
-  var e = load('tree', width), svg = e.$('svg-hero'), vb = svg.getAttribute('viewBox').split(' ').map(Number);
+// the width of a box, as the essay estimates it where nothing can be measured: 7.6 a character, 1.15 em (14.4) a △
+function estW(s) { var d = s.split('△').length - 1; return (s.length - d) * 7.6 + d * 14.4 + 14; }
+// sample points along a drawn arrow: a line, one quadratic or cubic Bézier, or a polyline
+function arrowPoints(l) {
+  var pts = [], s, u;
+  if (l.localName === 'line') { for (s = 0; s <= 40; s++) { u = s / 40; pts.push([+l.getAttribute('x1') + (l.getAttribute('x2') - l.getAttribute('x1')) * u, +l.getAttribute('y1') + (l.getAttribute('y2') - l.getAttribute('y1')) * u]); } return pts; }
+  var d = l.getAttribute('d'), m = d.match(/-?[\d.]+/g).map(Number);
+  if (/C/.test(d)) { for (s = 0; s <= 60; s++) { u = s / 60; var v = 1 - u, w = [v * v * v, 3 * u * v * v, 3 * u * u * v, u * u * u]; pts.push([w[0] * m[0] + w[1] * m[2] + w[2] * m[4] + w[3] * m[6], w[0] * m[1] + w[1] * m[3] + w[2] * m[5] + w[3] * m[7]]); } return pts; }
+  if (/Q/.test(d)) { for (s = 0; s <= 40; s++) { u = s / 40; var a = (1 - u) * (1 - u), b = 2 * u * (1 - u), c = u * u; pts.push([a * m[0] + b * m[2] + c * m[4], a * m[1] + b * m[3] + c * m[5]]); } return pts; }
+  for (var i = 0; i + 3 < m.length; i += 2) for (s = 0; s < 20; s++) { u = s / 20; pts.push([m[i] + (m[i + 2] - m[i]) * u, m[i + 1] + (m[i + 3] - m[i + 1]) * u]); }
+  pts.push([m[m.length - 2], m[m.length - 1]]);
+  return pts;
+}
+function bundleChecks(e, width, what) {
+  var svg = e.$('svg-hero'), vb = svg.getAttribute('viewBox').split(' ').map(Number);
   var rects = svg.querySelectorAll('rect.n-rect').map(function (r) { return { x: +r.getAttribute('x'), y: +r.getAttribute('y'), w: +r.getAttribute('width'), h: +r.getAttribute('height'), t: r.parentNode.querySelector('text').textContent }; });
   var over = 0, outside = 0;
   rects.forEach(function (a, i) {
     if (a.x < vb[0] || a.y < vb[1] || a.x + a.w > vb[0] + vb[2] || a.y + a.h > vb[1] + vb[3]) outside++;
     rects.forEach(function (b, j) { if (j > i && a.x < b.x + b.w + 4 && b.x < a.x + a.w + 4 && a.y < b.y + b.h + 4 && b.y < a.y + a.h + 4) over++; });
   });
-  check(over === 0, width + ': no two boxes of the tree bundle touch');
-  check(outside === 0, width + ': every box inside the view box ' + vb.join(' '));
-  // no arrow crosses a box it does not join
-  var crossings = 0;
+  check(over === 0, what + ': no two boxes of the tree bundle touch');
+  check(outside === 0, what + ': every box inside the view box ' + vb.join(' '));
+  // no arrow crosses a box it does not join; a curve also keeps 3 clear of every box
+  var crossings = 0, notOne = [], short = [];
   svg.querySelectorAll('.edge').forEach(function (l) {
-    var pts = [];
-    if (l.localName === 'line') { for (var s = 0; s <= 40; s++) { var u = s / 40; pts.push([+l.getAttribute('x1') + (l.getAttribute('x2') - l.getAttribute('x1')) * u, +l.getAttribute('y1') + (l.getAttribute('y2') - l.getAttribute('y1')) * u]); } }
-    else if (/Q/.test(l.getAttribute('d'))) { var m = l.getAttribute('d').match(/-?[\d.]+/g).map(Number); for (var s2 = 0; s2 <= 40; s2++) { var v = s2 / 40, a = (1 - v) * (1 - v), b = 2 * v * (1 - v), c = v * v; pts.push([a * m[0] + b * m[2] + c * m[4], a * m[1] + b * m[3] + c * m[5]]); } }
-    else { var q = l.getAttribute('d').match(/-?[\d.]+/g).map(Number); for (var i = 0; i + 3 < q.length; i += 2) for (var s3 = 0; s3 < 20; s3++) { var w = s3 / 20; pts.push([q[i] + (q[i + 2] - q[i]) * w, q[i + 1] + (q[i + 3] - q[i + 1]) * w]); } pts.push([q[q.length - 2], q[q.length - 1]]); }
-    rects.forEach(function (r) { if (pts.slice(2, -2).some(function (p) { return p[0] > r.x + 2 && p[0] < r.x + r.w - 2 && p[1] > r.y + 2 && p[1] < r.y + r.h - 2; })) crossings++; });
+    var pts = arrowPoints(l), curve = l.localName === 'path' && /C/.test(l.getAttribute('d')), m = curve ? -3 : 2;
+    if (l.localName === 'path' && !/^M -?[\d.]+ -?[\d.]+ [QC]( -?[\d.]+)+$/.test(l.getAttribute('d'))) notOne.push(l.getAttribute('d'));
+    var len = 0;
+    for (var k = 1; k < pts.length; k++) len += Math.sqrt(Math.pow(pts[k][0] - pts[k - 1][0], 2) + Math.pow(pts[k][1] - pts[k - 1][1], 2));
+    if (len < 12) short.push(r1(len));
+    rects.forEach(function (r) { if (pts.slice(2, -2).some(function (p) { return p[0] > r.x + m && p[0] < r.x + r.w - m && p[1] > r.y + m && p[1] < r.y + r.h - m; })) crossings++; });
   });
-  check(crossings === 0, width + ': no arrow crosses a box (' + crossings + ')');
-  console.log('  ' + width + ': view box ' + vb.join(' ') + ', ' + rects.length + ' boxes, ' + svg.querySelectorAll('path.edge').length + ' arrows not straight');
+  check(crossings === 0, what + ': no arrow crosses a box, and every curve clears the boxes by 3 (' + crossings + ')');
+  check(notOne.length === 0, what + ': every arrow that is not straight is one smooth Bézier curve, with no corners (' + notOne.join(' | ') + ')');
+  check(short.length === 0, what + ': every arrow is at least 12 long (' + short.join(', ') + ')');
+  return { svg: svg, vb: vb, rects: rects };
+}
+function r1(x) { return Math.round(x * 10) / 10; }
+[1200, 400].forEach(function (width) {
+  var e = load('tree', width), b = bundleChecks(e, width, String(width)), vb = b.vb, rects = b.rects;
+  var top = Math.min.apply(null, rects.map(function (r) { return r.y; }));
+  check(top - vb[1] <= 40, width + ': no empty band above the bundle: the highest box is ' + r1(top - vb[1]) + ' below the top of the view box (at most 40)');
+  if (width <= 820) check(vb[2] <= 440, width + ': the narrow bundle fits its 440 px frame unscaled (' + vb[2] + ' wide)');
+  var bad = rects.filter(function (r) { return Math.abs(r.w - estW(r.t)) > 0.15; });
+  check(bad.length === 0, width + ': box widths allow 1.15 em for each △ (' + bad.map(function (r) { return r.t + ' ' + r.w; }).join('; ') + ')');
+  console.log('  ' + width + ': view box ' + vb.join(' ') + ', ' + rects.length + ' boxes, ' + b.svg.querySelectorAll('path.edge').length + ' arrows not straight');
+});
+// in a browser the labels with △ are measured (getComputedTextLength); the stand-in makes each △ 2 em wide
+[1200, 400].forEach(function (width) {
+  var wide = function (s) { var d = s.split('△').length - 1; return (s.length - d) * 7.6 + d * 25; };
+  var e = stub.load(html, { width: width, hash: '#calc=tree', textLength: wide });
+  e.advance(3000);
+  var b = bundleChecks(e, width, width + ', measured'), bad = b.rects.filter(function (r) { return Math.abs(r.w - (/△/.test(r.t) ? r1(wide(r.t) + 14) : estW(r.t))) > 0.15; });
+  check(bad.length === 0, width + ', measured: a box with △ is as wide as its measured label, and 14 (' + bad.map(function (r) { return r.t + ' ' + r.w; }).join('; ') + ')');
+  check(dupIds(e).length === 0, width + ', measured: no duplicate ids');
+});
+
+/* ---------- 6. the net of one step: labels ---------- */
+section('Nets, one step: the labels of free ports');
+[1200, 400].forEach(function (width) {
+  var e = load('net', width), nets = 0, clash = [], hit = [];
+  e.click(e.document.querySelector('[data-l="1"]'));
+  e.$('focus').options.forEach(function (o) {
+    e.change(e.$('focus'), o.value); e.advance(100);
+    ['outer', 'inner', 'random'].forEach(function (ord) {
+      e.change(e.$('order'), ord); e.advance(100);
+      for (var k = 0; k <= Number(e.$('time').max); k++) {
+        e.change(e.$('time'), String(k)); e.advance(20);
+        var svg = e.$('svg-hero'), labs = [], tris = [];
+        svg.querySelectorAll('text.freep, text.lab').forEach(function (t) {
+          var s = t.textContent, w = s.length * (/freep/.test(t.getAttribute('class')) ? 7.6 : 6.4), x = +t.getAttribute('x'), y = +t.getAttribute('y');
+          labs.push({ s: s, x0: x - w / 2, x1: x + w / 2, y0: y - 10, y1: y + 3 });
+        });
+        svg.querySelectorAll('polygon.agent').forEach(function (p) {
+          var q = p.getAttribute('points').split(' ').map(function (xy) { return xy.split(',').map(Number); });
+          tris.push({ x0: Math.min(q[0][0], q[1][0], q[2][0]), x1: Math.max(q[0][0], q[1][0], q[2][0]), y0: Math.min(q[0][1], q[1][1], q[2][1]), y1: Math.max(q[0][1], q[1][1], q[2][1]) });
+        });
+        function meet(a, b) { return a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1; }
+        labs.forEach(function (a, i) {
+          labs.forEach(function (b, j) { if (j > i && meet(a, b)) clash.push(o.textContent + ' ' + ord + ' ' + k + ': ' + a.s + '/' + b.s); });
+          tris.forEach(function (t) { if (meet(a, t)) hit.push(o.textContent + ' ' + ord + ' ' + k + ': ' + a.s); });
+        });
+        nets++;
+      }
+    });
+  });
+  check(nets > 250, width + ': the one-step view drawn for every net of every term, in three orders (' + nets + ')');
+  check(clash.length === 0, width + ': no two labels of free ports overlap (' + clash.slice(0, 3).join('; ') + ')');
+  check(hit.length === 0, width + ': no label overlaps an agent (' + hit.slice(0, 3).join('; ') + ')');
+  console.log('  ' + width + ': ' + nets + ' nets drawn, labels apart');
 });
 
 console.log('\n' + passes + ' checks passed, ' + failures + ' failed.');

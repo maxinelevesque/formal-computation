@@ -32,8 +32,13 @@
 - [x] **The calculus switch** (`notes/15`): every SKI interactive in essay 1 also in tree
       calculus and interaction nets, behind one toggle (merged 2026-11-19; lab tests 405,
       essay tests 178; SKI output byte-identical).
-- [ ] Switch polish (browser check): empty band above the tree bundle; bent long arrows from
-      `K a (I b)`; narrow-screen tree bundle; net "One step" readability; `△` glyph width.
+- [x] Switch polish (browser check, 2026-11-20; `notes/15` §15.4): the wide tree bundle's view box
+      fitted to its content; the long steps from `K a (I b)` and `K a (K b (△b))` as single cubic
+      curves; the narrow tree bundle 434 wide (ring below, not widening the columns); net "One step"
+      labels kept apart; `△` boxes measured in the browser, 1.15 em under the stub. Each checked in
+      `essay-test.js`.
+- [ ] Look at the polish in a real browser: the two long curves of the wide tree bundle (they bow
+      round the right of fibre `a`), the redraw after the fonts load, a phone.
 - [ ] Make `tree-semantics` public (Maxine); its links in the essay are pinned to `5147cfa`.
 - [x] Lean: three classes (`ThreeClasses.lean`), V-valued pairings, one-step diamond ⇒ equal
       lengths (`Diamond.lean`), SKI runs as a DynPresentation, tree essay facts (job 3141).

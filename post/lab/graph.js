@@ -132,19 +132,27 @@
      hero figure: each fibre sits over its own point of the line, the normal form nearest
      the line, the other states in layers by their distance to it (for the fibre with no
      value: by distance from its first states). opts: width, height, orientation ('wide': line
-     along the bottom; 'tall': line down the right side), measure(label) -> box width.
+     along the bottom; 'tall': line down the right side), measure(label) -> box width (default: 7.6
+     a character, 1.15 em for a △, which may come from a wider fallback font, and 14 of padding).
      opts.layering: 'nearest' (default: the shortest distance to the normal form) or 'longest'
      (the longest run to it, so that every step goes down at least one layer).
      opts.slots: a step over more than one layer gets a slot in each layer it crosses; its edge has
      via: the points of those slots, from source to target.
+     opts.curves (with slots): such an edge also gets curve: the two control points of one cubic
+     Bézier from the source's centre to the target's, the least bent that clears every other box
+     (null if none does; then draw it through via).
      opts.rings: a fibre with no value whose states lie on one loop is drawn as a ring, in the
      order its states were given, clockwise from the top, rather than as a column.
+     Steps between two states of one row (only with layering 'nearest') keep the two side by side,
+     opts.linkGap (default 12) further apart than the other neighbours.
+     The view box is fitted to the content: the boxes (with room above for a marker), the curves,
+     and the line.
      Returns { nodes: [{ i, x, y, w, label, fibre, nf, layer }], edges: [{ from, to, rule }],
                fibres: { id: { x, y, label } }, line: [x1, y1, x2, y2], vb, width, height }. */
   function layoutBundle(graph, opts) {
     opts = opts || {};
     var tall = opts.orientation === 'tall';
-    var measure = opts.measure || function (s) { return s.length * 7.6 + 14; };
+    var measure = opts.measure || function (s) { var d = (s.match(/△/g) || []).length; return (s.length - d) * 7.6 + d * 14.4 + 14; };
     var st = graph.states;
     var layer = st.map(function () { return -1; });
     var byFibre = {};
@@ -207,7 +215,8 @@
       for (var tries = 0; tries < 200; tries++, rx += 4) {
         off = mem.map(function (i, k) { var a = -Math.PI / 2 + 2 * Math.PI * k / n; return { i: i, dx: rx * Math.cos(a), dy: ry * Math.sin(a) }; });
         var clash = off.some(function (a, p) { return off.some(function (b, q) {
-          return q > p && Math.abs(a.dx - b.dx) < (nodes[a.i].w + nodes[b.i].w) / 2 + 12 && Math.abs(a.dy - b.dy) < 30;
+          // side by side: room for an arrow between them
+          return q > p && Math.abs(a.dx - b.dx) < (nodes[a.i].w + nodes[b.i].w) / 2 + 30 && Math.abs(a.dy - b.dy) < 30;
         }); });
         if (!clash) break;
       }
@@ -250,16 +259,56 @@
       }
       function size(i) { return typeof i === 'string' ? 10 : tall ? 22 : nodes[i].w; }
       var along = {}, bary = {}, rank = {};
+      // steps within a row (the two states are then kept side by side, a little further apart)
+      var same = {}, linkGap = opts.linkGap === undefined ? 12 : opts.linkGap;
+      graph.edges.forEach(function (e) {
+        if (e.from === e.to || st[e.from].fibre !== f.id || st[e.to].fibre !== f.id || layer[e.from] !== layer[e.to]) return;
+        (same[e.from] = same[e.from] || []).push(e.to);
+      });
+      function linked(i, j) { return (same[i] || []).indexOf(j) >= 0 || (same[j] || []).indexOf(i) >= 0; }
+      function gapAfter(row, k) { return gap + (k + 1 < row.length && linked(row[k], row[k + 1]) ? linkGap : 0); }
+      function rowW(row) { return row.reduce(function (a, i, k) { return a + size(i) + (k + 1 < row.length ? gapAfter(row, k) : 0); }, 0); }
       // place rows from the line outward; each row ordered by the mean place of its successors
       var bandW = 0;
       rows.forEach(function (row) {
         if (!row) return;
-        var w = row.reduce(function (a, i) { return a + size(i) + gap; }, -gap);
+        var nl = row.reduce(function (a, i) { return a + (same[i] || []).filter(function (j) { return row.indexOf(j) >= 0; }).length; }, 0);
+        var w = rowW(row) + linkGap * Math.min(nl, row.length - 1);
         if (w > bandW) bandW = w;
       });
       function placeRow(row) {
-        var w = row.reduce(function (a, i) { return a + size(i) + gap; }, -gap), x = cursor + (bandW - w) / 2;
-        row.forEach(function (i) { along[i] = x + size(i) / 2; x += size(i) + gap; });
+        var w = rowW(row), x = cursor + (bandW - w) / 2;
+        row.forEach(function (i, k) { along[i] = x + size(i) / 2; x += size(i) + gapAfter(row, k); });
+      }
+      // states joined by a step within the row are kept together, sources first; the groups in the order they had
+      function groupRow(row) {
+        var pos = {}, grp = {}, any = false;
+        row.forEach(function (i, k) { pos[i] = k; grp[i] = i; });
+        function find(i) { while (grp[i] !== i) i = grp[i]; return i; }
+        row.forEach(function (i) { (same[i] || []).forEach(function (j) {
+          if (pos[j] === undefined) return;
+          any = true;
+          var a = find(i), b = find(j);
+          if (a !== b) grp[b] = a;
+        }); });
+        if (!any) return;
+        var groups = {}, keys = [];
+        row.forEach(function (i) { var g = find(i); if (!groups[g]) { groups[g] = []; keys.push(g); } groups[g].push(i); });
+        var mid = {};
+        keys.forEach(function (g) { mid[g] = groups[g].reduce(function (a, i) { return a + pos[i]; }, 0) / groups[g].length; });
+        keys.sort(function (a, b) { return mid[a] - mid[b]; });
+        var out = [];
+        keys.forEach(function (g) {
+          var mem = groups[g].slice(), indeg = {};
+          mem.forEach(function (i) { indeg[i] = 0; });
+          mem.forEach(function (i) { (same[i] || []).forEach(function (j) { if (indeg[j] !== undefined && j !== i) indeg[j]++; }); });
+          while (mem.length) {
+            var free = mem.filter(function (i) { return indeg[i] === 0; }), pick = (free.length ? free : mem)[0];
+            out.push(pick); mem.splice(mem.indexOf(pick), 1);
+            (same[pick] || []).forEach(function (j) { if (indeg[j] !== undefined) indeg[j]--; });
+          }
+        });
+        out.forEach(function (i, k) { row[k] = i; });
       }
       // order a row by the mean place of its neighbours (ties: the order it had)
       function orderRow(row, nb) {
@@ -270,10 +319,11 @@
           if (typeof i !== 'string') nodes[i].bary = bary[i];
         });
         row.sort(function (a, b) { return bary[a] - bary[b] || rank[a] - rank[b]; });
+        groupRow(row);
       }
       rows.forEach(function (row, r) {
         if (!row) return;
-        if (r > 0) orderRow(row, succOf);
+        if (r > 0) orderRow(row, succOf); else groupRow(row);
         placeRow(row);
       });
       if (opts.slots) {
@@ -305,15 +355,19 @@
       bands.forEach(function (b) { out.fibres[b.id] = { x: x0 + b.anchor, y: lineY, label: b.label, from: x0 + b.start, to: x0 + b.end }; });
       out.line = [20, lineY, W - 20, lineY];
       out.width = W; out.height = H;
-      out.vb = '0 ' + Math.min(0, Math.round(nfY - (nLayers - 1) * rowH - 30)) + ' ' + W + ' ' + Math.round(H - Math.min(0, nfY - (nLayers - 1) * rowH - 30));
+      // from the line down; the boxes are added below, so the view box starts at the highest of them
+      out.vb = '0 ' + Math.round(lineY - 10) + ' ' + W + ' ' + Math.round(H - lineY + 10);
     } else {
       // tall: the line down the right; layers become columns, the normal form nearest the line
       var colW = [];
-      nodes.forEach(function (n) { colW[n.layer] = Math.max(colW[n.layer] || 0, n.w); });
+      // a ring sits below the columns, so it does not widen them
+      nodes.forEach(function (n) { if (!n.ring) colW[n.layer] = Math.max(colW[n.layer] || 0, n.w); });
       var Wt = opts.width || 380, lineX = Wt - 60, Ht = Math.max(opts.height || 424, total + 40), y0 = (Ht - total) / 2;
-      var colX = [], x = lineX - 40;
-      for (var c = 0; c < nLayers; c++) { colX[c] = x - (colW[c] || 0) / 2; x -= (colW[c] || 0) + 16; }
-      nodes.forEach(function (n) { n.x = n.ring ? lineX - 40 - (ringBox(n).x1 - n.ring.dx) : colX[n.layer]; n.y = y0 + n.along; });
+      // columns only for the layers that hold a state outside a ring
+      var colX = [], x = lineX - 32;
+      for (var c = 0; c < colW.length; c++) { colX[c] = x - (colW[c] || 0) / 2; x -= (colW[c] || 0) + 16; }
+      x += 16;
+      nodes.forEach(function (n) { n.x = n.ring ? lineX - 32 - (ringBox(n).x1 - n.ring.dx) : colX[n.layer]; n.y = y0 + n.along; });
       slotXY = function (id) { return [colX[slotLayer[id]], y0 + slotAlong[id]]; };
       bands.forEach(function (b) { out.fibres[b.id] = { x: lineX, y: y0 + b.anchor, label: b.label, from: y0 + b.start, to: y0 + b.end }; });
       out.line = [lineX, 16, lineX, Ht - 12];
@@ -324,14 +378,53 @@
     out.orientation = tall ? 'tall' : 'wide';
     // the slots of a long step, from its source to its target
     out.edges.forEach(function (e, k) { if (slotsOf[k]) e.via = slotsOf[k].map(function (id) { return slotXY(id); }); });
-    // the view box also covers every box (a ring may reach past the layers)
+    if (opts.curves) out.edges.forEach(function (e) { if (e.via) e.curve = smoothCurve(nodes[e.from], nodes[e.to], e.via, nodes); });
+    // the view box covers every box (a ring may reach past the layers) and every curve
     var vb = out.vb.split(' ').map(Number), bx0 = vb[0], by0 = vb[1], bx1 = vb[0] + vb[2], by1 = vb[1] + vb[3];
     nodes.forEach(function (n) {
       bx0 = Math.min(bx0, Math.floor(n.x - n.w / 2 - 8)); bx1 = Math.max(bx1, Math.ceil(n.x + n.w / 2 + 8));
       by0 = Math.min(by0, Math.floor(n.y - 30)); by1 = Math.max(by1, Math.ceil(n.y + 20));
     });
+    out.edges.forEach(function (e) {
+      if (e.curve) cubicPoints(nodes[e.from], e.curve[0], e.curve[1], nodes[e.to], 24).forEach(function (p) {
+        bx0 = Math.min(bx0, Math.floor(p[0] - 8)); bx1 = Math.max(bx1, Math.ceil(p[0] + 8));
+        by0 = Math.min(by0, Math.floor(p[1] - 8)); by1 = Math.max(by1, Math.ceil(p[1] + 8));
+      });
+    });
     out.vb = bx0 + ' ' + by0 + ' ' + (bx1 - bx0) + ' ' + (by1 - by0);
     return out;
+  }
+
+  function cubicPoints(a, c1, c2, b, n) {
+    var pts = [];
+    for (var s = 0; s <= n; s++) {
+      var u = s / n, v = 1 - u, w0 = v * v * v, w1 = 3 * u * v * v, w2 = 3 * u * u * v, w3 = u * u * u;
+      pts.push([w0 * a.x + w1 * c1[0] + w2 * c2[0] + w3 * b.x, w0 * a.y + w1 * c1[1] + w2 * c2[1] + w3 * b.y]);
+    }
+    return pts;
+  }
+  /* One cubic Bézier from a to b (box centres) that clears every other box by 6 across and 5 up and down:
+     its control points sit at a third and two thirds of the chord, moved off it by k1 and k2. The least bent
+     such curve, bent to the side of the slots first; null if none within 240. */
+  function smoothCurve(a, b, via, others) {
+    var dx = b.x - a.x, dy = b.y - a.y, len = Math.sqrt(dx * dx + dy * dy) || 1, nx = -dy / len, ny = dx / len;
+    var side = (via || []).reduce(function (s, p) { return s + (p[0] - a.x) * nx + (p[1] - a.y) * ny; }, 0) < 0 ? -1 : 1;
+    var ks = [0];
+    for (var k = 6; k <= 240; k += 6) ks.push(side * k, -side * k);
+    var cands = [];
+    ks.forEach(function (k1) { ks.forEach(function (k2) {
+      if (k1 * k2 < 0) return;   // one side only: no S-bends
+      cands.push({ k1: k1, k2: k2, cost: Math.max(Math.abs(k1), Math.abs(k2)) + 0.35 * Math.abs(k1 - k2) + ((k1 + k2) * side < 0 ? 0.5 : 0) });
+    }); });
+    cands.sort(function (p, q) { return p.cost - q.cost; });
+    var boxes = (others || []).filter(function (n) { return n !== a && n !== b; });
+    for (var i = 0; i < cands.length; i++) {
+      var c1 = [a.x + dx / 3 + nx * cands[i].k1, a.y + dy / 3 + ny * cands[i].k1], c2 = [a.x + 2 * dx / 3 + nx * cands[i].k2, a.y + 2 * dy / 3 + ny * cands[i].k2];
+      var pts = cubicPoints(a, c1, c2, b, 60);
+      var clear = boxes.every(function (n) { return pts.every(function (p) { return Math.abs(p[0] - n.x) >= n.w / 2 + 6 || Math.abs(p[1] - n.y) >= 16; }); });
+      if (clear) return [[Math.round(c1[0] * 10) / 10, Math.round(c1[1] * 10) / 10], [Math.round(c2[0] * 10) / 10, Math.round(c2[1] * 10) / 10]];
+    }
+    return null;
   }
 
   var graph = { reductionGraph: reductionGraph, runPath: runPath, layoutBundle: layoutBundle };
