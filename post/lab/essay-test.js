@@ -306,7 +306,7 @@ figs.forEach(function (f) {
   });
 });
 var LEAN = ['Tree.probes_read_code', 'Tree.calculus_confluent', 'Calculus.probeEq_of_conv', 'Calculus.codeEq_iff_conv', 'Calculus.probeEq_plug',
-  'Tree.tree_six_terms', 'Tree.tree_six_distinct', 'Tree.sk_unsound', 'Tree.fundamental_K', 'Tree.fundamental_S', 'Tree.fundamental_triage', 'Tree.omega_cycle', 'Diamond.equal_lengths', 'Diamond.length_le'];
+  'Tree.tree_six_terms', 'Tree.tree_six_distinct', 'Tree.sk_unsound', 'Tree.fundamental_K', 'Tree.fundamental_S', 'Tree.fundamental_triage', 'Tree.omega_cycle', 'Diamond.equal_lengths', 'Diamond.length_le', 'SKI.six_terms'];
 var marks = T.document.querySelectorAll('.calc-note a.lean, .calc-bar a.lean');
 check(marks.length > 0 && marks.every(function (a) { var n = a.getAttribute('data-lean'); return LEAN.indexOf(n) >= 0 && a.getAttribute('title') === 'Mechanized: ' + n && a.getAttribute('aria-label') === 'Mechanized: ' + n; }), 'lean marks in the notes use known names, in the essay\'s format (' + marks.length + ')');
 var tsl = T.document.querySelectorAll('a.ts');
